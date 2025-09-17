@@ -4,11 +4,7 @@ Local Community Board (LCB) is a desktop application designed to strengthen comm
 
 It allows community members to:
 
-- Post and browse announcements (items for sale, lost & found, offers, help requests)
-
 - Organize and join events (meetings, clean-ups, social gatherings, workshops)
-
-- Create and participate in discussion threads about local issues or interests
 
 - Subscribe to specific areas to receive personalized notifications (e.g. Sports, Education, Repairs)
 
@@ -16,7 +12,7 @@ It allows community members to:
 
 Everyone can view public content as a Guest, but only registered Users can post and interact. Admins maintain the system, moderate content, and manage user roles.
 
-This system centralizes all local community communication in one convenient and secure platform.
+This system centralizes all local community events in one convenient and secure platform.
 
 ---
 
