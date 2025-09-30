@@ -1,20 +1,25 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace LocalCommunityBoard.Domain.Entities
 {
+    [Table("Roles")]
     public class Role
     {
-        [Key] 
+        [Key]
+        [Column("id")]
         public int Id { get; set; }
 
-        [Required] 
-        public string Name { get; set; } = string.Empty;
+        [Required]
+        [Column("name")]
+        public string Name { get; set; } = null!;
 
+        [Column("description")]
         public string? Description { get; set; }
 
         public ICollection<User> Users { get; set; } = new List<User>();

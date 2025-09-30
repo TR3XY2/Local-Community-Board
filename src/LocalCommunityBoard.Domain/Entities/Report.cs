@@ -1,27 +1,36 @@
 ﻿using LocalCommunityBoard.Domain.Enums;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace LocalCommunityBoard.Domain.Entities
 {
+    [Table("Reports")]
     public class Report
     {
-        [Key] 
+        [Key]
+        [Column("id")]
         public int Id { get; set; }
 
-        [Required] 
+        [Required]
+        [Column("reporter_id")]
         public int ReporterId { get; set; }
         public User Reporter { get; set; } = null!;
 
-        [Required] 
+        [Required]
+        [Column("target_type")]
         public TargetType TargetType { get; set; }
 
-        [Required] 
+        [Required]
+        [Column("target_id")]
         public int TargetId { get; set; }
 
+        [Column("reason")]
         public string? Reason { get; set; }
 
-        public ReportStatus Status { get; set; } = ReportStatus.Open;
+        [Column("status")]
+        public ReportStatus Status { get; set; }
 
+        [Column("created_at")]
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     }
 }

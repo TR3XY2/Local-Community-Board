@@ -1,30 +1,37 @@
 ﻿using LocalCommunityBoard.Domain.Enums;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Xml.Linq;
 
 namespace LocalCommunityBoard.Domain.Entities
 {
+    [Table("Users")]
     public class User
     {
-        [Key] 
+        [Key]
+        [Column("id")]
         public int Id { get; set; }
 
-        [Required] 
-        public string Username { get; set; } = string.Empty;
+        [Required]
+        [Column("username")]
+        public string Username { get; set; } = null!;
 
-        [Required] 
-        public string Email { get; set; } = string.Empty;
+        [Required]
+        [Column("email")]
+        public string Email { get; set; } = null!;
 
-        [Required] 
-        public string Password { get; set; } = string.Empty;
+        [Required]
+        [Column("password")]
+        public string Password { get; set; } = null!;
 
-        [Required] 
+        [Column("role_id")]
         public int RoleId { get; set; }
-
         public Role Role { get; set; } = null!;
 
-        public UserStatus Status { get; set; } = UserStatus.Active;
+        [Column("status")]
+        public UserStatus Status { get; set; }
 
+        [Column("created_at")]
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
         public ICollection<Announcement> Announcements { get; set; } = new List<Announcement>();
@@ -32,6 +39,6 @@ namespace LocalCommunityBoard.Domain.Entities
         public ICollection<Reaction> Reactions { get; set; } = new List<Reaction>();
         public ICollection<Subscription> Subscriptions { get; set; } = new List<Subscription>();
         public ICollection<Report> Reports { get; set; } = new List<Report>();
-        public ICollection<ModerationAction> ModerationActions { get; set; } = new List<ModerationAction>();
     }
 }
+  
