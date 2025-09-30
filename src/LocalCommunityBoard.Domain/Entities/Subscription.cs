@@ -6,17 +6,17 @@ namespace LocalCommunityBoard.Domain.Entities
     [Table("Subscriptions")]
     public class Subscription
     {
+        [Key]
         [Column("id")]
-        [Key] 
         public int Id { get; set; }
 
         [Column("user_id")]
-        [Required] 
+        [Required]
         public int UserId { get; set; }
         public User User { get; set; } = null!;
 
         [Column("location_id")]
-        [Required] 
+        [Required]
         public int LocationId { get; set; }
         public Location Location { get; set; } = null!;
 

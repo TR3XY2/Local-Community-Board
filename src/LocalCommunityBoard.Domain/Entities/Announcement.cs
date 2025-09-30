@@ -3,33 +3,41 @@ using System.ComponentModel.DataAnnotations;
 
 namespace LocalCommunityBoard.Domain.Entities
 {
+    [Table("Announcements")]
     public class Announcement
     {
-        [Key] 
+        [Key]
+        [Column("id")]
         public int Id { get; set; }
 
-        [Required] 
+        [Required]
+        [Column("user_id")]
         public int UserId { get; set; }
         public User User { get; set; } = null!;
 
-        [Required] 
+        [Column("category_id")]
         public int CategoryId { get; set; }
         public Category Category { get; set; } = null!;
 
-        [Required] 
+        [Column("location_id")]
         public int LocationId { get; set; }
         public Location Location { get; set; } = null!;
 
         [Required]
-        public string Title { get; set; } = string.Empty;
+        [Column("title")]
+        public string Title { get; set; } = null!;
 
-        [Required] 
-        public string Body { get; set; } = string.Empty;
+        [Required]
+        [Column("body")]
+        public string Body { get; set; } = null!;
 
-        public AnnouncementStatus Status { get; set; } = AnnouncementStatus.Active;
+        [Column("status")]
+        public int Status { get; set; }
 
+        [Column("created_at")]
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
+        // Навігація
         public ICollection<Comment> Comments { get; set; } = new List<Comment>();
         public ICollection<Reaction> Reactions { get; set; } = new List<Reaction>();
     }

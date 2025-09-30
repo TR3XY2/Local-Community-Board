@@ -7,14 +7,18 @@ using System.Threading.Tasks;
 
 namespace LocalCommunityBoard.Domain.Entities
 {
+    [Table("Categories")]
     public class Category
     {
-        [Key] 
+        [Key]
+        [Column("id")]
         public int Id { get; set; }
 
-        [Required] 
-        public string Name { get; set; } = string.Empty;
+        [Required]
+        [Column("name")]
+        public string Name { get; set; } = null!;
 
+        // Навігація
         public ICollection<Announcement> Announcements { get; set; } = new List<Announcement>();
     }
 }

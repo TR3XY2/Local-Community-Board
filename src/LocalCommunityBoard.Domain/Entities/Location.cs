@@ -7,18 +7,27 @@ using System.Threading.Tasks;
 
 namespace LocalCommunityBoard.Domain.Entities
 {
+    [Table("Locations")]
     public class Location
     {
-        [Key] 
+        [Key]
+        [Column("id")]
         public int Id { get; set; }
 
-        [Required] 
-        public string City { get; set; } = string.Empty;
+        [Required]
+        [Column("city")]
+        public string City { get; set; } = null!;
 
+        [Column("district")]
         public string? District { get; set; }
+
+        [Column("street")]
         public string? Street { get; set; }
+
+        [Column("house")]
         public string? House { get; set; }
 
+        // Навігація
         public ICollection<Announcement> Announcements { get; set; } = new List<Announcement>();
         public ICollection<Subscription> Subscriptions { get; set; } = new List<Subscription>();
     }
