@@ -1,5 +1,6 @@
 ﻿using LocalCommunityBoard.Domain.Enums;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Xml.Linq;
 
 namespace LocalCommunityBoard.Domain.Entities
@@ -28,12 +29,11 @@ namespace LocalCommunityBoard.Domain.Entities
         public Role Role { get; set; } = null!;
 
         [Column("status")]
-        public int Status { get; set; }
+        public UserStatus Status { get; set; }
 
         [Column("created_at")]
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
-        // Навігація
         public ICollection<Announcement> Announcements { get; set; } = new List<Announcement>();
         public ICollection<Comment> Comments { get; set; } = new List<Comment>();
         public ICollection<Reaction> Reactions { get; set; } = new List<Reaction>();

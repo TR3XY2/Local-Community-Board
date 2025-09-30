@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace LocalCommunityBoard.Domain.Entities
 {
@@ -30,7 +31,6 @@ namespace LocalCommunityBoard.Domain.Entities
         [Column("created_at")]
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
-        // Навігація
         public ICollection<Comment> Replies { get; set; } = new List<Comment>();
     }
 }

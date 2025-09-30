@@ -1,5 +1,6 @@
 ﻿using LocalCommunityBoard.Domain.Enums;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace LocalCommunityBoard.Domain.Entities
 {
@@ -17,7 +18,7 @@ namespace LocalCommunityBoard.Domain.Entities
 
         [Required]
         [Column("target_type")]
-        public int TargetType { get; set; }
+        public TargetType TargetType { get; set; }
 
         [Required]
         [Column("target_id")]
@@ -27,7 +28,7 @@ namespace LocalCommunityBoard.Domain.Entities
         public string? Reason { get; set; }
 
         [Column("status")]
-        public int Status { get; set; }
+        public ReportStatus Status { get; set; }
 
         [Column("created_at")]
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;

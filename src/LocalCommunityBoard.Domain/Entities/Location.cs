@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -27,7 +28,6 @@ namespace LocalCommunityBoard.Domain.Entities
         [Column("house")]
         public string? House { get; set; }
 
-        // Навігація
         public ICollection<Announcement> Announcements { get; set; } = new List<Announcement>();
         public ICollection<Subscription> Subscriptions { get; set; } = new List<Subscription>();
     }

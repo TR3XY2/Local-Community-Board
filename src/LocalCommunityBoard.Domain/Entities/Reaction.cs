@@ -1,5 +1,6 @@
 ﻿using LocalCommunityBoard.Domain.Enums;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace LocalCommunityBoard.Domain.Entities
 {
@@ -22,7 +23,7 @@ namespace LocalCommunityBoard.Domain.Entities
 
         [Required]
         [Column("type")]
-        public int Type { get; set; }
+        public ReactionType Type { get; set; }
 
         [Column("created_at")]
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;

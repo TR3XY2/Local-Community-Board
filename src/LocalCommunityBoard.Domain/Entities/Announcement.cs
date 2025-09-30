@@ -1,5 +1,6 @@
 ﻿using LocalCommunityBoard.Domain.Enums;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace LocalCommunityBoard.Domain.Entities
 {
@@ -25,19 +26,18 @@ namespace LocalCommunityBoard.Domain.Entities
 
         [Required]
         [Column("title")]
-        public string Title { get; set; } = null!;
+        public string Title { get; set; } = string.Empty;
 
         [Required]
         [Column("body")]
-        public string Body { get; set; } = null!;
+        public string Body { get; set; } = string.Empty;
 
         [Column("status")]
-        public int Status { get; set; }
+        public AnnouncementStatus Status { get; set; }
 
         [Column("created_at")]
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
-        // Навігація
         public ICollection<Comment> Comments { get; set; } = new List<Comment>();
         public ICollection<Reaction> Reactions { get; set; } = new List<Reaction>();
     }

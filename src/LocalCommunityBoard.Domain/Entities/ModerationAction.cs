@@ -1,5 +1,6 @@
 ﻿using LocalCommunityBoard.Domain.Enums;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace LocalCommunityBoard.Domain.Entities
 {
@@ -17,14 +18,14 @@ namespace LocalCommunityBoard.Domain.Entities
 
         [Required]
         [Column("target_type")]
-        public int TargetType { get; set; }
+        public TargetType TargetType { get; set; }
 
         [Required]
         [Column("target_id")]
         public int TargetId { get; set; }
 
         [Column("action")]
-        public int Action { get; set; }
+        public ModerationActionType Action { get; set; }
 
         [Column("reason")]
         public string? Reason { get; set; }
