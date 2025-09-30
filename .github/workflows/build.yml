@@ -44,30 +44,33 @@ jobs:
       # Install scanner if not cached
       - name: Install SonarQube Cloud scanner
         if: steps.cache-sonar-scanner.outputs.cache-hit != 'true'
-        shell: powershell
+        shell: pwsh
         run: |
           New-Item -Path ${{ runner.temp }}\scanner -ItemType Directory
           dotnet tool update dotnet-sonarscanner --tool-path ${{ runner.temp }}\scanner
 
-      # Restore & build solution
-      - name: Restore dependencies
-        run: dotnet restore
-
-      - name: Build
-        run: dotnet build --no-restore --configuration Release
-
-      # Run SonarQube analysis
+      # SonarQube begin
       - name: SonarQube begin
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        shell: pwsh
         run: |
           ${{ runner.temp }}\scanner\dotnet-sonarscanner begin /k:"TR3XY2_Local-Community-Board" /o:"localboard" /d:sonar.token="${{ secrets.SONAR_TOKEN }}"
 
-      - name: Run tests
-        run: dotnet test --no-build --configuration Release --collect:"XPlat Code Coverage"
+      # Restore, build, test (inside scanner context)
+      - name: Restore dependencies
+        run: dotnet restore LocalCommunityBoard.sln
 
+      - name: Build
+        run: dotnet build LocalCommunityBoard.sln --no-restore --configuration Release
+
+      - name: Run tests
+        run: dotnet test LocalCommunityBoard.sln --no-build --configuration Release --collect:"XPlat Code Coverage"
+
+      # SonarQube end
       - name: SonarQube end
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        shell: pwsh
         run: |
           ${{ runner.temp }}\scanner\dotnet-sonarscanner end /d:sonar.token="${{ secrets.SONAR_TOKEN }}"
