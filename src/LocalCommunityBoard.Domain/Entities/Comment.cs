@@ -1,8 +1,12 @@
-﻿using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
+﻿// <copyright file="Comment.cs" company="PlaceholderCompany">
+// Copyright (c) PlaceholderCompany. All rights reserved.
+// </copyright>
 
 namespace LocalCommunityBoard.Domain.Entities
 {
+    using System.ComponentModel.DataAnnotations;
+    using System.ComponentModel.DataAnnotations.Schema;
+
     [Table("Comments")]
     public class Comment
     {
@@ -13,15 +17,18 @@ namespace LocalCommunityBoard.Domain.Entities
         [Required]
         [Column("announcement_id")]
         public int AnnouncementId { get; set; }
+
         public Announcement Announcement { get; set; } = null!;
 
         [Required]
         [Column("user_id")]
         public int UserId { get; set; }
+
         public User User { get; set; } = null!;
 
         [Column("parent_comment_id")]
         public int? ParentCommentId { get; set; }
+
         public Comment? ParentComment { get; set; }
 
         [Required]

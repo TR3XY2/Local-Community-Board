@@ -1,10 +1,14 @@
-﻿using LocalCommunityBoard.Domain.Enums;
-using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
-using System.Xml.Linq;
+﻿// <copyright file="User.cs" company="PlaceholderCompany">
+// Copyright (c) PlaceholderCompany. All rights reserved.
+// </copyright>
 
 namespace LocalCommunityBoard.Domain.Entities
 {
+    using System.ComponentModel.DataAnnotations;
+    using System.ComponentModel.DataAnnotations.Schema;
+    using System.Xml.Linq;
+    using LocalCommunityBoard.Domain.Enums;
+
     [Table("Users")]
     public class User
     {
@@ -26,6 +30,7 @@ namespace LocalCommunityBoard.Domain.Entities
 
         [Column("role_id")]
         public int RoleId { get; set; }
+
         public Role Role { get; set; } = null!;
 
         [Column("status")]
@@ -35,10 +40,13 @@ namespace LocalCommunityBoard.Domain.Entities
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
         public ICollection<Announcement> Announcements { get; set; } = new List<Announcement>();
+
         public ICollection<Comment> Comments { get; set; } = new List<Comment>();
+
         public ICollection<Reaction> Reactions { get; set; } = new List<Reaction>();
+
         public ICollection<Subscription> Subscriptions { get; set; } = new List<Subscription>();
+
         public ICollection<Report> Reports { get; set; } = new List<Report>();
     }
 }
-  

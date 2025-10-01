@@ -1,9 +1,13 @@
-﻿using LocalCommunityBoard.Domain.Enums;
-using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
+﻿// <copyright file="Report.cs" company="PlaceholderCompany">
+// Copyright (c) PlaceholderCompany. All rights reserved.
+// </copyright>
 
 namespace LocalCommunityBoard.Domain.Entities
 {
+    using System.ComponentModel.DataAnnotations;
+    using System.ComponentModel.DataAnnotations.Schema;
+    using LocalCommunityBoard.Domain.Enums;
+
     [Table("Reports")]
     public class Report
     {
@@ -14,6 +18,7 @@ namespace LocalCommunityBoard.Domain.Entities
         [Required]
         [Column("reporter_id")]
         public int ReporterId { get; set; }
+
         public User Reporter { get; set; } = null!;
 
         [Required]

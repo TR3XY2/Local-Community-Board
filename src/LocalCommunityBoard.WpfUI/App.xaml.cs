@@ -1,8 +1,12 @@
-﻿using System.Windows;
-using Serilog;
+﻿// <copyright file="App.xaml.cs" company="PlaceholderCompany">
+// Copyright (c) PlaceholderCompany. All rights reserved.
+// </copyright>
 
 namespace LocalCommunityBoard.WpfUI
 {
+    using System.Windows;
+    using Serilog;
+
     public partial class App : Application
     {
         public App()
