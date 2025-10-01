@@ -10,10 +10,24 @@ namespace LocalCommunityBoard.Domain.Enums
     using System.Text;
     using System.Threading.Tasks;
 
+    /// <summary>
+    /// Represents the type of target in the system.
+    /// </summary>
     public enum TargetType
     {
+        /// <summary>
+        /// Represents an announcement target.
+        /// </summary>
         Announcement,
+
+        /// <summary>
+        /// Represents a comment target.
+        /// </summary>
         Comment,
+
+        /// <summary>
+        /// Represents a user target.
+        /// </summary>
         User,
     }
 }

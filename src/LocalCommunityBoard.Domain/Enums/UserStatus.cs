@@ -10,9 +10,19 @@ namespace LocalCommunityBoard.Domain.Enums
     using System.Text;
     using System.Threading.Tasks;
 
+    /// <summary>
+    /// Represents the status of a user in the system.
+    /// </summary>
     public enum UserStatus
     {
+        /// <summary>
+        /// The user is active and has full access.
+        /// </summary>
         Active,
+
+        /// <summary>
+        /// The user is blocked and cannot access the system.
+        /// </summary>
         Blocked,
     }
 }
