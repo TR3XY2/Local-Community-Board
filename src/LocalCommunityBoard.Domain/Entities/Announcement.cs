@@ -1,9 +1,13 @@
-﻿using LocalCommunityBoard.Domain.Enums;
-using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
+﻿// <copyright file="Announcement.cs" company="PlaceholderCompany">
+// Copyright (c) PlaceholderCompany. All rights reserved.
+// </copyright>
 
 namespace LocalCommunityBoard.Domain.Entities
 {
+    using System.ComponentModel.DataAnnotations;
+    using System.ComponentModel.DataAnnotations.Schema;
+    using LocalCommunityBoard.Domain.Enums;
+
     [Table("Announcements")]
     public class Announcement
     {
@@ -14,14 +18,17 @@ namespace LocalCommunityBoard.Domain.Entities
         [Required]
         [Column("user_id")]
         public int UserId { get; set; }
+
         public User User { get; set; } = null!;
 
         [Column("category_id")]
         public int CategoryId { get; set; }
+
         public Category Category { get; set; } = null!;
 
         [Column("location_id")]
         public int LocationId { get; set; }
+
         public Location Location { get; set; } = null!;
 
         [Required]
@@ -39,6 +46,7 @@ namespace LocalCommunityBoard.Domain.Entities
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
         public ICollection<Comment> Comments { get; set; } = new List<Comment>();
+
         public ICollection<Reaction> Reactions { get; set; } = new List<Reaction>();
     }
 }

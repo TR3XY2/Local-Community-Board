@@ -1,9 +1,13 @@
-﻿using LocalCommunityBoard.Domain.Enums;
-using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
+﻿// <copyright file="ModerationAction.cs" company="PlaceholderCompany">
+// Copyright (c) PlaceholderCompany. All rights reserved.
+// </copyright>
 
 namespace LocalCommunityBoard.Domain.Entities
 {
+    using System.ComponentModel.DataAnnotations;
+    using System.ComponentModel.DataAnnotations.Schema;
+    using LocalCommunityBoard.Domain.Enums;
+
     [Table("ModerationActions")]
     public class ModerationAction
     {
@@ -14,6 +18,7 @@ namespace LocalCommunityBoard.Domain.Entities
         [Required]
         [Column("admin_id")]
         public int AdminId { get; set; }
+
         public User Admin { get; set; } = null!;
 
         [Required]
