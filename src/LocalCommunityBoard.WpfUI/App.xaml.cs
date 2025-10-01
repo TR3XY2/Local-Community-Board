@@ -1,38 +1,37 @@
-﻿// <copyright file="App.xaml.cs" company="PlaceholderCompany">
+// <copyright file="App.xaml.cs" company="PlaceholderCompanн">
 // Copyright (c) PlaceholderCompany. All rights reserved.
 // </copyright>
 
-namespace LocalCommunityBoard.WpfUI
+namespace LocalCommunityBoard.WpfUI;
+
+using System.Windows;
+using Serilog;
+
+public partial class App : Application
 {
-    using System.Windows;
-    using Serilog;
-
-    public partial class App : Application
+    public App()
     {
-        public App()
-        {
-            Log.Logger = new LoggerConfiguration()
-                .MinimumLevel.Debug()
-                .Enrich.FromLogContext()
-                .WriteTo.Console()
-                .WriteTo.File("logs/log.txt", rollingInterval: RollingInterval.Day)
-                .WriteTo.Seq("http://localhost:5341")
-                .CreateLogger();
+        Log.Logger = new LoggerConfiguration()
+            .MinimumLevel.Debug()
+            .Enrich.FromLogContext()
+            .WriteTo.Console()
+            .WriteTo.File("logs/log.txt", rollingInterval: RollingInterval.Day)
+            .WriteTo.Seq("http://localhost:5341")
+            .CreateLogger();
 
-            Log.Information("Application starting up...");
-        }
+        Log.Information("Application starting up...");
+    }
 
-        protected override void OnStartup(StartupEventArgs e)
-        {
-            base.OnStartup(e);
-            Log.Information("WPF application started");
-        }
+    protected override void OnStartup(StartupEventArgs e)
+    {
+        base.OnStartup(e);
+        Log.Information("WPF application started");
+    }
 
-        protected override void OnExit(ExitEventArgs e)
-        {
-            Log.Information("Application is shutting down");
-            Log.CloseAndFlush();
-            base.OnExit(e);
-        }
+    protected override void OnExit(ExitEventArgs e)
+    {
+        Log.Information("Application is shutting down");
+        Log.CloseAndFlush();
+        base.OnExit(e);
     }
 }
