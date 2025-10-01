@@ -9,8 +9,10 @@ namespace LocalCommunityBoard.WpfUI
         {
             Log.Logger = new LoggerConfiguration()
                 .MinimumLevel.Debug()
+                .Enrich.FromLogContext()
                 .WriteTo.Console()
                 .WriteTo.File("logs/log.txt", rollingInterval: RollingInterval.Day)
+                .WriteTo.Seq("http://localhost:5341")
                 .CreateLogger();
 
             Log.Information("Application starting up...");
