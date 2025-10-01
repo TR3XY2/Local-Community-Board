@@ -5,6 +5,9 @@
 namespace LocalCommunityBoard.WpfUI;
 
 using System.Windows;
+using LocalCommunityBoard.Infrastructure.Data;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Serilog;
 
 /// <summary>
@@ -12,19 +15,23 @@ using Serilog;
 /// </summary>
 public partial class App : Application
 {
+    private readonly IConfiguration configuration;
+
     /// <summary>
     /// Initializes a new instance of the <see cref="App"/> class.
     /// Sets up the logging configuration for the application.
     /// </summary>
     public App()
     {
+        this.configuration = new ConfigurationBuilder()
+                .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
+                .AddUserSecrets<App>()
+                .Build();
+
         Log.Logger = new LoggerConfiguration()
-            .MinimumLevel.Debug()
-            .Enrich.FromLogContext()
-            .WriteTo.Console()
-            .WriteTo.File("logs/log.txt", rollingInterval: RollingInterval.Day)
-            .WriteTo.Seq("http://localhost:5341")
-            .CreateLogger();
+        .ReadFrom.Configuration(this.configuration)
+        .Enrich.FromLogContext()
+        .CreateLogger();
 
         Log.Information("Application starting up...");
     }
@@ -36,6 +43,17 @@ public partial class App : Application
     protected override void OnStartup(StartupEventArgs e)
     {
         base.OnStartup(e);
+
+        var connectionString = this.configuration.GetConnectionString("Postgres");
+
+        var optionsBuilder = new DbContextOptionsBuilder<LocalCommunityBoardDbContext>();
+        optionsBuilder.UseNpgsql(connectionString);
+
+        using (var context = new LocalCommunityBoardDbContext(optionsBuilder.Options))
+        {
+            context.Database.Migrate();
+        }
+
         Log.Information("WPF application started");
     }
 

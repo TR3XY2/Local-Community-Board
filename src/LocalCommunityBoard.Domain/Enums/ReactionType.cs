@@ -2,27 +2,26 @@
 // Copyright (c) PlaceholderCompany. All rights reserved.
 // </copyright>
 
-namespace LocalCommunityBoard.Domain.Enums
+namespace LocalCommunityBoard.Domain.Enums;
+
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+/// <summary>
+/// Represents the type of reaction that can be given.
+/// </summary>
+public enum ReactionType
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Text;
-    using System.Threading.Tasks;
+    /// <summary>
+    /// Represents a "Like" reaction.
+    /// </summary>
+    Like,
 
     /// <summary>
-    /// Represents the type of reaction that can be given.
+    /// Represents a "Dislike" reaction.
     /// </summary>
-    public enum ReactionType
-    {
-        /// <summary>
-        /// Represents a "Like" reaction.
-        /// </summary>
-        Like,
-
-        /// <summary>
-        /// Represents a "Dislike" reaction.
-        /// </summary>
-        Dislike,
-    }
+    Dislike,
 }
