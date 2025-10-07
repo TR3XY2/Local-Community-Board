@@ -44,6 +44,7 @@
 	<GenerateDocumentationFile>true</GenerateDocumentationFile>
 	<UserSecretsId>c8ba4a65-2a2b-4f43-a9d4-d3d59228bfd6</UserSecretsId>
 	<TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+	<NoWarn>CS1591, SA1600</NoWarn>
   </PropertyGroup>
 
 </Project>
