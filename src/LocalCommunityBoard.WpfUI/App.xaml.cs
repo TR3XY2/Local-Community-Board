@@ -38,7 +38,7 @@ public partial class App : Application
         Log.Logger = new LoggerConfiguration()
             .ReadFrom.Configuration(this.configuration)
             .Enrich.FromLogContext()
-            .WriteTo.File("logs/user-actions.log", rollingInterval: RollingInterval.Day, restrictedToMinimumLevel: Serilog.Events.LogEventLevel.Information)
+            .WriteTo.File("logs/user-actions.log", restrictedToMinimumLevel: Serilog.Events.LogEventLevel.Information, rollingInterval: RollingInterval.Day)
             .WriteTo.File("logs/errors.log", restrictedToMinimumLevel: Serilog.Events.LogEventLevel.Error, rollingInterval: RollingInterval.Day)
             .CreateLogger();
 
