@@ -31,9 +31,16 @@ public class UserRepository : Repository<User>, IUserRepository
         => await this.DbSet.Include(u => u.Role)
                        .FirstOrDefaultAsync(u => u.Username == username);
 
+    public async Task<User?> GetByPhoneNumberAsync(string phoneNumber)
+        => await this.DbSet.Include(u => u.Role)
+                       .FirstOrDefaultAsync(u => u.PhoneNumber == phoneNumber);
+
     public async Task<bool> EmailExistsAsync(string email)
         => await this.DbSet.AnyAsync(u => u.Email == email);
 
     public async Task<bool> UsernameExistsAsync(string username)
         => await this.DbSet.AnyAsync(u => u.Username == username);
+
+    public async Task<bool> PhoneNumberExistsAsync(string phoneNumber)
+        => await this.DbSet.AnyAsync(u => u.PhoneNumber == phoneNumber);
 }

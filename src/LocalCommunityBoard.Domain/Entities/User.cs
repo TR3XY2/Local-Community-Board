@@ -37,6 +37,13 @@ public class User
     public string Email { get; set; } = null!;
 
     /// <summary>
+    /// Gets or sets phone number of the user.
+    /// </summary>
+    [Required]
+    [Column("phone_number")]
+    public string PhoneNumber { get; set; } = null!;
+
+    /// <summary>
     /// Gets or sets the hashed password of the user.
     /// </summary>
     [Required]
