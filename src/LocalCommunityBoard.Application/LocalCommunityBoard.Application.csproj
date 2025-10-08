@@ -17,6 +17,7 @@
     <Nullable>enable</Nullable>
 	<GenerateDocumentationFile>true</GenerateDocumentationFile>
 	<TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+	  <NoWarn>CS1591, SA1600, SA1611, SA1615, IDE1006</NoWarn>
   </PropertyGroup>
 
 </Project>
