@@ -25,11 +25,6 @@ namespace LocalCommunityBoard.Application.DTOs
         public required string Email { get; set; }
 
         /// <summary>
-        /// Gets or sets the password.
-        /// </summary>
-        public required string Password { get; set; }
-
-        /// <summary>
         /// Gets or sets the JWT token for immediate authentication after signup.
         /// </summary>
         public required string Token { get; set; }
