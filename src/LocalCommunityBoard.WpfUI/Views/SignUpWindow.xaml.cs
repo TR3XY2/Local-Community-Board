@@ -39,7 +39,8 @@ public partial class SignUpWindow : Window
         }
         catch (Exception ex)
         {
-            MessageBox.Show(ex.Message, "Registration Failed", MessageBoxButton.OK, MessageBoxImage.Error);
+            var message = ex.InnerException?.Message ?? ex.Message;
+            MessageBox.Show(message, "Registration Failed", MessageBoxButton.OK, MessageBoxImage.Error);
         }
     }
 }
