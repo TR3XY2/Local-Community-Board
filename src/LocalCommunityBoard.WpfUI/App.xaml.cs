@@ -4,11 +4,17 @@
 
 namespace LocalCommunityBoard.WpfUI;
 
+using System;
 using System.Windows;
+using LocalCommunityBoard.Application.Interfaces;
+using LocalCommunityBoard.Application.Services;
+using LocalCommunityBoard.Domain.Interfaces;
 using LocalCommunityBoard.Infrastructure.Data;
 using LocalCommunityBoard.Infrastructure.Logging;
+using LocalCommunityBoard.Infrastructure.Repositories;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Serilog;
 using Serilog.Extensions.Logging;
@@ -22,16 +28,18 @@ public partial class App : Application
 
     public App()
     {
+        // Load configuration
         this.configuration = new ConfigurationBuilder()
             .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
             .AddUserSecrets<App>()
             .Build();
 
+        // Configure Serilog
         Log.Logger = new LoggerConfiguration()
             .ReadFrom.Configuration(this.configuration)
             .Enrich.FromLogContext()
             .WriteTo.File("logs/user-actions.log", rollingInterval: RollingInterval.Day, restrictedToMinimumLevel: Serilog.Events.LogEventLevel.Information)
-            .WriteTo.File("logs/errors.log", rollingInterval: RollingInterval.Day, restrictedToMinimumLevel: Serilog.Events.LogEventLevel.Error)
+            .WriteTo.File("logs/errors.log", restrictedToMinimumLevel: Serilog.Events.LogEventLevel.Error, rollingInterval: RollingInterval.Day)
             .CreateLogger();
 
         Logging.Factory = new SerilogLoggerFactory(Log.Logger);
@@ -39,6 +47,8 @@ public partial class App : Application
         var logger = Logging.CreateLogger<App>();
         logger.LogInformation("Application starting up...");
     }
+
+    public static IServiceProvider Services { get; private set; } = null!;
 
     protected override void OnStartup(StartupEventArgs e)
     {
@@ -48,6 +58,7 @@ public partial class App : Application
 
         try
         {
+            // Global exception handling
             AppDomain.CurrentDomain.UnhandledException += (_, args) =>
                 logger.LogCritical(args.ExceptionObject as Exception, "Unhandled domain exception");
 
@@ -57,14 +68,22 @@ public partial class App : Application
                 args.Handled = true;
             };
 
-            var connectionString = this.configuration.GetConnectionString("Postgres");
-            var optionsBuilder = new DbContextOptionsBuilder<LocalCommunityBoardDbContext>()
-                .UseNpgsql(connectionString);
+            // Configure services (DI)
+            var services = new ServiceCollection();
+            this.ConfigureServices(services);
 
-            using (var context = new LocalCommunityBoardDbContext(optionsBuilder.Options))
+            Services = services.BuildServiceProvider();
+
+            // Run migrations
+            using (var scope = Services.CreateScope())
             {
-                context.Database.Migrate();
+                var db = scope.ServiceProvider.GetRequiredService<LocalCommunityBoardDbContext>();
+                db.Database.Migrate();
             }
+
+            // Start main window
+            var mainWindow = Services.GetRequiredService<MainWindow>();
+            mainWindow.Show();
 
             logger.LogInformation("WPF application started successfully.");
             logger.LogInformation("User session started at {Time}", DateTime.Now);
@@ -82,5 +101,23 @@ public partial class App : Application
         logger.LogInformation("Application is shutting down...");
         Log.CloseAndFlush();
         base.OnExit(e);
+    }
+
+    private void ConfigureServices(IServiceCollection services)
+    {
+        // Database
+        var connectionString = this.configuration.GetConnectionString("Postgres");
+        services.AddDbContext<LocalCommunityBoardDbContext>(options =>
+            options.UseNpgsql(connectionString));
+
+        // Repositories
+        services.AddScoped<IUserRepository, UserRepository>();
+
+        // Application Services
+        services.AddScoped<IUserService, UserService>();
+        services.AddSingleton<UserSession>(); // session to track logged-in user
+
+        // WPF Windows
+        services.AddTransient<MainWindow>();
     }
 }
