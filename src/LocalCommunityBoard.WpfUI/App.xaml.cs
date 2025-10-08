@@ -30,8 +30,8 @@ public partial class App : Application
         Log.Logger = new LoggerConfiguration()
             .ReadFrom.Configuration(this.configuration)
             .Enrich.FromLogContext()
-            .WriteTo.File("logs/user-actions.log", rollingInterval: RollingInterval.Day, restrictedToMinimumLevel: Serilog.Events.LogEventLevel.Information)
-            .WriteTo.File("logs/errors.log", rollingInterval: RollingInterval.Day, restrictedToMinimumLevel: Serilog.Events.LogEventLevel.Error)
+            .WriteTo.File("logs/user-actions.log", restrictedToMinimumLevel: Serilog.Events.LogEventLevel.Information, rollingInterval: RollingInterval.Day)
+            .WriteTo.File("logs/errors.log", restrictedToMinimumLevel: Serilog.Events.LogEventLevel.Error, rollingInterval: RollingInterval.Day)
             .CreateLogger();
 
         Logging.Factory = new SerilogLoggerFactory(Log.Logger);
@@ -46,33 +46,26 @@ public partial class App : Application
 
         var logger = Logging.CreateLogger<App>();
 
-        try
+        AppDomain.CurrentDomain.UnhandledException += (_, args) =>
+        logger.LogCritical(args.ExceptionObject as Exception, "Unhandled domain exception");
+
+        this.DispatcherUnhandledException += (_, args) =>
         {
-            AppDomain.CurrentDomain.UnhandledException += (_, args) =>
-                logger.LogCritical(args.ExceptionObject as Exception, "Unhandled domain exception");
+            logger.LogCritical(args.Exception, "Unhandled UI exception");
+            args.Handled = true;
+        };
 
-            this.DispatcherUnhandledException += (_, args) =>
-            {
-                logger.LogCritical(args.Exception, "Unhandled UI exception");
-                args.Handled = true;
-            };
-
-            var connectionString = this.configuration.GetConnectionString("Postgres");
-            var optionsBuilder = new DbContextOptionsBuilder<LocalCommunityBoardDbContext>()
+        var connectionString = this.configuration.GetConnectionString("Postgres");
+        var optionsBuilder = new DbContextOptionsBuilder<LocalCommunityBoardDbContext>()
                 .UseNpgsql(connectionString);
 
-            using (var context = new LocalCommunityBoardDbContext(optionsBuilder.Options))
-            {
-                context.Database.Migrate();
-            }
-
-            logger.LogInformation("WPF application started successfully.");
-            logger.LogInformation("User session started at {Time}", DateTime.Now);
-        }
-        catch (Exception ex)
+        using (var context = new LocalCommunityBoardDbContext(optionsBuilder.Options))
         {
-            logger.LogError(ex, "Error during application startup");
+            context.Database.Migrate();
         }
+
+        logger.LogInformation("WPF application started successfully.");
+        logger.LogInformation("User session started at {Time}", DateTime.Now);
     }
 
     protected override void OnExit(ExitEventArgs e)
