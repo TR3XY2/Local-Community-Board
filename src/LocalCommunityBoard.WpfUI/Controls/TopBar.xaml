@@ -1,0 +1,23 @@
+﻿<UserControl x:Class="LocalCommunityBoard.WpfUI.Controls.TopBar"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             Height="45"
+             Background="#FF2B2B2B">
+    <DockPanel>
+        <TextBlock Text="Local Community Board"
+                   Foreground="White"
+                   FontSize="16"
+                   VerticalAlignment="Center"
+                   Margin="10,0,0,0" />
+
+        <StackPanel Orientation="Horizontal"
+                    HorizontalAlignment="Right"
+                    DockPanel.Dock="Right"
+                    Margin="0,0,10,0">
+
+            <Button x:Name="LoginButton" Content="Login" Width="80" Margin="5" Click="Login_Click"/>
+            <Button x:Name="SignupButton" Content="Sign Up" Width="80" Margin="5" Click="Signup_Click"/>
+            <Button x:Name="LogoutButton" Content="Logout" Width="80" Margin="5" Click="Logout_Click" Visibility="Collapsed"/>
+        </StackPanel>
+    </DockPanel>
+</UserControl>
