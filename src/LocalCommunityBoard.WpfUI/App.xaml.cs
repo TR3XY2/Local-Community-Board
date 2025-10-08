@@ -30,32 +30,30 @@ public partial class App : Application
         Log.Logger = new LoggerConfiguration()
             .ReadFrom.Configuration(this.configuration)
             .Enrich.FromLogContext()
+            .WriteTo.File("logs/user-actions.log", rollingInterval: RollingInterval.Day, restrictedToMinimumLevel: Serilog.Events.LogEventLevel.Information)
+            .WriteTo.File("logs/errors.log", rollingInterval: RollingInterval.Day, restrictedToMinimumLevel: Serilog.Events.LogEventLevel.Error)
             .CreateLogger();
 
-        LoggerFactory = new SerilogLoggerFactory(Log.Logger);
-        Logger = LoggerFactory.CreateLogger<App>();
+        Logging.Factory = new SerilogLoggerFactory(Log.Logger);
 
-        Logging.Factory = LoggerFactory;
-
-        Logger.LogInformation("Application starting up...");
+        var logger = Logging.CreateLogger<App>();
+        logger.LogInformation("Application starting up...");
     }
-
-    public static ILoggerFactory LoggerFactory { get; private set; } = null!;
-
-    public static ILogger<App> Logger { get; private set; } = null!;
 
     protected override void OnStartup(StartupEventArgs e)
     {
         base.OnStartup(e);
 
+        var logger = Logging.CreateLogger<App>();
+
         try
         {
             AppDomain.CurrentDomain.UnhandledException += (_, args) =>
-                Logger.LogCritical(args.ExceptionObject as Exception, "Unhandled domain exception");
+                logger.LogCritical(args.ExceptionObject as Exception, "Unhandled domain exception");
 
             this.DispatcherUnhandledException += (_, args) =>
             {
-                Logger.LogCritical(args.Exception, "Unhandled UI exception");
+                logger.LogCritical(args.Exception, "Unhandled UI exception");
                 args.Handled = true;
             };
 
@@ -68,17 +66,20 @@ public partial class App : Application
                 context.Database.Migrate();
             }
 
-            Logger.LogInformation("WPF application started successfully.");
+            logger.LogInformation("WPF application started successfully.");
+            logger.LogInformation("User session started at {Time}", DateTime.Now);
         }
         catch (Exception ex)
         {
-            Logger.LogError(ex, "Error during application startup");
+            logger.LogError(ex, "Error during application startup");
         }
     }
 
     protected override void OnExit(ExitEventArgs e)
     {
-        Logger.LogInformation("Application is shutting down...");
+        var logger = Logging.CreateLogger<App>();
+        logger.LogInformation("User session ended at {Time}", DateTime.Now);
+        logger.LogInformation("Application is shutting down...");
         Log.CloseAndFlush();
         base.OnExit(e);
     }

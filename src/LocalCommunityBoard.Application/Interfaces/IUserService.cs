@@ -1,0 +1,20 @@
+// <copyright file="IUserService.cs" company="PlaceholderCompany">
+// Copyright (c) PlaceholderCompany. All rights reserved.
+// </copyright>
+
+namespace LocalCommunityBoard.Application.Interfaces;
+
+using LocalCommunityBoard.Domain.Entities;
+
+public interface IUserService
+{
+    Task<User> RegisterAsync(string username, string email, string password);
+
+    Task<User?> LoginAsync(string email, string password);
+
+    Task<User?> GetByIdAsync(int id);
+
+    Task<bool> UpdateAsync(User user);
+
+    Task<bool> DeleteAsync(int id);
+}
