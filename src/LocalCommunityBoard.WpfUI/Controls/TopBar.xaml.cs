@@ -31,8 +31,13 @@ public partial class TopBar : UserControl
             this.LoginButton.Visibility = Visibility.Visible;
             this.SignupButton.Visibility = Visibility.Visible;
             this.LogoutButton.Visibility = Visibility.Collapsed;
+            this.ProfileButton.Visibility = Visibility.Collapsed;
         }
     }
+
+    public event RoutedEventHandler? HomeRequested;
+
+    public event RoutedEventHandler? ProfileRequested;
 
     private void UpdateUI()
     {
@@ -41,6 +46,7 @@ public partial class TopBar : UserControl
         this.LoginButton.Visibility = loggedIn ? Visibility.Collapsed : Visibility.Visible;
         this.SignupButton.Visibility = loggedIn ? Visibility.Collapsed : Visibility.Visible;
         this.LogoutButton.Visibility = loggedIn ? Visibility.Visible : Visibility.Collapsed;
+        this.ProfileButton.Visibility = loggedIn ? Visibility.Visible : Visibility.Collapsed;
     }
 
     private void Login_Click(object sender, RoutedEventArgs e)
@@ -49,6 +55,7 @@ public partial class TopBar : UserControl
         if (window.ShowDialog() == true)
         {
             this.UpdateUI();
+            this.ProfileRequested?.Invoke(this, new RoutedEventArgs());
         }
     }
 
@@ -61,5 +68,16 @@ public partial class TopBar : UserControl
     {
         this.session?.Logout();
         this.UpdateUI();
+        this.HomeRequested?.Invoke(this, new RoutedEventArgs());
+    }
+
+    private void Profile_Click(object sender, RoutedEventArgs e)
+    {
+        this.ProfileRequested?.Invoke(this, new RoutedEventArgs());
+    }
+
+    private void Home_Click(object sender, System.Windows.Input.MouseButtonEventArgs e)
+    {
+        this.HomeRequested?.Invoke(this, new RoutedEventArgs());
     }
 }
