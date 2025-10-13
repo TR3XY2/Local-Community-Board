@@ -727,4 +727,89 @@ public class UserServiceTests
     }
 
     #endregion
+
+    #region LogoutAsync Tests
+    /// <summary>
+    /// Tests successful logout with existing user.
+    /// Positive test case.
+    /// </summary>
+    [Fact]
+    public async Task LogoutAsync_WithExistingUser_ReturnsUser()
+    {
+        // Arrange
+        const int userId = 1;
+        var expectedUser = new User
+        {
+            Id = userId,
+            Username = "testuser",
+            Email = "test@example.com",
+            Status = UserStatus.Active
+        };
+
+        this.mockUserRepository
+            .Setup(x => x.GetByIdAsync(userId))
+            .ReturnsAsync(expectedUser);
+
+        // Act
+        var result = await this.sut.LogoutAsync(userId);
+
+        // Assert
+        Assert.NotNull(result);
+        Assert.Equal(userId, result.Id);
+        Assert.Equal(expectedUser.Username, result.Username);
+
+        this.mockUserRepository.Verify(
+            x => x.GetByIdAsync(userId),
+            Times.Once);
+    }
+
+    /// <summary>
+    /// Tests logout with non-existent user.
+    /// Negative test case.
+    /// </summary>
+    [Fact]
+    public async Task LogoutAsync_WithNonExistentUser_ReturnsNull()
+    {
+        // Arrange
+        const int nonExistentUserId = 999;
+
+        this.mockUserRepository
+            .Setup(x => x.GetByIdAsync(nonExistentUserId))
+            .ReturnsAsync((User?)null);
+
+        // Act
+        var result = await this.sut.LogoutAsync(nonExistentUserId);
+
+        // Assert
+        Assert.Null(result);
+
+        this.mockUserRepository.Verify(
+            x => x.GetByIdAsync(nonExistentUserId),
+            Times.Once);
+    }
+
+    /// <summary>
+    /// Tests logout with various user IDs.
+    /// Boundary test cases.
+    /// </summary>
+    [Theory]
+    [InlineData(1)]
+    [InlineData(int.MaxValue)]
+    [InlineData(-1)] // Invalid ID to test edge case
+    public async Task LogoutAsync_WithVariousUserIds_CallsRepository(int userId)
+    {
+        // Arrange
+        this.mockUserRepository
+            .Setup(x => x.GetByIdAsync(userId))
+            .ReturnsAsync((User?)null);
+
+        // Act
+        await this.sut.LogoutAsync(userId);
+
+        // Assert
+        this.mockUserRepository.Verify(
+            x => x.GetByIdAsync(userId),
+            Times.Once);
+    }
+    #endregion
 }
