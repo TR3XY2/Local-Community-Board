@@ -55,7 +55,6 @@ public partial class TopBar : UserControl
         if (window.ShowDialog() == true)
         {
             this.UpdateUI();
-            this.ProfileRequested?.Invoke(this, new RoutedEventArgs());
         }
     }
 

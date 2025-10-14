@@ -46,9 +46,33 @@ public partial class ProfileView : UserControl
             var newUsername = this.UsernameBox.Text.Trim();
             var newEmail = this.EmailBox.Text.Trim();
 
+            // Always save basic info
             await this.userService.UpdatePersonalInfoAsync(userId, newUsername, newEmail);
 
-            // Update session data
+            // Optional password change
+            var oldPassword = this.CurrentPasswordBox.Password;
+            var newPassword = this.NewPasswordBox.Password;
+            var confirmPassword = this.ConfirmPasswordBox.Password;
+
+            if (!string.IsNullOrWhiteSpace(oldPassword) ||
+                !string.IsNullOrWhiteSpace(newPassword) ||
+                !string.IsNullOrWhiteSpace(confirmPassword))
+            {
+                if (string.IsNullOrWhiteSpace(oldPassword) ||
+                    string.IsNullOrWhiteSpace(newPassword) ||
+                    string.IsNullOrWhiteSpace(confirmPassword))
+                {
+                    throw new InvalidOperationException("Please fill in all password fields to change your password.");
+                }
+
+                if (newPassword != confirmPassword)
+                {
+                    throw new InvalidOperationException("New passwords do not match.");
+                }
+
+                await this.userService.ChangePasswordAsync(userId, oldPassword, newPassword);
+            }
+
             this.session.CurrentUser.Username = newUsername;
             this.session.CurrentUser.Email = newEmail;
 

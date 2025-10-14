@@ -4,26 +4,47 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              mc:Ignorable="d">
-	<Grid>
-		<StackPanel Margin="30" Width="300">
-			<TextBlock Text="My Profile" FontSize="24" FontWeight="Bold" Margin="0,0,0,20"/>
+    <Grid>
+        <StackPanel Margin="30" Width="300">
+            <TextBlock Text="My Profile" 
+                       FontSize="24" 
+                       FontWeight="Bold" 
+                       Margin="0,0,0,20"/>
 
-			<TextBlock Text="Username:" FontWeight="SemiBold"/>
-			<TextBox x:Name="UsernameBox" Margin="0,5,0,15"/>
+            <!-- Username -->
+            <TextBlock Text="Username:" FontWeight="SemiBold"/>
+            <TextBox x:Name="UsernameBox" Margin="0,5,0,15"/>
 
-			<TextBlock Text="Email:" FontWeight="SemiBold"/>
-			<TextBox x:Name="EmailBox" Margin="0,5,0,25"/>
+            <!-- Email -->
+            <TextBlock Text="Email:" FontWeight="SemiBold"/>
+            <TextBox x:Name="EmailBox" Margin="0,5,0,25"/>
 
-			<Button Content="Save Changes"
+            <!-- Optional Password Section -->
+            <Expander Header="Change Password" Margin="0,0,0,20">
+                <StackPanel>
+                    <TextBlock Text="Current Password:"/>
+                    <PasswordBox x:Name="CurrentPasswordBox" Margin="0,5,0,10"/>
+
+                    <TextBlock Text="New Password:"/>
+                    <PasswordBox x:Name="NewPasswordBox" Margin="0,5,0,10"/>
+
+                    <TextBlock Text="Confirm New Password:"/>
+                    <PasswordBox x:Name="ConfirmPasswordBox" Margin="0,5,0,5"/>
+                </StackPanel>
+            </Expander>
+
+            <!-- Save -->
+            <Button Content="Save Changes"
                     Width="150"
                     HorizontalAlignment="Center"
                     Click="SaveChanges_Click"/>
 
-			<TextBlock x:Name="StatusText"
+            <!-- Status -->
+            <TextBlock x:Name="StatusText"
                        Margin="0,15,0,0"
                        Foreground="Green"
                        Visibility="Collapsed"
                        Text="Changes saved successfully."/>
-		</StackPanel>
-	</Grid>
+        </StackPanel>
+    </Grid>
 </UserControl>
