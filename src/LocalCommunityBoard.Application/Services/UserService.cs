@@ -107,4 +107,53 @@ public class UserService : IUserService
 
         return true;
     }
+
+    /// <summary>
+    /// Updates the personal information of a user (e.g., username, email).
+    /// </summary>
+    /// <param name="userId">The ID of the user to update.</param>
+    /// <param name="newUsername">The new username, or null to keep the current one.</param>
+    /// <param name="newEmail">The new email, or null to keep the current one.</param>
+    /// <returns>True if the update was successful; false otherwise.</returns>
+    /// <exception cref="InvalidOperationException">Thrown if the user does not exist or email is already in use.</exception>
+    public async Task<bool> UpdatePersonalInfoAsync(int userId, string? newUsername, string? newEmail)
+    {
+        var user = await this.userRepository.GetByIdAsync(userId);
+        if (user == null)
+        {
+            throw new InvalidOperationException("User not found");
+        }
+
+        // Check if email is already in use by another user
+        if (!string.IsNullOrWhiteSpace(newEmail) && newEmail != user.Email)
+        {
+            if (await this.userRepository.EmailExistsAsync(newEmail))
+            {
+                throw new InvalidOperationException("Email is already in use by another account.");
+            }
+
+            user.Email = newEmail;
+        }
+
+        // Update username if provided
+        if (!string.IsNullOrWhiteSpace(newUsername))
+        {
+            user.Username = newUsername;
+        }
+
+        this.userRepository.Update(user);
+        await this.userRepository.SaveChangesAsync();
+        return true;
+    }
+
+    public async Task<User?> LogoutAsync(int userId)
+    {
+        var user = await this.userRepository.GetByIdAsync(userId);
+        if (user == null)
+        {
+            return null;
+        }
+
+        return user;
+    }
 }

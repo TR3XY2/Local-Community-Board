@@ -3,21 +3,53 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              Height="45"
              Background="#FF2B2B2B">
-    <DockPanel>
-        <TextBlock Text="Local Community Board"
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="Auto" />
+        </Grid.ColumnDefinitions>
+
+        <TextBlock x:Name="HomeTitle"
+                   Text="Local Community Board"
                    Foreground="White"
                    FontSize="16"
+                   FontWeight="SemiBold"
                    VerticalAlignment="Center"
-                   Margin="10,0,0,0" />
+                   Margin="10,0,0,0"
+                   Cursor="Hand"
+                   MouseLeftButtonUp="Home_Click" />
 
-        <StackPanel Orientation="Horizontal"
+        <StackPanel Grid.Column="1"
+                    Orientation="Horizontal"
+                    VerticalAlignment="Center"
                     HorizontalAlignment="Right"
-                    DockPanel.Dock="Right"
                     Margin="0,0,10,0">
 
-            <Button x:Name="LoginButton" Content="Login" Width="80" Margin="5" Click="Login_Click"/>
-            <Button x:Name="SignupButton" Content="Sign Up" Width="80" Margin="5" Click="Signup_Click"/>
-            <Button x:Name="LogoutButton" Content="Logout" Width="80" Margin="5" Click="Logout_Click" Visibility="Collapsed"/>
+            <Button x:Name="LoginButton"
+                    Content="Login"
+                    Width="80"
+                    Margin="5,0"
+                    Click="Login_Click"/>
+
+            <Button x:Name="SignupButton"
+                    Content="Sign Up"
+                    Width="80"
+                    Margin="5,0"
+                    Click="Signup_Click"/>
+
+            <Button x:Name="ProfileButton"
+                    Content="Profile"
+                    Width="80"
+                    Margin="5,0"
+                    Click="Profile_Click"
+                    Visibility="Collapsed"/>
+
+            <Button x:Name="LogoutButton"
+                    Content="Logout"
+                    Width="80"
+                    Margin="5,0"
+                    Click="Logout_Click"
+                    Visibility="Collapsed"/>
         </StackPanel>
-    </DockPanel>
+    </Grid>
 </UserControl>

@@ -134,5 +134,9 @@ public class LocalCommunityBoardDbContext : DbContext
             .WithMany()
             .HasForeignKey(c => c.ParentCommentId)
             .OnDelete(DeleteBehavior.Restrict);
+
+        modelBuilder.Entity<Role>().HasData(
+        new Role { Id = 1, Name = "User", Description = "Regular user" },
+        new Role { Id = 2, Name = "Admin", Description = "Administrator" });
     }
 }

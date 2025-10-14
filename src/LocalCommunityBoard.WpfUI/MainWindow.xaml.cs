@@ -14,6 +14,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using LocalCommunityBoard.WpfUI.Views;
 
 /// <summary>
 /// Interaction logic for MainWindow.xaml.
@@ -26,5 +27,22 @@ public partial class MainWindow : Window
     public MainWindow()
     {
         this.InitializeComponent();
+        this.NavigateHome();
+    }
+
+    private void TopBar_HomeRequested(object sender, RoutedEventArgs e)
+        => this.NavigateHome();
+
+    private void TopBar_ProfileRequested(object sender, RoutedEventArgs e)
+        => this.NavigateProfile();
+
+    private void NavigateHome()
+    {
+        this.MainContent.Content = new HomeView();
+    }
+
+    private void NavigateProfile()
+    {
+        this.MainContent.Content = new ProfileView();
     }
 }

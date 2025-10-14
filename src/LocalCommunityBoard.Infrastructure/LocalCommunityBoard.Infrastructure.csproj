@@ -1,31 +1,44 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <ItemGroup>
-    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.9" />
-    <PackageReference Include="Microsoft.Extensions.Configuration" Version="9.0.9" />
-    <PackageReference Include="Microsoft.Extensions.Configuration.FileExtensions" Version="9.0.9" />
-    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="9.0.9" />
-    <PackageReference Include="Microsoft.Extensions.Configuration.UserSecrets" Version="9.0.9" />
-    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="9.0.4" />
-    <PackageReference Include="StyleCop.Analyzers" Version="1.2.0-beta.507">
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-      <PrivateAssets>all</PrivateAssets>
-    </PackageReference>
-  </ItemGroup>
+	<ItemGroup>
+		<PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.9" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.9">
+			<PrivateAssets>all</PrivateAssets>
+			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		</PackageReference>
+		<PackageReference Include="Microsoft.Extensions.Configuration" Version="9.0.9" />
+		<PackageReference Include="Microsoft.Extensions.Configuration.FileExtensions" Version="9.0.9" />
+		<PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="9.0.9" />
+		<PackageReference Include="Microsoft.Extensions.Configuration.UserSecrets" Version="9.0.9" />
+		<PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="9.0.4" />
+		<PackageReference Include="StyleCop.Analyzers" Version="1.2.0-beta.507">
+			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+			<PrivateAssets>all</PrivateAssets>
+		</PackageReference>
+	</ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\LocalCommunityBoard.Domain\LocalCommunityBoard.Domain.csproj" />
-    <ProjectReference Include="..\LocalCommunityBoard.Application\LocalCommunityBoard.Application.csproj" />
-  </ItemGroup>
+	<ItemGroup>
+		<ProjectReference Include="..\LocalCommunityBoard.Domain\LocalCommunityBoard.Domain.csproj" />
+		<ProjectReference Include="..\LocalCommunityBoard.Application\LocalCommunityBoard.Application.csproj" />
+	</ItemGroup>
 
-  <PropertyGroup>
-	<TargetFramework>net9.0-windows</TargetFramework>
-	<ImplicitUsings>enable</ImplicitUsings>
-    <Nullable>enable</Nullable>
-	<GenerateDocumentationFile>true</GenerateDocumentationFile>
-    <UserSecretsId>c8ba4a65-2a2b-4f43-a9d4-d3d59228bfd6</UserSecretsId>
-	<TreatWarningsAsErrors>true</TreatWarningsAsErrors>
-	<NoWarn>CS1591, SA1600</NoWarn>
-  </PropertyGroup>
+	<PropertyGroup>
+		<TargetFramework>net9.0-windows</TargetFramework>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Nullable>enable</Nullable>
+		<GenerateDocumentationFile>true</GenerateDocumentationFile>
+		<UserSecretsId>c8ba4a65-2a2b-4f43-a9d4-d3d59228bfd6</UserSecretsId>
+		<TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+		<NoWarn>CS1591, SA1600</NoWarn>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<!-- ✅ Exclude auto-generated EF Migrations from StyleCop -->
+		<None Remove="Migrations\**\*.cs" />
+		<Compile Update="Migrations\**\*.cs">
+			<ExcludeFromStyleCop>true</ExcludeFromStyleCop>
+		</Compile>
+	</ItemGroup>
+
 
 </Project>
