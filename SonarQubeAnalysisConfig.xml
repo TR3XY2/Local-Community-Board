@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<SonarQubeAnalysisProperties xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+    xmlns="http://www.sonarsource.com/msbuild/integration/2015/1">
+
+    <!-- Виключення автогенерованих файлів -->
+    <Property Name="sonar.exclusions">
+        **/Migrations/**/*,
+        **/bin/**/*,
+        **/obj/**/*,
+        **/*.Designer.cs,
+        **/AssemblyInfo.cs,
+        **/GlobalUsings.g.cs
+    </Property>
+
+    <!-- Виключення з покриття коду -->
+    <Property Name="sonar.coverage.exclusions">
+        **/Migrations/**/*,
+        **/Program.cs,
+        **/App.xaml.cs,
+        **/*Window.xaml.cs,
+        **/*View.xaml.cs
+    </Property>
+
+    <!-- Виключення з дублювання коду -->
+    <Property Name="sonar.cpd.exclusions">
+        **/Migrations/**/*,
+        **/*.Designer.cs
+    </Property>
+
+</SonarQubeAnalysisProperties>

@@ -149,11 +149,6 @@ public class UserService : IUserService
     public async Task<User?> LogoutAsync(int userId)
     {
         var user = await this.userRepository.GetByIdAsync(userId);
-        if (user == null)
-        {
-            return null;
-        }
-
         return user;
     }
 }
