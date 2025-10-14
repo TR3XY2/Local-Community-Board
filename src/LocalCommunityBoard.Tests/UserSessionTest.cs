@@ -2,7 +2,7 @@
 // Copyright (c) PlaceholderCompany. All rights reserved.
 // </copyright>
 
-namespace LocalCommunityBoard.Application.Tests.Services;
+namespace LocalCommunityBoard.Application.Tests.Sessions;
 
 using LocalCommunityBoard.Application.Services;
 using LocalCommunityBoard.Domain.Entities;

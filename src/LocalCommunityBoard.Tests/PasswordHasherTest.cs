@@ -73,13 +73,13 @@ public class PasswordHasherTests
     /// Boundary test case - input validation.
     /// </summary>
     [Theory]
-    [InlineData("")]
-    [InlineData(null)] // null case
-    public void HashPassword_EmptyOrNullPassword_ThrowsArgumentException(string? password)
+    [InlineData("", typeof(ArgumentException))]
+    [InlineData(null, typeof(ArgumentNullException))]
+    public void HashPassword_EmptyOrNullPassword_ThrowsProperException(string? password, Type expectedException)
     {
         // Act & Assert
-#pragma warning disable CS8604 // Possible null reference argument.
-        Assert.Throws<ArgumentException>(() => PasswordHasher.HashPassword(password));
+#pragma warning disable CS8604
+        Assert.Throws(expectedException, () => PasswordHasher.HashPassword(password));
 #pragma warning restore CS8604
     }
 
@@ -123,13 +123,39 @@ public class PasswordHasherTests
     public void VerifyPassword_HashTooShort_ReturnsFalse()
     {
         // Arrange
-        string tooShortHash = Convert.ToBase64String(new byte[20]);
+        string tooShortHash = Convert.ToBase64String(new byte[47]); // One byte less than required 48 bytes
 
-        // Act
-        bool result = PasswordHasher.VerifyPassword("anypassword", tooShortHash);
+        // Act & Assert
+        Assert.Throws<ArgumentException>(() =>
+            PasswordHasher.VerifyPassword("anypassword", tooShortHash));
+    }
 
-        // Assert
-        Assert.False(result);
+    /// <summary>
+    /// Tests handling of empty password.
+    /// Boundary test case - empty input validation.
+    /// </summary>
+    [Fact]
+    public void HashPassword_EmptyPassword_ThrowsArgumentException()
+    {
+        // Act & Assert
+        var exception = Assert.Throws<ArgumentException>(() =>
+            PasswordHasher.HashPassword(string.Empty));
+
+        Assert.Contains("Password cannot be empty", exception.Message);
+    }
+
+    /// <summary>
+    /// Tests handling of null password.
+    /// Boundary test case - null input validation.
+    /// </summary>
+    [Fact]
+    public void HashPassword_NullPassword_ThrowsArgumentNullException()
+    {
+        // Act & Assert
+        var exception = Assert.Throws<ArgumentNullException>(() =>
+            PasswordHasher.HashPassword(null!));
+
+        Assert.Contains("password", exception.ParamName);
     }
 
     /// <summary>

@@ -21,6 +21,13 @@ public static class PasswordHasher
     /// </summary>
     public static string HashPassword(string password)
     {
+        ArgumentNullException.ThrowIfNull(password);
+
+        if (string.IsNullOrWhiteSpace(password))
+        {
+            throw new ArgumentException("Password cannot be empty or whitespace.", nameof(password));
+        }
+
         byte[] salt = RandomNumberGenerator.GetBytes(SaltSize);
 
         byte[] hash = Rfc2898DeriveBytes.Pbkdf2(

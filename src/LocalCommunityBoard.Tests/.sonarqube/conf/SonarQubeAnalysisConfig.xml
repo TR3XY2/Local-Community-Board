@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <AnalysisConfig xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns="http://www.sonarsource.com/msbuild/integration/2015/1">
-  <SonarConfigDir>C:\Users\Sofia1\Desktop\prog\enger\Local-Community-Board\.sonarqube\conf</SonarConfigDir>
-  <SonarOutputDir>C:\Users\Sofia1\Desktop\prog\enger\Local-Community-Board\.sonarqube\out</SonarOutputDir>
-  <SonarBinDir>C:\Users\Sofia1\Desktop\prog\enger\Local-Community-Board\.sonarqube\bin</SonarBinDir>
-  <SonarScannerWorkingDirectory>C:\Users\Sofia1\Desktop\prog\enger\Local-Community-Board</SonarScannerWorkingDirectory>
+  <SonarConfigDir>C:\Users\Sofia1\Desktop\prog\enger\Local-Community-Board\src\LocalCommunityBoard.Tests\.sonarqube\conf</SonarConfigDir>
+  <SonarOutputDir>C:\Users\Sofia1\Desktop\prog\enger\Local-Community-Board\src\LocalCommunityBoard.Tests\.sonarqube\out</SonarOutputDir>
+  <SonarBinDir>C:\Users\Sofia1\Desktop\prog\enger\Local-Community-Board\src\LocalCommunityBoard.Tests\.sonarqube\bin</SonarBinDir>
+  <SonarScannerWorkingDirectory>C:\Users\Sofia1\Desktop\prog\enger\Local-Community-Board\src\LocalCommunityBoard.Tests</SonarScannerWorkingDirectory>
   <JavaExePath>C:\Users\Sofia1\.sonar\cache\4bafe2e94439c8193fc8c68247cb0dbaf4e80265b903288f63f128304f129bbe\OpenJDK17U-jre_x64_windows_hotspot_17.0.11_9.zip_extracted\jdk-17.0.11+9-jre/bin/java.exe</JavaExePath>
   <EngineJarPath>C:\Users\Sofia1\.sonar\cache\d1325aba22edbf70e87c3aa82fd41ab4047b0f950f2a079f3f6378bdaeabfaaa\sonarcloud-scanner-engine-11.26.0.1060.jar</EngineJarPath>
   <UseSonarScannerCli>false</UseSonarScannerCli>
@@ -18,7 +18,7 @@
     <ConfigSetting Id="TfsUri" />
     <ConfigSetting Id="VsCoverageConverterToolPath" />
     <ConfigSetting Id="UnchangedFilesPath" />
-    <ConfigSetting Id="sonar.pullrequest.cache.basepath" Value="C:\Users\Sofia1\Desktop\prog\enger\Local-Community-Board" />
+    <ConfigSetting Id="sonar.pullrequest.cache.basepath" Value="C:\Users\Sofia1\Desktop\prog\enger\Local-Community-Board\src\LocalCommunityBoard.Tests" />
     <ConfigSetting Id="settings.file.path" Value="C:\Users\Sofia1\.dotnet\tools\.store\dotnet-sonarscanner\10.4.1\dotnet-sonarscanner\10.4.1\tools\netcoreapp3.1\any\SonarQube.Analysis.xml" />
   </AdditionalConfig>
   <ServerSettings>
@@ -207,8 +207,8 @@ Automatic Analysis will not be available between 07:00 CET and 09:00 CET</Proper
     <Property Name="sonar.maintenance_mode.start_date">2023-09-28T09:10:00:00.000+01:00</Property>
     <Property Name="sonar.sensor.cache.baseUrl">https://api.sonarcloud.io/analysis</Property>
     <Property Name="sonar.core.startTime">14.10.2025 18:21:09</Property>
-    <Property Name="sonar.exclusions">**/Migrations/**</Property>
     <Property Name="sonar.coverage.exclusions">**/Migrations/**</Property>
+    <Property Name="sonar.exclusions">**/Migrations/**</Property>
   </ServerSettings>
   <LocalSettings>
     <Property Name="sonar.host.url">https://sonarcloud.io</Property>
@@ -222,8 +222,8 @@ Automatic Analysis will not be available between 07:00 CET and 09:00 CET</Proper
   <AnalyzersSettings>
     <AnalyzerSettings>
       <Language>cs</Language>
-      <RulesetPath>C:\Users\Sofia1\Desktop\prog\enger\Local-Community-Board\.sonarqube\conf\Sonar-cs.ruleset</RulesetPath>
-      <DeactivatedRulesetPath>C:\Users\Sofia1\Desktop\prog\enger\Local-Community-Board\.sonarqube\conf\Sonar-cs-none.ruleset</DeactivatedRulesetPath>
+      <RulesetPath>C:\Users\Sofia1\Desktop\prog\enger\Local-Community-Board\src\LocalCommunityBoard.Tests\.sonarqube\conf\Sonar-cs.ruleset</RulesetPath>
+      <DeactivatedRulesetPath>C:\Users\Sofia1\Desktop\prog\enger\Local-Community-Board\src\LocalCommunityBoard.Tests\.sonarqube\conf\Sonar-cs-none.ruleset</DeactivatedRulesetPath>
       <AnalyzerPlugins>
         <AnalyzerPlugin Key="architecturecsharpfrontend" Version="2.7.0.6836" StaticResourceName="SonarAnalyzer.Architecture-2.7.0.6836.zip">
           <AssemblyPaths>
@@ -246,13 +246,13 @@ Automatic Analysis will not be available between 07:00 CET and 09:00 CET</Proper
         </AnalyzerPlugin>
       </AnalyzerPlugins>
       <AdditionalFilePaths>
-        <Path>C:\Users\Sofia1\Desktop\prog\enger\Local-Community-Board\.sonarqube\conf\cs\SonarLint.xml</Path>
+        <Path>C:\Users\Sofia1\Desktop\prog\enger\Local-Community-Board\src\LocalCommunityBoard.Tests\.sonarqube\conf\cs\SonarLint.xml</Path>
       </AdditionalFilePaths>
     </AnalyzerSettings>
     <AnalyzerSettings>
       <Language>vbnet</Language>
-      <RulesetPath>C:\Users\Sofia1\Desktop\prog\enger\Local-Community-Board\.sonarqube\conf\Sonar-vbnet.ruleset</RulesetPath>
-      <DeactivatedRulesetPath>C:\Users\Sofia1\Desktop\prog\enger\Local-Community-Board\.sonarqube\conf\Sonar-vbnet-none.ruleset</DeactivatedRulesetPath>
+      <RulesetPath>C:\Users\Sofia1\Desktop\prog\enger\Local-Community-Board\src\LocalCommunityBoard.Tests\.sonarqube\conf\Sonar-vbnet.ruleset</RulesetPath>
+      <DeactivatedRulesetPath>C:\Users\Sofia1\Desktop\prog\enger\Local-Community-Board\src\LocalCommunityBoard.Tests\.sonarqube\conf\Sonar-vbnet-none.ruleset</DeactivatedRulesetPath>
       <AnalyzerPlugins>
         <AnalyzerPlugin Key="securityvbnetfrontend" Version="11.10.0.40378" StaticResourceName="SonarAnalyzer.Security.VisualBasic-11.10.0.40378.zip">
           <AssemblyPaths>
@@ -269,7 +269,7 @@ Automatic Analysis will not be available between 07:00 CET and 09:00 CET</Proper
         </AnalyzerPlugin>
       </AnalyzerPlugins>
       <AdditionalFilePaths>
-        <Path>C:\Users\Sofia1\Desktop\prog\enger\Local-Community-Board\.sonarqube\conf\vbnet\SonarLint.xml</Path>
+        <Path>C:\Users\Sofia1\Desktop\prog\enger\Local-Community-Board\src\LocalCommunityBoard.Tests\.sonarqube\conf\vbnet\SonarLint.xml</Path>
       </AdditionalFilePaths>
     </AnalyzerSettings>
   </AnalyzersSettings>

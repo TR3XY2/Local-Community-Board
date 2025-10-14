@@ -36,23 +36,23 @@ public class AnnouncementRepository : Repository<Announcement>, IAnnouncementRep
         // --- Filter by location ---
         if (!string.IsNullOrWhiteSpace(city))
         {
-            query = query.Where(a => a.Location.City.ToLowerInvariant().Contains(city.ToLower()));
+            query = query.Where(a => a.Location.City.Contains(city, StringComparison.OrdinalIgnoreCase));
         }
 
         if (!string.IsNullOrWhiteSpace(district))
         {
             query = query.Where(a => a.Location.District != null &&
-                                     a.Location.District.ToLowerInvariant().Contains(district.ToLower()));
+                                   a.Location.District.Contains(district, StringComparison.OrdinalIgnoreCase));
         }
 
         if (!string.IsNullOrWhiteSpace(street))
         {
             query = query.Where(a => a.Location.Street != null &&
-                                     a.Location.Street.ToLowerInvariant().Contains(street.ToLower()));
+                                   a.Location.Street.Contains(street, StringComparison.OrdinalIgnoreCase));
         }
 
         // --- Filter by categories ---
-        if (categoryIds != null && categoryIds.Any())
+        if (categoryIds?.Any() == true)
         {
             query = query.Where(a => categoryIds.Contains(a.CategoryId));
         }
