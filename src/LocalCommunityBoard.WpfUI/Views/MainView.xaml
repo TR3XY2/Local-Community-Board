@@ -1,0 +1,131 @@
+﻿<UserControl x:Class="LocalCommunityBoard.WpfUI.Views.MainView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d"
+             Background="#FFF8F8F8">
+
+    <UserControl.Resources>
+        <!-- ✅ Converter defined once here -->
+        <BooleanToVisibilityConverter x:Key="BoolToVis" />
+    </UserControl.Resources>
+
+    <Grid Margin="10">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="250"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+
+        <!-- 🔹 LEFT FILTER PANEL -->
+        <Border Background="White"
+                CornerRadius="10"
+                Padding="15"
+                BorderBrush="#DDD"
+                BorderThickness="1"
+                Margin="0,0,20,0">
+            <StackPanel>
+                <TextBlock Text="Location"
+                           FontWeight="Bold"
+                           FontSize="16"
+                           Margin="0,0,0,10" />
+
+                <!-- City -->
+                <Grid Margin="0,0,0,8">
+                    <TextBox x:Name="CityInput" Height="28" />
+                    <TextBlock Text="City"
+                               Foreground="Gray"
+                               Margin="5,4,0,0"
+                               FontStyle="Italic"
+                               IsHitTestVisible="False"
+                               Visibility="{Binding Text.IsEmpty, 
+                                                    ElementName=CityInput, 
+                                                    Converter={StaticResource BoolToVis}}"/>
+                </Grid>
+
+                <!-- District -->
+                <Grid Margin="0,0,0,8">
+                    <TextBox x:Name="DistrictInput" Height="28" />
+                    <TextBlock Text="District"
+                               Foreground="Gray"
+                               Margin="5,4,0,0"
+                               FontStyle="Italic"
+                               IsHitTestVisible="False"
+                               Visibility="{Binding Text.IsEmpty, 
+                                                    ElementName=DistrictInput, 
+                                                    Converter={StaticResource BoolToVis}}"/>
+                </Grid>
+
+                <!-- Street -->
+                <Grid Margin="0,0,0,20">
+                    <TextBox x:Name="StreetInput" Height="28" />
+                    <TextBlock Text="Street"
+                               Foreground="Gray"
+                               Margin="5,4,0,0"
+                               FontStyle="Italic"
+                               IsHitTestVisible="False"
+                               Visibility="{Binding Text.IsEmpty, 
+                                                    ElementName=StreetInput, 
+                                                    Converter={StaticResource BoolToVis}}"/>
+                </Grid>
+
+                <TextBlock Text="Content Type"
+                           FontWeight="Bold"
+                           FontSize="16"
+                           Margin="0,0,0,10" />
+
+                <CheckBox x:Name="NewCheck" Content="New" Margin="0,0,0,5"/>
+                <CheckBox x:Name="EventsCheck" Content="Events" Margin="0,0,0,5"/>
+                <CheckBox x:Name="PostsCheck" Content="Posts" Margin="0,0,0,20"/>
+
+                <Button Content="Clear Filters"
+                        Width="120"
+                        HorizontalAlignment="Left"
+                        Margin="0,10,0,0"/>
+            </StackPanel>
+        </Border>
+
+        <!-- 🔹 RIGHT ANNOUNCEMENTS GRID -->
+        <ScrollViewer Grid.Column="1" VerticalScrollBarVisibility="Auto">
+            <ItemsControl>
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <UniformGrid Columns="3" />
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <Border Margin="10"
+                                BorderBrush="#DDD"
+                                BorderThickness="1"
+                                CornerRadius="10"
+                                Background="White"
+                                Padding="8"
+                                Width="230"
+                                Height="200">
+                            <StackPanel>
+                                <Image Source="/Assets/placeholder.png"
+                                       Height="120"
+                                       Stretch="UniformToFill"
+                                       Margin="0,0,0,5"/>
+                                <TextBlock Text="Announcement Title"
+                                           FontWeight="Bold"
+                                           FontSize="14"
+                                           TextAlignment="Center"/>
+                            </StackPanel>
+                        </Border>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+
+                <Border Background="White" Margin="10" BorderBrush="#DDD" BorderThickness="1" CornerRadius="10" Padding="10" Width="230" Height="200">
+                    <StackPanel>
+                        <Image Source="/Assets/placeholder.png" Height="120" Stretch="UniformToFill" Margin="0,0,0,5"/>
+                        <TextBlock Text="Sample Announcement" FontWeight="Bold" FontSize="14" TextAlignment="Center"/>
+                    </StackPanel>
+                </Border>
+
+            </ItemsControl>
+        </ScrollViewer>
+    </Grid>
+</UserControl>
