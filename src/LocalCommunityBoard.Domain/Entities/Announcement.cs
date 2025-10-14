@@ -82,6 +82,13 @@ public class Announcement
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
     /// <summary>
+    /// Gets or sets an optional image URL associated with the announcement.
+    /// </summary>
+    [Column("image_url")]
+    [MaxLength(500)]
+    public string? ImageUrl { get; set; }
+
+    /// <summary>
     /// Gets or sets the collection of comments associated with the announcement.
     /// </summary>
     public ICollection<Comment> Comments { get; set; } = new List<Comment>();
