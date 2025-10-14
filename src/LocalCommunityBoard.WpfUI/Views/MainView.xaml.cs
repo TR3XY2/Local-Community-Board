@@ -28,5 +28,16 @@ namespace LocalCommunityBoard.WpfUI.Views
         {
             this.InitializeComponent();
         }
+
+        private void CleaFilters_Click(object sender, RoutedEventArgs e)
+        {
+            this.CityInput.Text = string.Empty;
+            this.DistrictInput.Text = string.Empty;
+            this.StreetInput.Text = string.Empty;
+
+            this.NewCheck.IsChecked = false;
+            this.PostsCheck.IsChecked = false;
+            this.EventsCheck.IsChecked = false;
+        }
     }
 }
