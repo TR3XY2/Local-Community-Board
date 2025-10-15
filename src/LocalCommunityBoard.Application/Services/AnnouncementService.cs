@@ -27,15 +27,17 @@ public class AnnouncementService : IAnnouncementService
         this.categoryRepository = categoryRepository;
     }
 
-    /// <inheritdoc/>
-    public async Task<IEnumerable<Announcement>> GetAnnouncementsAsync(
+    public async Task<(IEnumerable<Announcement> Items, int TotalCount)> GetAnnouncementsPagedAsync(
         string? city = null,
         string? district = null,
         string? street = null,
         IEnumerable<int>? categoryIds = null,
-        DateTime? date = null)
+        DateTime? date = null,
+        int pageNumber = 1,
+        int pageSize = 9)
     {
-        return await this.announcementRepository.GetFilteredAsync(city, district, street, categoryIds, date);
+        return await this.announcementRepository.GetFilteredPagedAsync(
+            city, district, street, categoryIds, date, pageNumber, pageSize);
     }
 
     /// <inheritdoc/>

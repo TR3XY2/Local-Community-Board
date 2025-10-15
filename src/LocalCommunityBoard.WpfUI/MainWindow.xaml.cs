@@ -4,29 +4,29 @@
 
 namespace LocalCommunityBoard.WpfUI;
 
-using System.Text;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
+using LocalCommunityBoard.Application.Interfaces;
 using LocalCommunityBoard.WpfUI.Views;
 
 /// <summary>
-/// Interaction logic for MainWindow.xaml.
+/// Represents the main window of the application, providing the primary user interface and navigation functionality.
 /// </summary>
+/// <remarks>
+/// This class is responsible for initializing the main window and handling navigation between different
+/// views, such as the home view and the profile view. It subscribes to events from the top bar to trigger
+/// navigation.
+/// </remarks>
 public partial class MainWindow : Window
 {
-    /// <summary>
-    /// Initializes a new instance of the <see cref="MainWindow"/> class.
-    /// </summary>
-    public MainWindow()
+    private readonly IAnnouncementService announcementService;
+
+    public MainWindow(IAnnouncementService announcementService)
     {
         this.InitializeComponent();
+
+        // Dependency-injected service from App.xaml.cs
+        this.announcementService = announcementService;
+
         this.NavigateHome();
     }
 
@@ -38,7 +38,8 @@ public partial class MainWindow : Window
 
     private void NavigateHome()
     {
-        this.MainContent.Content = new HomeView();
+        // Pass the injected service into MainView
+        this.MainContent.Content = new MainView(this.announcementService);
     }
 
     private void NavigateProfile()

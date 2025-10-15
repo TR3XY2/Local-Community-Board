@@ -8,6 +8,7 @@ using System;
 using System.Windows;
 using LocalCommunityBoard.Application.Interfaces;
 using LocalCommunityBoard.Application.Services;
+using LocalCommunityBoard.Domain.Entities;
 using LocalCommunityBoard.Domain.Interfaces;
 using LocalCommunityBoard.Infrastructure.Data;
 using LocalCommunityBoard.Infrastructure.Logging;
@@ -112,9 +113,13 @@ public partial class App : Application
 
         // Repositories
         services.AddScoped<IUserRepository, UserRepository>();
+        services.AddScoped<IAnnouncementRepository, AnnouncementRepository>();
+        services.AddScoped<IRepository<Location>, Repository<Location>>();
+        services.AddScoped<IRepository<Category>, Repository<Category>>();
 
         // Application Services
         services.AddScoped<IUserService, UserService>();
+        services.AddScoped<IAnnouncementService, AnnouncementService>();
         services.AddSingleton<UserSession>(); // session to track logged-in user
 
         // WPF Windows

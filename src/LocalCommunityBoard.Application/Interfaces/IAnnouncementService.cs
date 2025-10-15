@@ -14,12 +14,14 @@ public interface IAnnouncementService
     /// <summary>
     /// Retrieves announcements with optional filters for city, district, street, category, and date.
     /// </summary>
-    Task<IEnumerable<Announcement>> GetAnnouncementsAsync(
+    Task<(IEnumerable<Announcement> Items, int TotalCount)> GetAnnouncementsPagedAsync(
         string? city = null,
         string? district = null,
         string? street = null,
         IEnumerable<int>? categoryIds = null,
-        DateTime? date = null);
+        DateTime? date = null,
+        int pageNumber = 1,
+        int pageSize = 9);
 
     /// <summary>
     /// Creates a new announcement.

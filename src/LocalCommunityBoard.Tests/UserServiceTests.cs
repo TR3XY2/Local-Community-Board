@@ -812,4 +812,129 @@ public class UserServiceTests
             Times.Once);
     }
     #endregion
+
+    #region UpdatePersonalInfoAsync Tests
+    /// <summary>
+    /// Tests successful personal info update.
+    /// Positive test case.
+    /// </summary>
+    [Fact]
+    public async Task UpdatePersonalInfoAsync_WithValidData_UpdatesSuccessfully()
+    {
+        // Arrange
+        const int userId = 1;
+        const string newUsername = "newusername";
+        const string newEmail = "newemail@example.com";
+
+        var existingUser = new User
+        {
+            Id = userId,
+            Username = "oldusername",
+            Email = "old@example.com"
+        };
+
+        this.mockUserRepository
+            .Setup(x => x.GetByIdAsync(userId))
+            .ReturnsAsync(existingUser);
+
+        this.mockUserRepository
+            .Setup(x => x.EmailExistsAsync(newEmail))
+            .ReturnsAsync(false);
+
+        // Act
+        var result = await this.sut.UpdatePersonalInfoAsync(userId, newUsername, newEmail);
+
+        // Assert
+        Assert.True(result);
+        Assert.Equal(newUsername, existingUser.Username);
+        Assert.Equal(newEmail, existingUser.Email);
+
+        this.mockUserRepository.Verify(x => x.Update(existingUser), Times.Once);
+        this.mockUserRepository.Verify(x => x.SaveChangesAsync(), Times.Once);
+    }
+
+    /// <summary>
+    /// Tests personal info update with non-existent user.
+    /// Negative test case.
+    /// </summary>
+    [Fact]
+    public async Task UpdatePersonalInfoAsync_WithNonExistentUser_ThrowsInvalidOperationException()
+    {
+        // Arrange
+        const int nonExistentUserId = 999;
+
+        this.mockUserRepository
+            .Setup(x => x.GetByIdAsync(nonExistentUserId))
+            .ReturnsAsync((User?)null);
+
+        // Act & Assert
+        var exception = await Assert.ThrowsAsync<InvalidOperationException>(
+            () => this.sut.UpdatePersonalInfoAsync(nonExistentUserId, "newname", "new@example.com"));
+
+        Assert.Equal("User not found", exception.Message);
+    }
+
+    /// <summary>
+    /// Tests personal info update with an email that already exists.
+    /// Negative test case.
+    /// </summary>
+    [Fact]
+    public async Task UpdatePersonalInfoAsync_WithExistingEmail_ThrowsInvalidOperationException()
+    {
+        // Arrange
+        const int userId = 1;
+        const string existingEmail = "existing@example.com";
+
+        var user = new User
+        {
+            Id = userId,
+            Username = "username",
+            Email = "old@example.com"
+        };
+
+        this.mockUserRepository
+            .Setup(x => x.GetByIdAsync(userId))
+            .ReturnsAsync(user);
+
+        this.mockUserRepository
+            .Setup(x => x.EmailExistsAsync(existingEmail))
+            .ReturnsAsync(true);
+
+        // Act & Assert
+        var exception = await Assert.ThrowsAsync<InvalidOperationException>(
+            () => this.sut.UpdatePersonalInfoAsync(userId, "newname", existingEmail));
+
+        Assert.Equal("Email is already in use by another account.", exception.Message);
+    }
+
+    /// <summary>
+    /// Tests personal info update with null values.
+    /// Ensures existing data remains unchanged.
+    /// </summary>
+    [Fact]
+    public async Task UpdatePersonalInfoAsync_WithNullValues_KeepsExistingData()
+    {
+        // Arrange
+        const int userId = 1;
+        var existingUser = new User
+        {
+            Id = userId,
+            Username = "existingname",
+            Email = "existing@example.com"
+        };
+
+        this.mockUserRepository
+            .Setup(x => x.GetByIdAsync(userId))
+            .ReturnsAsync(existingUser);
+
+        // Act
+        var result = await this.sut.UpdatePersonalInfoAsync(userId, null, null);
+
+        // Assert
+        Assert.True(result);
+        Assert.Equal("existingname", existingUser.Username);
+        Assert.Equal("existing@example.com", existingUser.Email);
+    }
+
+    #endregion
 }

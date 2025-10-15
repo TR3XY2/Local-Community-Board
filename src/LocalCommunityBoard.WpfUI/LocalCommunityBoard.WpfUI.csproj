@@ -1,6 +1,10 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <ItemGroup>
+    <None Remove="Assets\placeholder.png" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\LocalCommunityBoard.Application\LocalCommunityBoard.Application.csproj" />
     <ProjectReference Include="..\LocalCommunityBoard.Infrastructure\LocalCommunityBoard.Infrastructure.csproj" />
     <ProjectReference Include="..\LocalCommunityBoard.Domain\LocalCommunityBoard.Domain.csproj" />
@@ -30,6 +34,12 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Resource Include="Assets\placeholder.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+  </ItemGroup>
+
+  <ItemGroup>
     <None Update="appsettings.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
@@ -44,7 +54,7 @@
 	<GenerateDocumentationFile>true</GenerateDocumentationFile>
 	<UserSecretsId>c8ba4a65-2a2b-4f43-a9d4-d3d59228bfd6</UserSecretsId>
 	<TreatWarningsAsErrors>true</TreatWarningsAsErrors>
-	<NoWarn>CS1591, SA1600, CA1416</NoWarn>
+	<NoWarn>CS1591, SA1600, CA1416, SA1311</NoWarn>
   </PropertyGroup>
 
 </Project>
