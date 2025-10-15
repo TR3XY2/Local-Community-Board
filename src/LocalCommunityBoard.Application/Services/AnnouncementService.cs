@@ -89,7 +89,8 @@ public class AnnouncementService : IAnnouncementService
         int userId,
         string? title = null,
         string? body = null,
-        int? categoryId = null)
+        int? categoryId = null,
+        string? imageUrl = null)
     {
         var announcement = await this.announcementRepository.GetByIdAsync(announcementId);
         if (announcement == null)
@@ -120,6 +121,11 @@ public class AnnouncementService : IAnnouncementService
             }
 
             announcement.CategoryId = categoryId.Value;
+        }
+
+        if (!string.IsNullOrWhiteSpace(imageUrl))
+        {
+            announcement.ImageUrl = imageUrl.Trim();
         }
 
         this.announcementRepository.Update(announcement);
