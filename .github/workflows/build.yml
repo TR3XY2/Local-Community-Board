@@ -55,17 +55,17 @@ jobs:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         shell: pwsh
         run: |
-          ${{ runner.temp }}\scanner\dotnet-sonarscanner begin /k:"TR3XY2_Local-Community-Board" /o:"localboard" /d:sonar.token="${{ secrets.SONAR_TOKEN }}"
+          ${{ runner.temp }}\scanner\dotnet-sonarscanner begin /k:"TR3XY2_Local-Community-Board" /o:"localboard" /d:sonar.token="${{ secrets.SONAR_TOKEN }} /d:sonar.projectBaseDir="src/LocalCommunityBoard.Application"
 
       # Restore, build, test (inside scanner context)
       - name: Restore dependencies
-        run: dotnet restore LocalCommunityBoard.sln
+        run: dotnet restore src/LocalCommunityBoard.Application/LocalCommunityBoard.Application.csproj
 
       - name: Build
-        run: dotnet build LocalCommunityBoard.sln --no-restore --configuration Release
+        run: dotnet build src/LocalCommunityBoard.Application/LocalCommunityBoard.Application.csproj --no-restore --configuration Release
 
       - name: Run tests
-        run: dotnet test LocalCommunityBoard.sln --no-build --configuration Release --collect:"XPlat Code Coverage"
+        run: dotnet test src/LocalCommunityBoard.Tests/LocalCommunityBoard.Tests.csproj --no-build --configuration Release --collect:"XPlat Code Coverage"
 
       # SonarQube end
       - name: SonarQube end
