@@ -4,23 +4,33 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              mc:Ignorable="d">
-    <Grid>
-        <StackPanel Margin="30" Width="300">
-            <TextBlock Text="My Profile" 
-                       FontSize="24" 
-                       FontWeight="Bold" 
-                       Margin="0,0,0,20"/>
+
+    <ScrollViewer VerticalScrollBarVisibility="Auto">
+        <StackPanel Margin="30"
+                    MaxWidth="500"
+                    HorizontalAlignment="Center">
+
+            <!-- Header -->
+            <TextBlock Text="My Profile"
+                       FontSize="26"
+                       FontWeight="Bold"
+                       Margin="0,0,0,25"/>
 
             <!-- Username -->
             <TextBlock Text="Username:" FontWeight="SemiBold"/>
-            <TextBox x:Name="UsernameBox" Margin="0,5,0,15"/>
+            <TextBox x:Name="UsernameBox"
+                     Margin="0,5,0,15"
+                     Padding="6"/>
 
             <!-- Email -->
             <TextBlock Text="Email:" FontWeight="SemiBold"/>
-            <TextBox x:Name="EmailBox" Margin="0,5,0,25"/>
+            <TextBox x:Name="EmailBox"
+                     Margin="0,5,0,25"
+                     Padding="6"/>
 
             <!-- Optional Password Section -->
-            <Expander Header="Change Password" Margin="0,0,0,20">
+            <Expander Header="Change Password"
+                      Margin="0,0,0,25">
                 <StackPanel>
                     <TextBlock Text="Current Password:"/>
                     <PasswordBox x:Name="CurrentPasswordBox" Margin="0,5,0,10"/>
@@ -44,7 +54,51 @@
                        Margin="0,15,0,0"
                        Foreground="Green"
                        Visibility="Collapsed"
-                       Text="Changes saved successfully."/>
+                       Text="Changes saved successfully." />
+
+            <!-- Divider -->
+            <Separator Margin="0,30,0,15"/>
+
+            <!-- My Announcements -->
+            <TextBlock Text="My Announcements"
+                       FontSize="20"
+                       FontWeight="Bold"
+                       Margin="0,0,0,15" />
+
+            <ItemsControl x:Name="MyAnnouncementsList">
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <Border BorderBrush="#DDD"
+                                BorderThickness="1"
+                                CornerRadius="6"
+                                Padding="10"
+                                Margin="0,0,0,10">
+                            <DockPanel LastChildFill="False">
+                                <TextBlock Text="{Binding Title}"
+                                           FontWeight="SemiBold"
+                                           FontSize="14"
+                                           VerticalAlignment="Center"
+                                           TextWrapping="Wrap"
+                                           DockPanel.Dock="Left"
+                                           Width="260" />
+
+                                <StackPanel Orientation="Horizontal"
+                                            HorizontalAlignment="Right"
+                                            DockPanel.Dock="Right">
+                                    <Button Content="Edit"
+                                            Width="70"
+                                            Margin="0,0,5,0"
+                                            IsEnabled="False"/>
+                                    <Button Content="Delete"
+                                            Width="70"
+                                            IsEnabled="False"/>
+                                </StackPanel>
+                            </DockPanel>
+                        </Border>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+
         </StackPanel>
-    </Grid>
+    </ScrollViewer>
 </UserControl>

@@ -147,4 +147,9 @@ public class AnnouncementService : IAnnouncementService
 
         return true;
     }
+
+    public async Task<IEnumerable<Announcement>> GetAnnouncementsByUserIdAsync(int userId)
+    {
+        return await this.announcementRepository.GetByUserIdAsync(userId);
+    }
 }
