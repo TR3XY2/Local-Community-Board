@@ -93,4 +93,39 @@ public class AnnouncementRepository : Repository<Announcement>, IAnnouncementRep
             .OrderByDescending(a => a.CreatedAt)
             .ToListAsync();
     }
+
+    /// <inheritdoc/>
+    public async Task<bool> UpdateAnnouncementAsync(
+        int announcementId,
+        int userId,
+        string? title = null,
+        string? body = null,
+        int? categoryId = null)
+    {
+        var announcement = await this.DbSet.FirstOrDefaultAsync(a => a.Id == announcementId && a.UserId == userId);
+        if (announcement == null)
+        {
+            return false; // Announcement not found or user not authorized
+        }
+
+        // Update fields if new values are provided
+        if (!string.IsNullOrWhiteSpace(title))
+        {
+            announcement.Title = title.Trim();
+        }
+
+        if (!string.IsNullOrWhiteSpace(body))
+        {
+            announcement.Body = body.Trim();
+        }
+
+        if (categoryId.HasValue)
+        {
+            announcement.CategoryId = categoryId.Value;
+        }
+
+        this.DbSet.Update(announcement);
+        await this.SaveChangesAsync();
+        return true;
+    }
 }

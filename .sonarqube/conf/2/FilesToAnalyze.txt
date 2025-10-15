@@ -1,0 +1,11 @@
+﻿C:\Users\Sofia1\Desktop\prog\enger\Local-Community-Board\src\LocalCommunityBoard.Infrastructure\Data\LocalCommunityBoardDbContext.cs
+C:\Users\Sofia1\Desktop\prog\enger\Local-Community-Board\src\LocalCommunityBoard.Infrastructure\Data\LocalCommunityBoardDbContextFactory.cs
+C:\Users\Sofia1\Desktop\prog\enger\Local-Community-Board\src\LocalCommunityBoard.Infrastructure\Logging\Logging.cs
+C:\Users\Sofia1\Desktop\prog\enger\Local-Community-Board\src\LocalCommunityBoard.Infrastructure\Migrations\20251001190400_InitialCreate.cs
+C:\Users\Sofia1\Desktop\prog\enger\Local-Community-Board\src\LocalCommunityBoard.Infrastructure\Migrations\20251001190400_InitialCreate.Designer.cs
+C:\Users\Sofia1\Desktop\prog\enger\Local-Community-Board\src\LocalCommunityBoard.Infrastructure\Migrations\20251008171810_AddRolesSeed.cs
+C:\Users\Sofia1\Desktop\prog\enger\Local-Community-Board\src\LocalCommunityBoard.Infrastructure\Migrations\20251008171810_AddRolesSeed.Designer.cs
+C:\Users\Sofia1\Desktop\prog\enger\Local-Community-Board\src\LocalCommunityBoard.Infrastructure\Migrations\LocalCommunityBoardDbContextModelSnapshot.cs
+C:\Users\Sofia1\Desktop\prog\enger\Local-Community-Board\src\LocalCommunityBoard.Infrastructure\Repositories\AnnouncementRepository.cs
+C:\Users\Sofia1\Desktop\prog\enger\Local-Community-Board\src\LocalCommunityBoard.Infrastructure\Repositories\Repository.cs
+C:\Users\Sofia1\Desktop\prog\enger\Local-Community-Board\src\LocalCommunityBoard.Infrastructure\Repositories\UserRepository.cs
