@@ -5,30 +5,60 @@
 namespace LocalCommunityBoard.WpfUI.Views;
 
 using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using LocalCommunityBoard.Application.Interfaces;
 using LocalCommunityBoard.Application.Services;
+using LocalCommunityBoard.Domain.Entities;
 using Microsoft.Extensions.DependencyInjection;
 
 /// <summary>
-/// Profile view for the logged-in user.
+/// Represents a user interface for viewing and editing the profile of the currently logged-in user.
 /// </summary>
+/// <remarks>The <see cref="ProfileView"/> control provides functionality for displaying and updating user profile
+/// information,  including username, email, and password. It also allows the user to view their announcements.  This
+/// control depends on the <see cref="IUserService"/> for user-related operations,  <see cref="IAnnouncementService"/>
+/// for managing announcements, and <see cref="UserSession"/> for session management.</remarks>
 public partial class ProfileView : UserControl
 {
     private readonly IUserService userService;
+    private readonly IAnnouncementService announcementService;
     private readonly UserSession session;
 
     public ProfileView()
     {
         this.InitializeComponent();
         this.userService = App.Services.GetRequiredService<IUserService>();
+        this.announcementService = App.Services.GetRequiredService<IAnnouncementService>();
         this.session = App.Services.GetRequiredService<UserSession>();
 
         if (this.session.IsLoggedIn && this.session.CurrentUser != null)
         {
             this.UsernameBox.Text = this.session.CurrentUser.Username;
             this.EmailBox.Text = this.session.CurrentUser.Email;
+            _ = this.LoadMyAnnouncementsAsync();
+        }
+    }
+
+    private async Task LoadMyAnnouncementsAsync()
+    {
+        try
+        {
+            if (!this.session.IsLoggedIn || this.session.CurrentUser == null)
+            {
+                return;
+            }
+
+            var userId = this.session.CurrentUser.Id;
+            var myAnnouncements = await this.announcementService.GetAnnouncementsByUserIdAsync(userId);
+
+            this.MyAnnouncementsList.ItemsSource = myAnnouncements;
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show($"Failed to load announcements: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
         }
     }
 
@@ -46,10 +76,8 @@ public partial class ProfileView : UserControl
             var newUsername = this.UsernameBox.Text.Trim();
             var newEmail = this.EmailBox.Text.Trim();
 
-            // Always save basic info
             await this.userService.UpdatePersonalInfoAsync(userId, newUsername, newEmail);
 
-            // Optional password change
             var oldPassword = this.CurrentPasswordBox.Password;
             var newPassword = this.NewPasswordBox.Password;
             var confirmPassword = this.ConfirmPasswordBox.Password;

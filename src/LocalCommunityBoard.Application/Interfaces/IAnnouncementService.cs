@@ -49,4 +49,11 @@ public interface IAnnouncementService
     /// Deletes an announcement (only if owned by user).
     /// </summary>
     Task<bool> DeleteAnnouncementAsync(int announcementId, int userId);
+
+    /// <summary>
+    /// Retrieves all announcements created by a specific user.
+    /// </summary>
+    /// <param name="userId">The ID of the user.</param>
+    /// <returns>A collection of announcements.</returns>
+    Task<IEnumerable<Announcement>> GetAnnouncementsByUserIdAsync(int userId);
 }
