@@ -98,6 +98,88 @@ public class AnnouncementServiceTests
             Times.Once);
     }
 
+    /// <summary>
+    /// Tests paging with street and date filters.
+    /// State verification test.
+    /// </summary>
+    [Fact]
+    public async Task GetAnnouncementsPagedAsync_WithStreetAndDate_PassesFiltersToRepository()
+    {
+        // Arrange
+        const string street = "TestStreet";
+        var date = new DateTime(2025, 10, 15);
+
+        this.mockAnnouncementRepository
+            .Setup(r => r.GetFilteredPagedAsync(null, null, street, null, date, 1, 9))
+            .ReturnsAsync((Enumerable.Empty<Announcement>(), 0));
+
+        // Act
+        await this.sut.GetAnnouncementsPagedAsync(street: street, date: date);
+
+        // Assert
+        this.mockAnnouncementRepository.Verify(
+            r => r.GetFilteredPagedAsync(null, null, street, null, date, 1, 9),
+            Times.Once);
+    }
+
+    /// <summary>
+    /// Tests paging with invalid page parameters.
+    /// Negative test case.
+    /// </summary>
+    [Theory]
+    [InlineData(0, 9)]
+    [InlineData(1, 0)]
+    [InlineData(-1, 9)]
+    [InlineData(1, -1)]
+    public async Task GetAnnouncementsPagedAsync_WithInvalidPageParameters_ReturnsEmptyResult(int pageNumber, int pageSize)
+    {
+        // Arrange
+        this.mockAnnouncementRepository
+            .Setup(r => r.GetFilteredPagedAsync(
+                It.IsAny<string>(),
+                It.IsAny<string>(),
+                It.IsAny<string>(),
+                It.IsAny<IEnumerable<int>>(),
+                It.IsAny<DateTime?>(),
+                pageNumber,
+                pageSize))
+            .ReturnsAsync((Enumerable.Empty<Announcement>(), 0));
+
+        // Act
+        var result = await this.sut.GetAnnouncementsPagedAsync(pageNumber: pageNumber, pageSize: pageSize);
+
+        // Assert
+        Assert.Empty(result.Items);
+        Assert.Equal(0, result.TotalCount);
+    }
+
+    /// <summary>
+    /// Tests paging with empty result.
+    /// Edge case test.
+    /// </summary>
+    [Fact]
+    public async Task GetAnnouncementsPagedAsync_WithNoAnnouncements_ReturnsEmptyResult()
+    {
+        // Arrange
+        this.mockAnnouncementRepository
+            .Setup(r => r.GetFilteredPagedAsync(
+                It.IsAny<string>(),
+                It.IsAny<string>(),
+                It.IsAny<string>(),
+                It.IsAny<IEnumerable<int>>(),
+                It.IsAny<DateTime?>(),
+                It.IsAny<int>(),
+                It.IsAny<int>()))
+            .ReturnsAsync((Enumerable.Empty<Announcement>(), 0));
+
+        // Act
+        var result = await this.sut.GetAnnouncementsPagedAsync();
+
+        // Assert
+        Assert.Empty(result.Items);
+        Assert.Equal(0, result.TotalCount);
+    }
+
     #endregion
 
     #region CreateAnnouncementAsync Tests
@@ -224,6 +306,39 @@ public class AnnouncementServiceTests
             this.sut.CreateAnnouncementAsync(1, "Title", "Body", 1, 999));
 
         Assert.Contains("Location with ID 999 does not exist", exception.Message);
+    }
+
+    /// <summary>
+    /// Tests creation with image URLs and links.
+    /// Positive test case.
+    /// </summary>
+    [Fact]
+    public async Task CreateAnnouncementAsync_WithImageUrlsAndLinks_SavesCorrectly()
+    {
+        // Arrange
+        const int userId = 1;
+        const string title = "Test Title";
+        const string body = "Test Body";
+        const int categoryId = 1;
+        const int locationId = 1;
+        IEnumerable<string> imageUrls = new List<string> { "http://example.com/image.jpg" };
+
+        this.mockCategoryRepository
+            .Setup(r => r.GetByIdAsync(categoryId))
+            .ReturnsAsync(new Category { Id = categoryId });
+
+        this.mockLocationRepository
+            .Setup(r => r.GetByIdAsync(locationId))
+            .ReturnsAsync(new Location { Id = locationId });
+
+        // Act
+        var result = await this.sut.CreateAnnouncementAsync(
+            userId, title, body, categoryId, locationId);
+
+        // Assert
+        Assert.NotNull(result);
+        this.mockAnnouncementRepository.Verify(
+            r => r.SaveChangesAsync(), Times.Once);
     }
 
     #endregion
@@ -398,6 +513,85 @@ public class AnnouncementServiceTests
         Assert.Contains("Category with ID 999 does not exist", exception.Message);
     }
 
+    /// <summary>
+    /// Tests update with image URL.
+    /// Positive test case.
+    /// </summary>
+    [Fact]
+    public async Task UpdateAnnouncementAsync_WithImageUrl_UpdatesImageUrl()
+    {
+        // Arrange
+        var announcement = new Announcement
+        {
+            Id = 1,
+            UserId = 1,
+            Title = "Old Title",
+            Body = "Old Body",
+            ImageUrl = null
+        };
+
+        this.mockAnnouncementRepository
+            .Setup(r => r.GetByIdAsync(1))
+            .ReturnsAsync(announcement);
+
+        // Act
+        var result = await this.sut.UpdateAnnouncementAsync(1, 1, imageUrl: "  http://example.com/image.jpg  ");
+
+        // Assert
+        Assert.True(result);
+        Assert.Equal("http://example.com/image.jpg", announcement.ImageUrl);
+        this.mockAnnouncementRepository.Verify(
+            r => r.Update(announcement), Times.Once);
+        this.mockAnnouncementRepository.Verify(
+            r => r.SaveChangesAsync(), Times.Once);
+    }
+
+    /// <summary>
+    /// Tests update with empty title or body.
+    /// Edge case test.
+    /// </summary>
+    [Theory]
+    [InlineData("", "Body")]
+    [InlineData("   ", "Body")]
+    [InlineData(null, "Body")]
+    [InlineData("Title", "")]
+    [InlineData("Title", "   ")]
+    [InlineData("Title", null)]
+    public async Task UpdateAnnouncementAsync_WithEmptyTitleOrBody_SkipsUpdate(string? title, string? body)
+    {
+        // Arrange
+        var announcement = new Announcement
+        {
+            Id = 1,
+            UserId = 1,
+            Title = "Old Title",
+            Body = "Old Body"
+        };
+
+        this.mockAnnouncementRepository
+            .Setup(r => r.GetByIdAsync(1))
+            .ReturnsAsync(announcement);
+
+        // Act
+        var result = await this.sut.UpdateAnnouncementAsync(1, 1, title, body);
+
+        // Assert
+        Assert.True(result);
+        if (string.IsNullOrWhiteSpace(title))
+            Assert.Equal("Old Title", announcement.Title);
+        else
+            Assert.Equal(title.Trim(), announcement.Title);
+
+        if (string.IsNullOrWhiteSpace(body))
+            Assert.Equal("Old Body", announcement.Body);
+        else
+            Assert.Equal(body.Trim(), announcement.Body);
+        this.mockAnnouncementRepository.Verify(
+            r => r.Update(announcement), Times.Once);
+        this.mockAnnouncementRepository.Verify(
+            r => r.SaveChangesAsync(), Times.Once);
+    }
+
     #endregion
 
     #region DeleteAnnouncementAsync Tests
@@ -471,6 +665,57 @@ public class AnnouncementServiceTests
         Assert.False(result);
         this.mockAnnouncementRepository.Verify(
             r => r.Delete(It.IsAny<Announcement>()), Times.Never);
+    }
+
+    #endregion
+
+    #region GetAnnouncementsByUserIdAsync Tests
+
+    /// <summary>
+    /// Tests successful retrieval of announcements by user ID.
+    /// Positive test case - happy path.
+    /// </summary>
+    [Fact]
+    public async Task GetAnnouncementsByUserIdAsync_WithValidUserId_ReturnsAnnouncements()
+    {
+        // Arrange
+        const int userId = 1;
+        var announcements = new List<Announcement>
+        {
+            new Announcement { Id = 1, UserId = userId, Title = "Test 1" },
+            new Announcement { Id = 2, UserId = userId, Title = "Test 2" }
+        };
+
+        this.mockAnnouncementRepository
+            .Setup(r => r.GetByUserIdAsync(userId))
+            .ReturnsAsync(announcements);
+
+        // Act
+        var result = await this.sut.GetAnnouncementsByUserIdAsync(userId);
+
+        // Assert
+        Assert.Equal(2, result.Count());
+        Assert.All(result, a => Assert.Equal(userId, a.UserId));
+    }
+
+    /// <summary>
+    /// Tests retrieval of announcements for non-existent user ID.
+    /// Edge case test.
+    /// </summary>
+    [Fact]
+    public async Task GetAnnouncementsByUserIdAsync_WithNonExistentUserId_ReturnsEmptyList()
+    {
+        // Arrange
+        const int userId = 999;
+        this.mockAnnouncementRepository
+            .Setup(r => r.GetByUserIdAsync(userId))
+            .ReturnsAsync(Enumerable.Empty<Announcement>());
+
+        // Act
+        var result = await this.sut.GetAnnouncementsByUserIdAsync(userId);
+
+        // Assert
+        Assert.Empty(result);
     }
 
     #endregion

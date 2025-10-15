@@ -14,6 +14,9 @@ namespace LocalCommunityBoard.WpfUI.Views
     /// </summary>
     public partial class CreatePostView : UserControl
     {
+        private const string ValidationTitle = "Validation";
+
+        private static readonly char[] commaSeparator = { ',' };
         private readonly IAnnouncementService announcementService;
         private readonly UserSession userSession;
 
@@ -32,36 +35,36 @@ namespace LocalCommunityBoard.WpfUI.Views
 
             if (string.IsNullOrWhiteSpace(title))
             {
-                MessageBox.Show("Title cannot be empty.", "Validation", MessageBoxButton.OK, MessageBoxImage.Warning);
+                MessageBox.Show("Title cannot be empty.", ValidationTitle, MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
 
             if (string.IsNullOrWhiteSpace(body))
             {
-                MessageBox.Show("Body cannot be empty.", "Validation", MessageBoxButton.OK, MessageBoxImage.Warning);
+                MessageBox.Show("Body cannot be empty.", ValidationTitle, MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
 
             if (!int.TryParse(this.CategoryIdTextBox.Text?.Trim(), out var categoryId))
             {
-                MessageBox.Show("Please enter a valid numeric Category ID.", "Validation", MessageBoxButton.OK, MessageBoxImage.Warning);
+                MessageBox.Show("Please enter a valid numeric Category ID.", ValidationTitle, MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
 
             if (!int.TryParse(this.LocationIdTextBox.Text?.Trim(), out var locationId))
             {
-                MessageBox.Show("Please enter a valid numeric Location ID.", "Validation", MessageBoxButton.OK, MessageBoxImage.Warning);
+                MessageBox.Show("Please enter a valid numeric Location ID.", ValidationTitle, MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
 
             // Парсинг optional полів (images / links)
             var imageUrls = string.IsNullOrWhiteSpace(this.ImagesTextBox.Text)
                 ? Enumerable.Empty<string>()
-                : this.ImagesTextBox.Text.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries).Select(s => s.Trim());
+                : this.ImagesTextBox.Text.Split(commaSeparator, StringSplitOptions.RemoveEmptyEntries).Select(s => s.Trim());
 
             var links = string.IsNullOrWhiteSpace(this.LinksTextBox.Text)
                 ? Enumerable.Empty<string>()
-                : this.LinksTextBox.Text.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries).Select(s => s.Trim());
+                : this.LinksTextBox.Text.Split(commaSeparator, StringSplitOptions.RemoveEmptyEntries).Select(s => s.Trim());
 
             // Отримати userId — декілька способів (fallback)
             if (this.userSession?.IsLoggedIn != true || this.userSession.CurrentUser == null)
@@ -75,7 +78,7 @@ namespace LocalCommunityBoard.WpfUI.Views
             try
             {
                 // Виклик вашого сервісу
-                var created = await this.announcementService.CreateAnnouncementAsync(
+                await this.announcementService.CreateAnnouncementAsync(
                     userId,
                     title,
                     body,
@@ -107,64 +110,8 @@ namespace LocalCommunityBoard.WpfUI.Views
             this.TryNavigateHome();
         }
 
-        private int? GetCurrentUserIdFallback()
-        {
-            try
-            {
-                // 1) Application.Current.Properties["UserId"] — простий підхід
-                if (Application.Current?.Properties != null &&
-                    Application.Current.Properties.Contains("UserId") &&
-                    Application.Current.Properties["UserId"] is int propId)
-                {
-                    return propId;
-                }
-
-                // 2) DataContext could contain a user id property (optional)
-                if (this.DataContext != null)
-                {
-                    var dc = this.DataContext;
-                    var idProp = dc.GetType().GetProperty("UserId");
-                    if (idProp != null)
-                    {
-                        var val = idProp.GetValue(dc);
-                        if (val is int idFromDc)
-                        {
-                            return idFromDc;
-                        }
-
-                        if (val is long longId)
-                        {
-                            return Convert.ToInt32(longId);
-                        }
-                    }
-                }
-
-                // 3) Try to find MainWindow and check its DataContext or a public property (if you have one)
-                if (Application.Current?.MainWindow != null)
-                {
-                    var mw = Application.Current.MainWindow;
-                    var mwProp = mw.GetType().GetProperty("CurrentUserId");
-                    if (mwProp != null)
-                    {
-                        var val = mwProp.GetValue(mw);
-                        if (val is int id)
-                        {
-                            return id;
-                        }
-                    }
-                }
-            }
-            catch
-            {
-                // swallow and return null => means not logged in / not available
-            }
-
-            return null;
-        }
-
         /// <summary>
-        /// Спроба повернутися на головну — якщо MainWindow має MainContent — переключає його на головний View.
-        /// Якщо у вас інший механізм навігації — замініть.
+        /// Attempt to navigate back to the home/main view.
         /// </summary>
         private void TryNavigateHome()
         {
