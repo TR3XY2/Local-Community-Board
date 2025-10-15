@@ -66,13 +66,25 @@
 
                     <ItemsControl.ItemTemplate>
                         <DataTemplate DataType="{x:Type viewModels:AnnouncementViewModel}">
-                            <Border Margin="10" BorderBrush="#DDD" BorderThickness="1" CornerRadius="10" Background="White" Padding="8" Width="230" Height="200">
+                            <Border Margin="10"
+                                    BorderBrush="#DDD"
+                                    BorderThickness="1"
+                                    CornerRadius="10"
+                                    Background="White"
+                                    Padding="8"
+                                    Width="230"
+                                    Height="200"
+                                    MouseLeftButtonUp="Announcement_Click"
+                                    Cursor="Hand">
                                 <StackPanel>
-                                    <Image Source="{Binding Image}" 
-                                       Height="120" 
-                                       Stretch="UniformToFill" 
+                                    <Image Source="{Binding Image}"
+                                       Height="120"
+                                       Stretch="UniformToFill"
                                        Margin="0,0,0,5"/>
-                                    <TextBlock Text="{Binding Title}" FontWeight="Bold" FontSize="14" TextAlignment="Center"/>
+                                    <TextBlock Text="{Binding Title}"
+                                       FontWeight="Bold"
+                                       FontSize="14"
+                                       TextAlignment="Center"/>
                                 </StackPanel>
                             </Border>
                         </DataTemplate>
