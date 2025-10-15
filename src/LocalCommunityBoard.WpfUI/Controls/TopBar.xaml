@@ -25,6 +25,13 @@
                     HorizontalAlignment="Right"
                     Margin="0,0,10,0">
 
+            <Button x:Name="CreatePostButton"
+                    Content="Create Post"
+                    Width="100"
+                    Margin="5,0"
+                    Click="CreatePost_Click"
+                    Visibility="Collapsed"/>
+
             <Button x:Name="LoginButton"
                     Content="Login"
                     Width="80"

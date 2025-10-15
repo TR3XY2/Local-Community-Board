@@ -94,7 +94,6 @@ public class AnnouncementRepository : Repository<Announcement>, IAnnouncementRep
             .ToListAsync();
     }
 
-    /// <inheritdoc/>
     public async Task<bool> UpdateAnnouncementAsync(
         int announcementId,
         int userId,
