@@ -123,7 +123,7 @@ public partial class MainView : UserControl
         }
     }
 
-    private IEnumerable<int> GetSelectedCategoryIds()
+    private List<int> GetSelectedCategoryIds()
     {
         var ids = new List<int>();
         if (this.NewCheck.IsChecked == true)
