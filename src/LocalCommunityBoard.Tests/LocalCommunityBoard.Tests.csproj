@@ -22,10 +22,9 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<ProjectReference
-			Include="..\..\src\LocalCommunityBoard.Application\LocalCommunityBoard.Application.csproj" />
-		<ProjectReference
-			Include="..\..\src\LocalCommunityBoard.Domain\LocalCommunityBoard.Domain.csproj" />
+		<ProjectReference Include="..\..\src\LocalCommunityBoard.Application\LocalCommunityBoard.Application.csproj" />
+		<ProjectReference Include="..\..\src\LocalCommunityBoard.Domain\LocalCommunityBoard.Domain.csproj" />
+		<ProjectReference Include="..\LocalCommunityBoard.Logging\LocalCommunityBoard.Logging.csproj" />
 	</ItemGroup>
 
 	<ItemGroup>
