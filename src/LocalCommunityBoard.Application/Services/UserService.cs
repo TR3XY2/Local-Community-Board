@@ -2,158 +2,167 @@
 // Copyright (c) PlaceholderCompany. All rights reserved.
 // </copyright>
 
-namespace LocalCommunityBoard.Application.Services;
-
-using LocalCommunityBoard.Application.Interfaces;
-using LocalCommunityBoard.Application.Security;
-using LocalCommunityBoard.Domain.Entities;
-using LocalCommunityBoard.Domain.Enums;
-using LocalCommunityBoard.Domain.Interfaces;
-
-/// <summary>
-/// Provides business logic for user management (registration, login, etc.).
-/// </summary>
-public class UserService : IUserService
+namespace LocalCommunityBoard.Application.Services
 {
-    private readonly IUserRepository userRepository;
+    using LocalCommunityBoard.Application.Interfaces;
+    using LocalCommunityBoard.Application.Security;
+    using LocalCommunityBoard.Domain.Entities;
+    using LocalCommunityBoard.Domain.Enums;
+    using LocalCommunityBoard.Domain.Interfaces;
+    using Microsoft.Extensions.Logging;
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="UserService"/> class.
+    /// Provides business logic for user management (registration, login, etc.).
     /// </summary>
-    /// <param name="userRepository">Repository for user data access.</param>
-    public UserService(IUserRepository userRepository)
+    public class UserService : IUserService
     {
-        this.userRepository = userRepository;
-    }
+        private readonly IUserRepository userRepository;
+        private readonly ILogger<UserService> logger;
 
-    /// <summary>
-    /// Registers a new user with a securely hashed password.
-    /// </summary>
-    public async Task<User> RegisterAsync(string username, string email, string password)
-    {
-        if (await this.userRepository.EmailExistsAsync(email))
+        /// <summary>
+        /// Initializes a new instance of the <see cref="UserService"/> class.
+        /// </summary>
+        /// <param name="userRepository">Repository for user data access.</param>
+        /// <param name="logger">Logger for tracking user-related actions.</param>
+        public UserService(IUserRepository userRepository, ILogger<UserService> logger)
         {
-            throw new InvalidOperationException("Email already in use");
+            this.userRepository = userRepository;
+            this.logger = logger;
         }
 
-        var user = new User
+        /// <summary>
+        /// Registers a new user with a securely hashed password.
+        /// </summary>
+        public async Task<User> RegisterAsync(string username, string email, string password)
         {
-            Username = username,
-            Email = email,
-            Password = PasswordHasher.HashPassword(password),
-            RoleId = 1,
-            Status = UserStatus.Active,
-        };
-
-        await this.userRepository.AddAsync(user);
-        await this.userRepository.SaveChangesAsync();
-
-        return user;
-    }
-
-    /// <summary>
-    /// Authenticates a user by verifying email and password.
-    /// </summary>
-    public async Task<User?> LoginAsync(string email, string password)
-    {
-        var user = await this.userRepository.GetByEmailAsync(email);
-        if (user == null)
-        {
-            return null;
-        }
-
-        var isValid = PasswordHasher.VerifyPassword(password, user.Password);
-        return isValid ? user : null;
-    }
-
-    public async Task<User?> GetByIdAsync(int id) => await this.userRepository.GetByIdAsync(id);
-
-    public async Task<bool> UpdateAsync(User user)
-    {
-        this.userRepository.Update(user);
-        await this.userRepository.SaveChangesAsync();
-        return true;
-    }
-
-    public async Task<bool> DeleteAsync(int id)
-    {
-        var user = await this.userRepository.GetByIdAsync(id);
-        if (user == null)
-        {
-            return false;
-        }
-
-        this.userRepository.Delete(user);
-        await this.userRepository.SaveChangesAsync();
-        return true;
-    }
-
-    public async Task<bool> ChangePasswordAsync(int userId, string oldPassword, string newPassword)
-    {
-        var user = await this.userRepository.GetByIdAsync(userId);
-        if (user == null)
-        {
-            throw new InvalidOperationException("User not found");
-        }
-
-        if (!PasswordHasher.VerifyPassword(oldPassword, user.Password))
-        {
-            throw new UnauthorizedAccessException("Old password is incorrect");
-        }
-
-        user.Password = PasswordHasher.HashPassword(newPassword);
-        this.userRepository.Update(user);
-        await this.userRepository.SaveChangesAsync();
-
-        return true;
-    }
-
-    /// <summary>
-    /// Updates the personal information of a user (e.g., username, email).
-    /// </summary>
-    /// <param name="userId">The ID of the user to update.</param>
-    /// <param name="newUsername">The new username, or null to keep the current one.</param>
-    /// <param name="newEmail">The new email, or null to keep the current one.</param>
-    /// <returns>True if the update was successful; false otherwise.</returns>
-    /// <exception cref="InvalidOperationException">Thrown if the user does not exist or email is already in use.</exception>
-    public async Task<bool> UpdatePersonalInfoAsync(int userId, string? newUsername, string? newEmail)
-    {
-        var user = await this.userRepository.GetByIdAsync(userId);
-        if (user == null)
-        {
-            throw new InvalidOperationException("User not found");
-        }
-
-        // Check if email is already in use by another user
-        if (!string.IsNullOrWhiteSpace(newEmail) && newEmail != user.Email)
-        {
-            if (await this.userRepository.EmailExistsAsync(newEmail))
+            if (await this.userRepository.EmailExistsAsync(email))
             {
-                throw new InvalidOperationException("Email is already in use by another account.");
+                this.logger.LogWarning("Registration failed: email '{Email}' already in use", email);
+                throw new InvalidOperationException("Email already in use");
             }
 
-            user.Email = newEmail;
+            var user = new User
+            {
+                Username = username,
+                Email = email,
+                Password = PasswordHasher.HashPassword(password),
+                RoleId = 1,
+                Status = UserStatus.Active,
+            };
+
+            await this.userRepository.AddAsync(user);
+            await this.userRepository.SaveChangesAsync();
+
+            this.logger.LogInformation("New user registered successfully: {Username} ({Email})", username, email);
+            return user;
         }
 
-        // Update username if provided
-        if (!string.IsNullOrWhiteSpace(newUsername))
+        /// <summary>
+        /// Authenticates a user by verifying email and password.
+        /// </summary>
+        public async Task<User?> LoginAsync(string email, string password)
         {
-            user.Username = newUsername;
+            var user = await this.userRepository.GetByEmailAsync(email);
+            if (user == null)
+            {
+                this.logger.LogWarning("Login failed: user with email '{Email}' not found", email);
+                return null;
+            }
+
+            var isValid = PasswordHasher.VerifyPassword(password, user.Password);
+            if (!isValid)
+            {
+                this.logger.LogWarning("Login failed: incorrect password for user '{Email}'", email);
+                return null;
+            }
+
+            this.logger.LogInformation("User logged in successfully: {Email}", email);
+            return user;
         }
 
-        this.userRepository.Update(user);
-        await this.userRepository.SaveChangesAsync();
-        return true;
-    }
+        public async Task<User?> GetByIdAsync(int id) => await this.userRepository.GetByIdAsync(id);
 
-    public async Task<User?> LogoutAsync(int userId)
-    {
-        var user = await this.userRepository.GetByIdAsync(userId);
-        if (user == null)
+        public async Task<bool> UpdateAsync(User user)
         {
-            return null;
+            this.userRepository.Update(user);
+            await this.userRepository.SaveChangesAsync();
+            return true;
         }
 
-        return user;
+        public async Task<bool> DeleteAsync(int id)
+        {
+            var user = await this.userRepository.GetByIdAsync(id);
+            if (user == null)
+            {
+                return false;
+            }
+
+            this.userRepository.Delete(user);
+            await this.userRepository.SaveChangesAsync();
+            return true;
+        }
+
+        public async Task<bool> ChangePasswordAsync(int userId, string oldPassword, string newPassword)
+        {
+            var user = await this.userRepository.GetByIdAsync(userId);
+            if (user == null)
+            {
+                throw new InvalidOperationException("User not found");
+            }
+
+            if (!PasswordHasher.VerifyPassword(oldPassword, user.Password))
+            {
+                throw new UnauthorizedAccessException("Old password is incorrect");
+            }
+
+            user.Password = PasswordHasher.HashPassword(newPassword);
+            this.userRepository.Update(user);
+            await this.userRepository.SaveChangesAsync();
+
+            this.logger.LogInformation("User {Email} changed password successfully", user.Email);
+            return true;
+        }
+
+        public async Task<bool> UpdatePersonalInfoAsync(int userId, string? newUsername, string? newEmail)
+        {
+            var user = await this.userRepository.GetByIdAsync(userId);
+            if (user == null)
+            {
+                throw new InvalidOperationException("User not found");
+            }
+
+            if (!string.IsNullOrWhiteSpace(newEmail) && newEmail != user.Email)
+            {
+                if (await this.userRepository.EmailExistsAsync(newEmail))
+                {
+                    throw new InvalidOperationException("Email is already in use by another account.");
+                }
+
+                this.logger.LogInformation("User {OldEmail} changed email to {NewEmail}", user.Email, newEmail);
+                user.Email = newEmail;
+            }
+
+            if (!string.IsNullOrWhiteSpace(newUsername) && newUsername != user.Username)
+            {
+                this.logger.LogInformation("User {Email} changed username from {OldUsername} to {NewUsername}", user.Email, user.Username, newUsername);
+                user.Username = newUsername;
+            }
+
+            this.userRepository.Update(user);
+            await this.userRepository.SaveChangesAsync();
+            return true;
+        }
+
+        public async Task<User?> LogoutAsync(int userId)
+        {
+            var user = await this.userRepository.GetByIdAsync(userId);
+            if (user == null)
+            {
+                return null;
+            }
+
+            this.logger.LogInformation("User logged out: {Email}", user.Email);
+            return user;
+        }
     }
 }

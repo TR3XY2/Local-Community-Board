@@ -105,6 +105,16 @@ public partial class App : Application
 
     private void ConfigureServices(IServiceCollection services)
     {
+        // Ensure Microsoft.Extensions.Logging is configured and Serilog is hooked into DI
+        services.AddLogging(builder =>
+        {
+            builder.ClearProviders();
+
+            // Integrate Serilog with the Microsoft logging abstractions so ILogger<T> can be injected
+            builder.AddSerilog(Log.Logger, dispose: false);
+            builder.SetMinimumLevel(Microsoft.Extensions.Logging.LogLevel.Information);
+        });
+
         // Database
         var connectionString = this.configuration.GetConnectionString("Postgres");
         services.AddDbContext<LocalCommunityBoardDbContext>(options =>
