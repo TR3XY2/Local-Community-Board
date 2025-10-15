@@ -20,6 +20,7 @@
 	<ItemGroup>
 		<ProjectReference Include="..\LocalCommunityBoard.Domain\LocalCommunityBoard.Domain.csproj" />
 		<ProjectReference Include="..\LocalCommunityBoard.Application\LocalCommunityBoard.Application.csproj" />
+		<ProjectReference Include="..\LocalCommunityBoard.Logging\LocalCommunityBoard.Logging.csproj" />
 	</ItemGroup>
 
 	<PropertyGroup>
