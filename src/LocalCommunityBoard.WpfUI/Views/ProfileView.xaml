@@ -17,13 +17,15 @@
                        Margin="0,0,0,25"/>
 
             <!-- Username -->
-            <TextBlock Text="Username:" FontWeight="SemiBold"/>
+            <TextBlock Text="Username:"
+                       FontWeight="SemiBold"/>
             <TextBox x:Name="UsernameBox"
                      Margin="0,5,0,15"
                      Padding="6"/>
 
             <!-- Email -->
-            <TextBlock Text="Email:" FontWeight="SemiBold"/>
+            <TextBlock Text="Email:"
+                       FontWeight="SemiBold"/>
             <TextBox x:Name="EmailBox"
                      Margin="0,5,0,25"
                      Padding="6"/>
@@ -33,13 +35,16 @@
                       Margin="0,0,0,25">
                 <StackPanel>
                     <TextBlock Text="Current Password:"/>
-                    <PasswordBox x:Name="CurrentPasswordBox" Margin="0,5,0,10"/>
+                    <PasswordBox x:Name="CurrentPasswordBox"
+                                 Margin="0,5,0,10"/>
 
                     <TextBlock Text="New Password:"/>
-                    <PasswordBox x:Name="NewPasswordBox" Margin="0,5,0,10"/>
+                    <PasswordBox x:Name="NewPasswordBox"
+                                 Margin="0,5,0,10"/>
 
                     <TextBlock Text="Confirm New Password:"/>
-                    <PasswordBox x:Name="ConfirmPasswordBox" Margin="0,5,0,5"/>
+                    <PasswordBox x:Name="ConfirmPasswordBox"
+                                 Margin="0,5,0,5"/>
                 </StackPanel>
             </Expander>
 
@@ -54,7 +59,7 @@
                        Margin="0,15,0,0"
                        Foreground="Green"
                        Visibility="Collapsed"
-                       Text="Changes saved successfully." />
+                       Text="Changes saved successfully."/>
 
             <!-- Divider -->
             <Separator Margin="0,30,0,15"/>
@@ -63,7 +68,7 @@
             <TextBlock Text="My Announcements"
                        FontSize="20"
                        FontWeight="Bold"
-                       Margin="0,0,0,15" />
+                       Margin="0,0,0,15"/>
 
             <ItemsControl x:Name="MyAnnouncementsList">
                 <ItemsControl.ItemTemplate>
@@ -80,7 +85,7 @@
                                            VerticalAlignment="Center"
                                            TextWrapping="Wrap"
                                            DockPanel.Dock="Left"
-                                           Width="260" />
+                                           Width="260"/>
 
                                 <StackPanel Orientation="Horizontal"
                                             HorizontalAlignment="Right"
@@ -88,7 +93,8 @@
                                     <Button Content="Edit"
                                             Width="70"
                                             Margin="0,0,5,0"
-                                            IsEnabled="False"/>
+                                            Click="EditMyAnnouncement_Click"
+                                            Tag="{Binding Id}"/>
                                     <Button Content="Delete"
                                             Width="70"
                                             Click="DeleteMyAnnouncement_Click"

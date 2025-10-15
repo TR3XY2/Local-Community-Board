@@ -11,7 +11,10 @@ using System.IO;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
+using System.Windows.Input;
 using System.Windows.Media.Imaging;
+using LocalCommunityBoard.Application.Interfaces;
+using LocalCommunityBoard.Domain.Entities;
 
 public class AnnouncementViewModel : LocalCommunityBoard.Domain.Entities.Announcement, INotifyPropertyChanged
 {

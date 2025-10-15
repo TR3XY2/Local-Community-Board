@@ -43,7 +43,8 @@ public interface IAnnouncementService
         int userId,
         string? title = null,
         string? body = null,
-        int? categoryId = null);
+        int? categoryId = null,
+        string? imageUrl = null);
 
     /// <summary>
     /// Deletes an announcement (only if owned by user).

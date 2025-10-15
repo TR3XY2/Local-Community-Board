@@ -23,6 +23,7 @@ using Microsoft.Extensions.DependencyInjection;
 /// for managing announcements, and <see cref="UserSession"/> for session management.</remarks>
 public partial class ProfileView : UserControl
 {
+    private const string ErrorTitle = "Error";
     private readonly IUserService userService;
     private readonly IAnnouncementService announcementService;
     private readonly UserSession session;
@@ -58,7 +59,78 @@ public partial class ProfileView : UserControl
         }
         catch (Exception ex)
         {
-            MessageBox.Show($"Failed to load announcements: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            MessageBox.Show($"Failed to load announcements: {ex.Message}", ErrorTitle, MessageBoxButton.OK, MessageBoxImage.Error);
+        }
+    }
+
+    private async void EditMyAnnouncement_Click(object sender, RoutedEventArgs e)
+    {
+        if (!this.session.IsLoggedIn || this.session.CurrentUser is null)
+        {
+            MessageBox.Show(
+                "You must be logged in to edit your announcements.",
+                ErrorTitle,
+                MessageBoxButton.OK,
+                MessageBoxImage.Error);
+            return;
+        }
+
+        if (sender is not Button btn || btn.Tag is not int announcementId)
+        {
+            return;
+        }
+
+        var announcements = await this.announcementService.GetAnnouncementsByUserIdAsync(this.session.CurrentUser.Id);
+        var announcement = announcements?.FirstOrDefault(a => a.Id == announcementId);
+        if (announcement == null)
+        {
+            MessageBox.Show("Announcement not found.", ErrorTitle, MessageBoxButton.OK, MessageBoxImage.Error);
+            return;
+        }
+
+        var newTitle = Microsoft.VisualBasic.Interaction.InputBox("New title:", "Edit Announcement", announcement.Title);
+        if (string.IsNullOrWhiteSpace(newTitle))
+        {
+            return;
+        }
+
+        var newBody = Microsoft.VisualBasic.Interaction.InputBox("New body:", "Edit Announcement", announcement.Body);
+        if (string.IsNullOrWhiteSpace(newBody))
+        {
+            return;
+        }
+
+        var newPhoto = Microsoft.VisualBasic.Interaction.InputBox("New photo URL:", "Edit Announcement", announcement.ImageUrl ?? string.Empty);
+        if (string.IsNullOrWhiteSpace(newPhoto))
+        {
+            newPhoto = announcement.Title;
+        }
+
+        try
+        {
+            var ok = await this.announcementService.UpdateAnnouncementAsync(
+                announcement.Id,
+                this.session.CurrentUser.Id,
+                newTitle,
+                newBody,
+                announcement.CategoryId,
+                newPhoto);
+
+            if (ok)
+            {
+                await this.LoadMyAnnouncementsAsync();
+                this.StatusText.Visibility = Visibility.Visible;
+                this.StatusText.Foreground = System.Windows.Media.Brushes.Green;
+                this.StatusText.Text = "Announcement updated.";
+            }
+            else
+            {
+                MessageBox.Show("You don't have permission or the announcement was not found.", "Cannot edit", MessageBoxButton.OK, MessageBoxImage.Warning);
+            }
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show($"Failed to update: {ex.Message}", ErrorTitle, MessageBoxButton.OK, MessageBoxImage.Error);
         }
     }
 
@@ -68,7 +140,7 @@ public partial class ProfileView : UserControl
         {
             MessageBox.Show(
                 "You must be logged in to delete your announcements.",
-                "Error",
+                ErrorTitle,
                 MessageBoxButton.OK,
                 MessageBoxImage.Error);
             return;
@@ -116,7 +188,7 @@ public partial class ProfileView : UserControl
         {
             MessageBox.Show(
                 $"Failed to delete: {ex.Message}",
-                "Error",
+                ErrorTitle,
                 MessageBoxButton.OK,
                 MessageBoxImage.Error);
         }
@@ -126,7 +198,7 @@ public partial class ProfileView : UserControl
     {
         if (!this.session.IsLoggedIn || this.session.CurrentUser == null)
         {
-            MessageBox.Show("You must be logged in to edit your profile.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            MessageBox.Show("You must be logged in to edit your profile.", ErrorTitle, MessageBoxButton.OK, MessageBoxImage.Error);
             return;
         }
 
