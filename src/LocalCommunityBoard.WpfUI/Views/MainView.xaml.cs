@@ -19,17 +19,40 @@ using LocalCommunityBoard.Domain.Entities;
 /// asynchronously when the view is initialized.</remarks>
 public partial class MainView : UserControl
 {
+    private const int PageSize = 9;
     private readonly IAnnouncementService announcementService;
+    private int currentPage = 1;
+    private int totalPages = 1;
 
     public MainView(IAnnouncementService announcementService)
     {
         this.InitializeComponent();
         this.announcementService = announcementService;
-
+        this.DataContext = this;
         this.Loaded += this.MainView_Loaded;
     }
 
+    public string CurrentPageText => $"Page {this.currentPage} of {this.totalPages}";
+
     public ObservableCollection<Announcement> Announcements { get; set; } = new();
+
+    private async void PrevPage_Click(object sender, RoutedEventArgs e)
+    {
+        if (this.currentPage > 1)
+        {
+            this.currentPage--;
+            await this.LoadAnnouncementsAsync();
+        }
+    }
+
+    private async void NextPage_Click(object sender, RoutedEventArgs e)
+    {
+        if (this.currentPage < this.totalPages)
+        {
+            this.currentPage++;
+            await this.LoadAnnouncementsAsync();
+        }
+    }
 
     private async void MainView_Loaded(object sender, System.Windows.RoutedEventArgs e)
     {
@@ -49,39 +72,23 @@ public partial class MainView : UserControl
 
     private async Task LoadAnnouncementsAsync()
     {
-        string? city = string.IsNullOrWhiteSpace(this.CityInput.Text) ? null : this.CityInput.Text.Trim();
-        string? district = string.IsNullOrWhiteSpace(this.DistrictInput.Text) ? null : this.DistrictInput.Text.Trim();
-        string? street = string.IsNullOrWhiteSpace(this.StreetInput.Text) ? null : this.StreetInput.Text.Trim();
+        var (items, totalCount) = await this.announcementService.GetAnnouncementsPagedAsync(
+            city: this.CityInput.Text,
+            district: this.DistrictInput.Text,
+            street: this.StreetInput.Text,
+            categoryIds: this.GetSelectedCategoryIds(),
+            date: null,
+            pageNumber: this.currentPage,
+            pageSize: PageSize);
 
-        var selectedCategories = new List<int>();
-        if (this.NewCheck.IsChecked == true)
-        {
-            selectedCategories.Add(1);
-        }
-
-        if (this.EventsCheck.IsChecked == true)
-        {
-            selectedCategories.Add(2);
-        }
-
-        if (this.PostsCheck.IsChecked == true)
-        {
-            selectedCategories.Add(3);
-        }
-
-        var data = await this.announcementService.GetAnnouncementsAsync(
-            city: city,
-            district: district,
-            street: street,
-            categoryIds: selectedCategories.Any() ? selectedCategories : null);
+        this.totalPages = (int)Math.Ceiling((double)totalCount / PageSize);
+        this.PageInfoText.Text = $"Page {this.currentPage} of {this.totalPages}";
 
         this.Announcements.Clear();
-        foreach (var item in data)
+        foreach (var item in items)
         {
             this.Announcements.Add(item);
         }
-
-        this.AnnouncementsList.ItemsSource = this.Announcements;
     }
 
     private async void ApplyFilters_Click(object sender, RoutedEventArgs e)
@@ -99,5 +106,26 @@ public partial class MainView : UserControl
                 window.MainContent.Content = new AnnouncementDetailsView(selected);
             }
         }
+    }
+
+    private IEnumerable<int> GetSelectedCategoryIds()
+    {
+        var ids = new List<int>();
+        if (this.NewCheck.IsChecked == true)
+        {
+            ids.Add(1);
+        }
+
+        if (this.EventsCheck.IsChecked == true)
+        {
+            ids.Add(2);
+        }
+
+        if (this.PostsCheck.IsChecked == true)
+        {
+            ids.Add(3);
+        }
+
+        return ids;
     }
 }

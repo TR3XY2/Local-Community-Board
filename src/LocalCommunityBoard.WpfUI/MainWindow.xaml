@@ -4,8 +4,8 @@
         xmlns:controls="clr-namespace:LocalCommunityBoard.WpfUI.Controls"
         xmlns:views="clr-namespace:LocalCommunityBoard.WpfUI.Views"
         Title="Local Community Board"
-        Height="600"
-        Width="900"
+        Height="720"
+        Width="1100"
         WindowStartupLocation="CenterScreen"
         Background="#FFF8F8F8">
 

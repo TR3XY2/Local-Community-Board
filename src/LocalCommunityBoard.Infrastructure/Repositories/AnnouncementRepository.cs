@@ -19,13 +19,14 @@ public class AnnouncementRepository : Repository<Announcement>, IAnnouncementRep
     {
     }
 
-    /// <inheritdoc/>
-    public async Task<IEnumerable<Announcement>> GetFilteredAsync(
-    string? city,
-    string? district,
-    string? street,
-    IEnumerable<int>? categoryIds,
-    DateTime? date)
+    public async Task<(IEnumerable<Announcement> Items, int TotalCount)> GetFilteredPagedAsync(
+        string? city,
+        string? district,
+        string? street,
+        IEnumerable<int>? categoryIds,
+        DateTime? date,
+        int pageNumber,
+        int pageSize)
     {
         var query = this.DbSet
             .Include(a => a.User)
@@ -33,38 +34,35 @@ public class AnnouncementRepository : Repository<Announcement>, IAnnouncementRep
             .Include(a => a.Location)
             .AsQueryable();
 
-        // --- Filter by location ---
+        // --- Location filters ---
         if (!string.IsNullOrWhiteSpace(city))
         {
             var cityLower = city.ToLower();
-            query = query.Where(a =>
-                a.Location.City != null &&
-                a.Location.City.ToLower().Contains(cityLower));
+            query = query.Where(a => a.Location.City != null &&
+                                     a.Location.City.ToLower().Contains(cityLower));
         }
 
         if (!string.IsNullOrWhiteSpace(district))
         {
             var districtLower = district.ToLower();
-            query = query.Where(a =>
-                a.Location.District != null &&
-                a.Location.District.ToLower().Contains(districtLower));
+            query = query.Where(a => a.Location.District != null &&
+                                     a.Location.District.ToLower().Contains(districtLower));
         }
 
         if (!string.IsNullOrWhiteSpace(street))
         {
             var streetLower = street.ToLower();
-            query = query.Where(a =>
-                a.Location.Street != null &&
-                a.Location.Street.ToLower().Contains(streetLower));
+            query = query.Where(a => a.Location.Street != null &&
+                                     a.Location.Street.ToLower().Contains(streetLower));
         }
 
-        // --- Filter by categories ---
+        // --- Categories ---
         if (categoryIds?.Any() == true)
         {
             query = query.Where(a => categoryIds.Contains(a.CategoryId));
         }
 
-        // --- Filter by date (same day) ---
+        // --- Date ---
         if (date.HasValue)
         {
             var start = date.Value.Date;
@@ -72,7 +70,17 @@ public class AnnouncementRepository : Repository<Announcement>, IAnnouncementRep
             query = query.Where(a => a.CreatedAt >= start && a.CreatedAt < end);
         }
 
-        return await query.OrderByDescending(a => a.CreatedAt).ToListAsync();
+        // --- Count before paging ---
+        var totalCount = await query.CountAsync();
+
+        // --- Apply paging ---
+        var items = await query
+            .OrderByDescending(a => a.CreatedAt)
+            .Skip((pageNumber - 1) * pageSize)
+            .Take(pageSize)
+            .ToListAsync();
+
+        return (items, totalCount);
     }
 
     /// <inheritdoc/>
