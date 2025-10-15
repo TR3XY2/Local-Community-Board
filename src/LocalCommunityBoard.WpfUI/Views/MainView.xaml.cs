@@ -10,6 +10,7 @@ using System.Windows;
 using System.Windows.Controls;
 using LocalCommunityBoard.Application.Interfaces;
 using LocalCommunityBoard.Domain.Entities;
+using LocalCommunityBoard.WpfUI.ViewModels;
 
 /// <summary>
 /// Represents the main view for displaying announcements in the application.
@@ -34,7 +35,7 @@ public partial class MainView : UserControl
 
     public string CurrentPageText => $"Page {this.currentPage} of {this.totalPages}";
 
-    public ObservableCollection<Announcement> Announcements { get; set; } = new();
+    public ObservableCollection<AnnouncementViewModel> Announcements { get; } = new();
 
     private async void PrevPage_Click(object sender, RoutedEventArgs e)
     {
@@ -87,7 +88,21 @@ public partial class MainView : UserControl
         this.Announcements.Clear();
         foreach (var item in items)
         {
-            this.Announcements.Add(item);
+            var vm = new AnnouncementViewModel
+            {
+                Id = item.Id,
+                Title = item.Title,
+                Body = item.Body,
+                CreatedAt = item.CreatedAt,
+                ImageUrl = item.ImageUrl,
+                Category = item.Category,
+                CategoryId = item.CategoryId,
+                Location = item.Location,
+                User = item.User,
+            };
+
+            this.Announcements.Add(vm);
+            _ = vm.LoadImageAsync();
         }
     }
 
@@ -98,7 +113,7 @@ public partial class MainView : UserControl
 
     private void Announcement_Click(object sender, System.Windows.Input.MouseButtonEventArgs e)
     {
-        if (sender is FrameworkElement fe && fe.DataContext is Announcement selected)
+        if (sender is FrameworkElement fe && fe.DataContext is AnnouncementViewModel selected)
         {
             var window = Application.Current.MainWindow as MainWindow;
             if (window != null)

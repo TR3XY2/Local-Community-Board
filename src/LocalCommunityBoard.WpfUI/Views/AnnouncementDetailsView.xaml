@@ -4,7 +4,7 @@
              Background="#FFF8F8F8">
     <Grid Margin="20">
         <StackPanel HorizontalAlignment="Center" Width="600">
-            <Image Height="300" Stretch="UniformToFill" Source="{Binding ImageUrl}" Margin="0,0,0,10"/>
+            <Image Height="300" Stretch="UniformToFill" Source="{Binding Image}" Margin="0,0,0,10"/>
             <TextBlock Text="{Binding Title}" FontSize="24" FontWeight="Bold" Margin="0,0,0,10" TextAlignment="Center"/>
             <TextBlock Text="{Binding Body}" FontSize="16" TextWrapping="Wrap" TextAlignment="Left"/>
         </StackPanel>

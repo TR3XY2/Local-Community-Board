@@ -3,7 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-             xmlns:domain="clr-namespace:LocalCommunityBoard.Domain.Entities;assembly=LocalCommunityBoard.Domain"
+             xmlns:domain="clr-namespace:LocalCommunityBoard.Domain.Entities;assembly=LocalCommunityBoard.Domain" xmlns:viewModels="clr-namespace:LocalCommunityBoard.WpfUI.ViewModels"
              mc:Ignorable="d"
              Background="#FFF8F8F8">
 
@@ -65,14 +65,13 @@
                     </ItemsControl.ItemsPanel>
 
                     <ItemsControl.ItemTemplate>
-                        <DataTemplate DataType="{x:Type domain:Announcement}">
+                        <DataTemplate DataType="{x:Type viewModels:AnnouncementViewModel}">
                             <Border Margin="10" BorderBrush="#DDD" BorderThickness="1" CornerRadius="10" Background="White" Padding="8" Width="230" Height="200">
                                 <StackPanel>
-                                    <Image Height="120" Stretch="UniformToFill" Margin="0,0,0,5">
-                                        <Image.Source>
-                                            <BitmapImage UriSource="{Binding ImageUrl}" />
-                                        </Image.Source>
-                                    </Image>
+                                    <Image Source="{Binding Image}" 
+                                       Height="120" 
+                                       Stretch="UniformToFill" 
+                                       Margin="0,0,0,5"/>
                                     <TextBlock Text="{Binding Title}" FontWeight="Bold" FontSize="14" TextAlignment="Center"/>
                                 </StackPanel>
                             </Border>

@@ -6,6 +6,7 @@ namespace LocalCommunityBoard.WpfUI.Views;
 
 using System.Windows.Controls;
 using LocalCommunityBoard.Domain.Entities;
+using LocalCommunityBoard.WpfUI.ViewModels;
 
 /// <summary>
 /// Represents a user control for displaying the details of an announcement.
@@ -15,7 +16,7 @@ using LocalCommunityBoard.Domain.Entities;
 /// data binding to its properties.</remarks>
 public partial class AnnouncementDetailsView : UserControl
 {
-    public AnnouncementDetailsView(Announcement announcement)
+    public AnnouncementDetailsView(AnnouncementViewModel announcement)
     {
         this.InitializeComponent();
         this.DataContext = announcement;
