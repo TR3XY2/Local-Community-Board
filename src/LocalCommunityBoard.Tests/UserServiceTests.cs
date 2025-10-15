@@ -20,19 +20,18 @@ using Xunit;
 public class UserServiceTests
 {
     private readonly Mock<IUserRepository> mockUserRepository;
+    private readonly Mock<ILogger<UserService>> mockLogger;
     private readonly UserService sut; // System Under Test
 
     /// <summary>
     /// Initializes a new instance of the <see cref="UserServiceTests"/> class.
-    // Add a mock ILogger<UserService> to the UserServiceTests class to satisfy the constructor dependency.
-
-    private readonly Mock<ILogger<UserService>> mockLogger;
-
+    /// Add a mock ILogger<UserService> to the UserServiceTests class to satisfy the constructor dependency.
+    /// </summary>
     public UserServiceTests()
     {
         this.mockUserRepository = new Mock<IUserRepository>();
-        this.mockLogger = new Mock<ILogger<UserService>>(); // Initialize the mock logger
-        this.sut = new UserService(this.mockUserRepository.Object, this.mockLogger.Object); // Pass the mock logger to the constructor
+        this.mockLogger = new Mock<ILogger<UserService>>();
+        this.sut = new UserService(this.mockUserRepository.Object, this.mockLogger.Object);
     }
 
     #region RegisterAsync Tests

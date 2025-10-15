@@ -23,6 +23,7 @@ using Microsoft.Extensions.DependencyInjection;
 /// for managing announcements, and <see cref="UserSession"/> for session management.</remarks>
 public partial class ProfileView : UserControl
 {
+    private const string ErrorTitle = "Error";
     private readonly IUserService userService;
     private readonly IAnnouncementService announcementService;
     private readonly UserSession session;
@@ -58,7 +59,7 @@ public partial class ProfileView : UserControl
         }
         catch (Exception ex)
         {
-            MessageBox.Show($"Failed to load announcements: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            MessageBox.Show($"Failed to load announcements: {ex.Message}", ErrorTitle, MessageBoxButton.OK, MessageBoxImage.Error);
         }
     }
 
@@ -68,7 +69,7 @@ public partial class ProfileView : UserControl
         {
             MessageBox.Show(
                 "You must be logged in to edit your announcements.",
-                "Error",
+                ErrorTitle,
                 MessageBoxButton.OK,
                 MessageBoxImage.Error);
             return;
@@ -83,7 +84,7 @@ public partial class ProfileView : UserControl
         var announcement = announcements?.FirstOrDefault(a => a.Id == announcementId);
         if (announcement == null)
         {
-            MessageBox.Show("Announcement not found.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            MessageBox.Show("Announcement not found.", ErrorTitle, MessageBoxButton.OK, MessageBoxImage.Error);
             return;
         }
 
@@ -129,7 +130,7 @@ public partial class ProfileView : UserControl
         }
         catch (Exception ex)
         {
-            MessageBox.Show($"Failed to update: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            MessageBox.Show($"Failed to update: {ex.Message}", ErrorTitle, MessageBoxButton.OK, MessageBoxImage.Error);
         }
     }
 
@@ -139,7 +140,7 @@ public partial class ProfileView : UserControl
         {
             MessageBox.Show(
                 "You must be logged in to delete your announcements.",
-                "Error",
+                ErrorTitle,
                 MessageBoxButton.OK,
                 MessageBoxImage.Error);
             return;
@@ -187,7 +188,7 @@ public partial class ProfileView : UserControl
         {
             MessageBox.Show(
                 $"Failed to delete: {ex.Message}",
-                "Error",
+                ErrorTitle,
                 MessageBoxButton.OK,
                 MessageBoxImage.Error);
         }
@@ -197,7 +198,7 @@ public partial class ProfileView : UserControl
     {
         if (!this.session.IsLoggedIn || this.session.CurrentUser == null)
         {
-            MessageBox.Show("You must be logged in to edit your profile.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            MessageBox.Show("You must be logged in to edit your profile.", ErrorTitle, MessageBoxButton.OK, MessageBoxImage.Error);
             return;
         }
 

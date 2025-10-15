@@ -7,6 +7,10 @@
 
 		<IsPackable>false</IsPackable>
 		<IsTestProject>true</IsTestProject>
+
+		<CollectCoverage>true</CollectCoverage>
+		<CoverletOutputFormat>opencover</CoverletOutputFormat>
+		<CoverletOutput>./TestResults/</CoverletOutput>
 	</PropertyGroup>
 
 	<ItemGroup>
@@ -22,9 +26,12 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<ProjectReference Include="..\..\src\LocalCommunityBoard.Application\LocalCommunityBoard.Application.csproj" />
-		<ProjectReference Include="..\..\src\LocalCommunityBoard.Domain\LocalCommunityBoard.Domain.csproj" />
-		<ProjectReference Include="..\LocalCommunityBoard.Logging\LocalCommunityBoard.Logging.csproj" />
+		<ProjectReference
+			Include="..\..\src\LocalCommunityBoard.Application\LocalCommunityBoard.Application.csproj" />
+		<ProjectReference
+			Include="..\..\src\LocalCommunityBoard.Domain\LocalCommunityBoard.Domain.csproj" />
+		<ProjectReference
+			Include="..\LocalCommunityBoard.Logging\LocalCommunityBoard.Logging.csproj" />
 	</ItemGroup>
 
 	<ItemGroup>
