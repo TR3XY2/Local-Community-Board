@@ -91,7 +91,8 @@
                                             IsEnabled="False"/>
                                     <Button Content="Delete"
                                             Width="70"
-                                            IsEnabled="False"/>
+                                            Click="DeleteMyAnnouncement_Click"
+                                            Tag="{Binding Id}"/>
                                 </StackPanel>
                             </DockPanel>
                         </Border>
