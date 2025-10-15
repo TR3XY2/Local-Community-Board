@@ -37,4 +37,21 @@ public interface IAnnouncementRepository : IRepository<Announcement>
     /// <param name="userId">The ID of the user.</param>
     /// <returns>A collection of announcements created by the user.</returns>
     Task<IEnumerable<Announcement>> GetByUserIdAsync(int userId);
+
+    /// <summary>
+    /// Updates an existing announcement.
+    /// </summary>
+    /// <param name="announcementId">The ID of the announcement to update.</param>
+    /// <param name="userId">The ID of the user attempting the update (for
+    /// authorization).</param>
+    /// <param name="title">The new title (optional).</param>
+    /// <param name="body">The new body (optional).</param>
+    /// <param name="categoryId">The new category ID (optional).</param>
+    /// <returns>True if the update was successful; otherwise, false.</returns>
+    Task<bool> UpdateAnnouncementAsync(
+    int announcementId,
+    int userId,
+    string? title = null,
+    string? body = null,
+    int? categoryId = null);
 }
