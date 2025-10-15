@@ -62,6 +62,66 @@ public partial class ProfileView : UserControl
         }
     }
 
+    private async void DeleteMyAnnouncement_Click(object sender, RoutedEventArgs e)
+    {
+        if (!this.session.IsLoggedIn || this.session.CurrentUser is null)
+        {
+            MessageBox.Show(
+                "You must be logged in to delete your announcements.",
+                "Error",
+                MessageBoxButton.OK,
+                MessageBoxImage.Error);
+            return;
+        }
+
+        if (sender is not Button btn || btn.Tag is not int announcementId)
+        {
+            return;
+        }
+
+        var confirm = MessageBox.Show(
+            "Delete this announcement?",
+            "Confirm",
+            MessageBoxButton.YesNo,
+            MessageBoxImage.Question);
+
+        if (confirm != MessageBoxResult.Yes)
+        {
+            return;
+        }
+
+        try
+        {
+            var userId = this.session.CurrentUser.Id;
+            var ok = await this.announcementService.DeleteAnnouncementAsync(announcementId, userId);
+
+            if (!ok)
+            {
+                MessageBox.Show(
+                    "You don't have permission or the announcement was not found.",
+                    "Cannot delete",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Warning);
+                return;
+            }
+
+            // Після успішного видалення — оновлюємо список
+            await this.LoadMyAnnouncementsAsync();
+
+            this.StatusText.Visibility = Visibility.Visible;
+            this.StatusText.Foreground = System.Windows.Media.Brushes.Green;
+            this.StatusText.Text = "Announcement deleted.";
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show(
+                $"Failed to delete: {ex.Message}",
+                "Error",
+                MessageBoxButton.OK,
+                MessageBoxImage.Error);
+        }
+    }
+
     private async void SaveChanges_Click(object sender, RoutedEventArgs e)
     {
         if (!this.session.IsLoggedIn || this.session.CurrentUser == null)
