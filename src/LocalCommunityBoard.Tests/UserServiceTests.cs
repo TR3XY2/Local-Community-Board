@@ -9,6 +9,7 @@ using LocalCommunityBoard.Application.Services;
 using LocalCommunityBoard.Domain.Entities;
 using LocalCommunityBoard.Domain.Enums;
 using LocalCommunityBoard.Domain.Interfaces;
+using Microsoft.Extensions.Logging;
 using Moq;
 using Xunit;
 
@@ -23,12 +24,15 @@ public class UserServiceTests
 
     /// <summary>
     /// Initializes a new instance of the <see cref="UserServiceTests"/> class.
-    /// Setup is done in constructor as per best practices.
-    /// </summary>
+    // Add a mock ILogger<UserService> to the UserServiceTests class to satisfy the constructor dependency.
+
+    private readonly Mock<ILogger<UserService>> mockLogger;
+
     public UserServiceTests()
     {
         this.mockUserRepository = new Mock<IUserRepository>();
-        this.sut = new UserService(this.mockUserRepository.Object);
+        this.mockLogger = new Mock<ILogger<UserService>>(); // Initialize the mock logger
+        this.sut = new UserService(this.mockUserRepository.Object, this.mockLogger.Object); // Pass the mock logger to the constructor
     }
 
     #region RegisterAsync Tests
