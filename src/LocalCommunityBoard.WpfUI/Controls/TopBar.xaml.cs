@@ -39,10 +39,13 @@ public partial class TopBar : UserControl
 
     public event RoutedEventHandler? ProfileRequested;
 
+    public event RoutedEventHandler? CreatePostRequested;
+
     private void UpdateUI()
     {
         bool loggedIn = this.session?.IsLoggedIn == true;
 
+        this.CreatePostButton.Visibility = loggedIn ? Visibility.Visible : Visibility.Collapsed;
         this.LoginButton.Visibility = loggedIn ? Visibility.Collapsed : Visibility.Visible;
         this.SignupButton.Visibility = loggedIn ? Visibility.Collapsed : Visibility.Visible;
         this.LogoutButton.Visibility = loggedIn ? Visibility.Visible : Visibility.Collapsed;
@@ -78,5 +81,10 @@ public partial class TopBar : UserControl
     private void Home_Click(object sender, System.Windows.Input.MouseButtonEventArgs e)
     {
         this.HomeRequested?.Invoke(this, new RoutedEventArgs());
+    }
+
+    private void CreatePost_Click(object sender, RoutedEventArgs e)
+    {
+        this.CreatePostRequested?.Invoke(this, e);
     }
 }

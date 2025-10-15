@@ -72,6 +72,11 @@ public class LocalCommunityBoardDbContext : DbContext
     public DbSet<Report> Reports => this.Set<Report>();
 
     /// <summary>
+    /// Gets the AuthSessions table.
+    /// </summary>
+    public DbSet<AuthSession> AuthSessions => this.Set<AuthSession>();
+
+    /// <summary>
     /// Gets the ModerationActions table.
     /// </summary>
     public DbSet<ModerationAction> ModerationActions => this.Set<ModerationAction>();
@@ -82,6 +87,14 @@ public class LocalCommunityBoardDbContext : DbContext
     /// <param name="modelBuilder">The model builder used to configure the database schema.</param>
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        // AuthSession
+        modelBuilder.Entity<AuthSession>(builder =>
+        {
+            builder.ToTable("AuthSessions");
+            builder.HasKey(x => x.Id);
+            builder.HasIndex(x => new { x.UserId, x.IsRevoked });
+        });
+
         modelBuilder.Entity<User>()
             .Property(u => u.Status)
             .HasConversion<string>();

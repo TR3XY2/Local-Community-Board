@@ -1,0 +1,41 @@
+﻿<UserControl x:Class="LocalCommunityBoard.WpfUI.Views.CreatePostView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:local="clr-namespace:LocalCommunityBoard.WpfUI.Views"
+             MinHeight="300" MinWidth="520">
+    <Grid Margin="16">
+        <StackPanel>
+            <TextBlock Text="Create New Post" FontSize="18" FontWeight="SemiBold" Margin="0,0,0,12"/>
+
+            <TextBlock Text="Title" />
+            <TextBox x:Name="TitleTextBox" Margin="0,4,0,8"/>
+
+            <TextBlock Text="Body" />
+            <TextBox x:Name="BodyTextBox" AcceptsReturn="True" Height="120" TextWrapping="Wrap" Margin="0,4,0,8"/>
+
+            <StackPanel Orientation="Horizontal" Margin="0,4,0,8" HorizontalAlignment="Left" >
+                <StackPanel>
+                    <TextBlock Text="Category ID" />
+                    <TextBox x:Name="CategoryIdTextBox" Width="120" Margin="0,4,8,0"/>
+                </StackPanel>
+
+                <StackPanel>
+                    <TextBlock Text="Location ID" />
+                    <TextBox x:Name="LocationIdTextBox" Width="120" Margin="0,4,0,0"/>
+                </StackPanel>
+            </StackPanel>
+
+            <!-- optional: images/links can be comma-separated -->
+            <TextBlock Text="Image URLs (comma separated, optional)" />
+            <TextBox x:Name="ImagesTextBox" Margin="0,4,0,8"/>
+
+            <TextBlock Text="Links (comma separated, optional)" />
+            <TextBox x:Name="LinksTextBox" Margin="0,4,0,12"/>
+
+            <StackPanel Orientation="Horizontal">
+                <Button Content="Publish" Width="100" Click="Publish_Click"/>
+                <Button Content="Cancel" Width="80" Margin="8,0,0,0" Click="Cancel_Click"/>
+            </StackPanel>
+        </StackPanel>
+    </Grid>
+</UserControl>

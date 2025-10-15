@@ -79,7 +79,8 @@ public partial class App : Application
             using (var scope = Services.CreateScope())
             {
                 var db = scope.ServiceProvider.GetRequiredService<LocalCommunityBoardDbContext>();
-                db.Database.Migrate();
+
+                // db.Database.Migrate();
             }
 
             // Start main window
