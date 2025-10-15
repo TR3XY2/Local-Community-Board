@@ -49,15 +49,44 @@ public partial class MainView : UserControl
 
     private async Task LoadAnnouncementsAsync()
     {
-        var data = await this.announcementService.GetAnnouncementsAsync();
-        this.Announcements.Clear();
+        string? city = string.IsNullOrWhiteSpace(this.CityInput.Text) ? null : this.CityInput.Text.Trim();
+        string? district = string.IsNullOrWhiteSpace(this.DistrictInput.Text) ? null : this.DistrictInput.Text.Trim();
+        string? street = string.IsNullOrWhiteSpace(this.StreetInput.Text) ? null : this.StreetInput.Text.Trim();
 
+        var selectedCategories = new List<int>();
+        if (this.NewCheck.IsChecked == true)
+        {
+            selectedCategories.Add(1);
+        }
+
+        if (this.EventsCheck.IsChecked == true)
+        {
+            selectedCategories.Add(2);
+        }
+
+        if (this.PostsCheck.IsChecked == true)
+        {
+            selectedCategories.Add(3);
+        }
+
+        var data = await this.announcementService.GetAnnouncementsAsync(
+            city: city,
+            district: district,
+            street: street,
+            categoryIds: selectedCategories.Any() ? selectedCategories : null);
+
+        this.Announcements.Clear();
         foreach (var item in data)
         {
             this.Announcements.Add(item);
         }
 
         this.AnnouncementsList.ItemsSource = this.Announcements;
+    }
+
+    private async void ApplyFilters_Click(object sender, RoutedEventArgs e)
+    {
+        await this.LoadAnnouncementsAsync();
     }
 
     private void Announcement_Click(object sender, System.Windows.Input.MouseButtonEventArgs e)

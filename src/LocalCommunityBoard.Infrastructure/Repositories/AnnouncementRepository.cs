@@ -21,11 +21,11 @@ public class AnnouncementRepository : Repository<Announcement>, IAnnouncementRep
 
     /// <inheritdoc/>
     public async Task<IEnumerable<Announcement>> GetFilteredAsync(
-        string? city,
-        string? district,
-        string? street,
-        IEnumerable<int>? categoryIds,
-        DateTime? date)
+    string? city,
+    string? district,
+    string? street,
+    IEnumerable<int>? categoryIds,
+    DateTime? date)
     {
         var query = this.DbSet
             .Include(a => a.User)
@@ -36,19 +36,26 @@ public class AnnouncementRepository : Repository<Announcement>, IAnnouncementRep
         // --- Filter by location ---
         if (!string.IsNullOrWhiteSpace(city))
         {
-            query = query.Where(a => a.Location.City.Contains(city, StringComparison.OrdinalIgnoreCase));
+            var cityLower = city.ToLower();
+            query = query.Where(a =>
+                a.Location.City != null &&
+                a.Location.City.ToLower().Contains(cityLower));
         }
 
         if (!string.IsNullOrWhiteSpace(district))
         {
-            query = query.Where(a => a.Location.District != null &&
-                                   a.Location.District.Contains(district, StringComparison.OrdinalIgnoreCase));
+            var districtLower = district.ToLower();
+            query = query.Where(a =>
+                a.Location.District != null &&
+                a.Location.District.ToLower().Contains(districtLower));
         }
 
         if (!string.IsNullOrWhiteSpace(street))
         {
-            query = query.Where(a => a.Location.Street != null &&
-                                   a.Location.Street.Contains(street, StringComparison.OrdinalIgnoreCase));
+            var streetLower = street.ToLower();
+            query = query.Where(a =>
+                a.Location.Street != null &&
+                a.Location.Street.ToLower().Contains(streetLower));
         }
 
         // --- Filter by categories ---
