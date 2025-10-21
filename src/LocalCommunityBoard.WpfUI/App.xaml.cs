@@ -80,7 +80,7 @@ public partial class App : Application
             {
                 var db = scope.ServiceProvider.GetRequiredService<LocalCommunityBoardDbContext>();
 
-                // db.Database.Migrate();
+                db.Database.Migrate();
             }
 
             // Start main window
@@ -127,11 +127,13 @@ public partial class App : Application
         services.AddScoped<IAnnouncementRepository, AnnouncementRepository>();
         services.AddScoped<IRepository<Location>, Repository<Location>>();
         services.AddScoped<IRepository<Category>, Repository<Category>>();
+        services.AddScoped<ICommentRepository, CommentRepository>();
 
         // Application Services
         services.AddScoped<IUserService, UserService>();
         services.AddScoped<IAnnouncementService, AnnouncementService>();
         services.AddSingleton<UserSession>(); // session to track logged-in user
+        services.AddScoped<ICommentService, CommentService>();
 
         // WPF Windows
         services.AddTransient<MainWindow>();

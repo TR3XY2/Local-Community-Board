@@ -4,21 +4,78 @@
 
 namespace LocalCommunityBoard.WpfUI.Views;
 
+using System.Threading.Tasks;
+using System.Windows;
 using System.Windows.Controls;
-using LocalCommunityBoard.Domain.Entities;
+using LocalCommunityBoard.Application.Interfaces;
+using LocalCommunityBoard.Application.Services;
 using LocalCommunityBoard.WpfUI.ViewModels;
+using Microsoft.Extensions.DependencyInjection;
 
 /// <summary>
-/// Represents a user control for displaying the details of an announcement.
+/// Represents a user control for displaying the details of an announcement, including its comments and functionality
+/// for posting new comments.
 /// </summary>
-/// <remarks>This control is designed to display the details of a specific <see cref="Announcement"/>
-/// object.  The provided <see cref="Announcement"/> instance is set as the data context for the control,  enabling
-/// data binding to its properties.</remarks>
+/// <remarks>This control is designed to display the details of a specific announcement, including its associated
+/// comments. It allows users to post new comments if they are logged in. Comments are loaded asynchronously after the
+/// control is initialized. The control relies on dependency-injected services for comment management and user session
+/// handling.</remarks>
 public partial class AnnouncementDetailsView : UserControl
 {
+    private readonly ICommentService commentService;
+    private readonly UserSession session;
+    private readonly AnnouncementViewModel announcement;
+
     public AnnouncementDetailsView(AnnouncementViewModel announcement)
     {
         this.InitializeComponent();
         this.DataContext = announcement;
+
+        this.commentService = App.Services.GetRequiredService<ICommentService>();
+        this.session = App.Services.GetRequiredService<UserSession>();
+        this.announcement = announcement;
+
+        // Load comments asynchronously after UI is ready
+        _ = this.LoadCommentsAsync();
+    }
+
+    private async Task LoadCommentsAsync()
+    {
+        try
+        {
+            var comments = await this.commentService.GetCommentsForAnnouncementAsync(this.announcement.Id);
+            this.CommentsList.ItemsSource = comments;
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show($"Failed to load comments: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+        }
+    }
+
+    private async void PostComment_Click(object sender, RoutedEventArgs e)
+    {
+        if (!this.session.IsLoggedIn || this.session.CurrentUser == null)
+        {
+            MessageBox.Show("You must be logged in to post a comment.", "Error", MessageBoxButton.OK, MessageBoxImage.Warning);
+            return;
+        }
+
+        var body = this.CommentBox.Text.Trim();
+        if (string.IsNullOrWhiteSpace(body))
+        {
+            MessageBox.Show("Comment cannot be empty.", "Error", MessageBoxButton.OK, MessageBoxImage.Warning);
+            return;
+        }
+
+        try
+        {
+            await this.commentService.AddCommentAsync(this.session.CurrentUser.Id, this.announcement.Id, body);
+            this.CommentBox.Text = string.Empty;
+            await this.LoadCommentsAsync();
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show($"Failed to post comment: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+        }
     }
 }
