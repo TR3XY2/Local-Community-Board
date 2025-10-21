@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace LocalCommunityBoard.Infrastructure.Migrations
 {
     [DbContext(typeof(LocalCommunityBoardDbContext))]
-    [Migration("20251021125624_SyncModel")]
-    partial class SyncModel
+    [Migration("20251021154056_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

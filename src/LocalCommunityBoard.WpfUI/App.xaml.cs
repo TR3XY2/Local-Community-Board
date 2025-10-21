@@ -134,6 +134,8 @@ public partial class App : Application
         services.AddScoped<IAnnouncementService, AnnouncementService>();
         services.AddSingleton<UserSession>(); // session to track logged-in user
         services.AddScoped<ICommentService, CommentService>();
+        services.AddScoped<IReportRepository, ReportRepository>();
+        services.AddScoped<IReportService, ReportService>();
 
         // WPF Windows
         services.AddTransient<MainWindow>();
