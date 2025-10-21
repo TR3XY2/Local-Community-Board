@@ -37,6 +37,13 @@ public partial class AnnouncementDetailsView : UserControl
 
         // Load comments asynchronously after UI is ready
         _ = this.LoadCommentsAsync();
+
+        // ADDED: при завантаженні — підтягнути лічильник лайків і стан кнопки
+        this.Loaded += async (_, __) =>
+        {
+            await this.RefreshLikesAsync();
+            await this.UpdateLikeVisualAsync();
+        };
     }
 
     private async Task LoadCommentsAsync()
@@ -76,6 +83,69 @@ public partial class AnnouncementDetailsView : UserControl
         catch (Exception ex)
         {
             MessageBox.Show($"Failed to post comment: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+        }
+    }
+
+    // ADDED
+    private async void LikeBtn_Click(object sender, RoutedEventArgs e)
+    {
+        if (!this.session.IsLoggedIn || this.session.CurrentUser is null)
+        {
+            MessageBox.Show("You must be logged in to like.", "Info", MessageBoxButton.OK, MessageBoxImage.Information);
+            return;
+        }
+
+        try
+        {
+            var reactionService = App.Services.GetRequiredService<IReactionService>();
+
+            // toggle like в БД
+            await reactionService.ToggleLikeAsync(this.announcement.Id, this.session.CurrentUser.Id);
+
+            // оновити лічильник і візуальний стан
+            await this.RefreshLikesAsync();
+            await this.UpdateLikeVisualAsync();
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show($"Failed to toggle like: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+        }
+    }
+
+    // ADDED: підтягнути кількість лайків
+    private async Task RefreshLikesAsync()
+    {
+        try
+        {
+            var reactionService = App.Services.GetRequiredService<IReactionService>();
+            var count = await reactionService.GetLikesCountAsync(this.announcement.Id);
+            this.LikeCountText.Text = count.ToString();
+        }
+        catch
+        {
+        }
+    }
+
+    // ADDED: “запам’ятати” стан для поточного юзера (підсвічення кнопки)
+    private async Task UpdateLikeVisualAsync()
+    {
+        var userId = this.session.CurrentUser?.Id ?? 0;
+        if (userId == 0)
+        {
+            this.LikeBtn.IsEnabled = false;
+            return;
+        }
+
+        try
+        {
+            var reactionService = App.Services.GetRequiredService<IReactionService>();
+            var hasLiked = await reactionService.HasUserLikedAsync(this.announcement.Id, userId);
+
+            // легка індикація активного лайка
+            this.LikeBtn.Opacity = hasLiked ? 1.0 : 0.85;
+        }
+        catch
+        {
         }
     }
 }

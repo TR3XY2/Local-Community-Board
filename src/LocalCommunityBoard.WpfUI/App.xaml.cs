@@ -128,12 +128,14 @@ public partial class App : Application
         services.AddScoped<IRepository<Location>, Repository<Location>>();
         services.AddScoped<IRepository<Category>, Repository<Category>>();
         services.AddScoped<ICommentRepository, CommentRepository>();
+        services.AddScoped<IReactionRepository, ReactionRepository>();   // ← ДОДАВ
 
         // Application Services
         services.AddScoped<IUserService, UserService>();
         services.AddScoped<IAnnouncementService, AnnouncementService>();
         services.AddSingleton<UserSession>(); // session to track logged-in user
         services.AddScoped<ICommentService, CommentService>();
+        services.AddScoped<IReactionService, ReactionService>();         // ← ДОДАВ
 
         // WPF Windows
         services.AddTransient<MainWindow>();
