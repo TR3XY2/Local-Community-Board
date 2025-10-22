@@ -27,6 +27,44 @@ namespace LocalCommunityBoard.WpfUI.Views
             this.userSession = userSession;
         }
 
+        /// <summary>
+        /// Attempt to navigate back to the home/main view.
+        /// </summary>
+        private static void TryNavigateHome()
+        {
+            try
+            {
+                if (Application.Current?.MainWindow != null)
+                {
+                    var mw = Application.Current.MainWindow;
+
+                    // Ensure that the accessibility bypass is safe by checking for null and proper access
+                    var mainContentProp = mw.GetType().GetProperty("MainContent", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Public);
+                    if (mainContentProp != null)
+                    {
+                        var contentControl = mainContentProp.GetValue(mw) as ContentControl;
+                        if (contentControl != null)
+                        {
+                            // If there is a NavigateHome method, invoke it safely
+                            var navigateMethod = mw.GetType().GetMethod("NavigateHome", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Public);
+                            if (navigateMethod != null)
+                            {
+                                navigateMethod.Invoke(mw, null);
+                                return;
+                            }
+
+                            // Otherwise, clear the content safely
+                            contentControl.Content = null;
+                        }
+                    }
+                }
+            }
+            catch
+            {
+                // Ignore navigation failure
+            }
+        }
+
         private async void Publish_Click(object sender, RoutedEventArgs e)
         {
             // Валідація простих полів
@@ -92,7 +130,7 @@ namespace LocalCommunityBoard.WpfUI.Views
                 // ПОВЕРНУТИСЬ НА ГОЛОВНУ СТОРІНКУ:
                 // Припущення: вікно MainWindow має ContentControl з ім'ям MainContent
                 // і його DataContext / логіка дозволяє навігацію назад.
-                this.TryNavigateHome();
+                TryNavigateHome();
             }
             catch (ArgumentException aex)
             {
@@ -107,43 +145,7 @@ namespace LocalCommunityBoard.WpfUI.Views
 
         private void Cancel_Click(object sender, RoutedEventArgs e)
         {
-            this.TryNavigateHome();
-        }
-
-        /// <summary>
-        /// Attempt to navigate back to the home/main view.
-        /// </summary>
-        private void TryNavigateHome()
-        {
-            try
-            {
-                if (Application.Current?.MainWindow != null)
-                {
-                    var mw = Application.Current.MainWindow;
-                    var mainContentProp = mw.GetType().GetProperty("MainContent");
-                    if (mainContentProp != null)
-                    {
-                        var contentControl = mainContentProp.GetValue(mw) as ContentControl;
-                        if (contentControl != null)
-                        {
-                            // Якщо у вас є метод NavigateHome на MainWindow — краще викликати його
-                            var navigateMethod = mw.GetType().GetMethod("NavigateHome", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic);
-                            if (navigateMethod != null)
-                            {
-                                navigateMethod.Invoke(mw, null);
-                                return;
-                            }
-
-                            // Інакше очищуємо / показуємо пустий
-                            contentControl.Content = null;
-                        }
-                    }
-                }
-            }
-            catch
-            {
-                // ignore navigation failure
-            }
+            TryNavigateHome();
         }
     }
 }
