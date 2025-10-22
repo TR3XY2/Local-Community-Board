@@ -33,6 +33,13 @@
                                 <TextBlock Text="{Binding User.Username}" FontWeight="Bold"/>
                                 <TextBlock Text="{Binding Body}" TextWrapping="Wrap" Margin="0,3,0,0"/>
                                 <TextBlock Text="{Binding CreatedAt}" FontStyle="Italic" FontSize="11" Foreground="Gray"/>
+                                
+                                <!-- Report Button -->
+                                <Button Content="Report"
+                                        Tag="{Binding Id}"
+                                        Width="100"
+                                        Margin="0,5,0,0"
+                                        Click="ReportButton_Click"/>
                             </StackPanel>
                         </Border>
                     </DataTemplate>

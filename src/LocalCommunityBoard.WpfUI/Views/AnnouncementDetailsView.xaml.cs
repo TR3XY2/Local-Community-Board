@@ -9,6 +9,7 @@ using System.Windows;
 using System.Windows.Controls;
 using LocalCommunityBoard.Application.Interfaces;
 using LocalCommunityBoard.Application.Services;
+using LocalCommunityBoard.Domain.Entities;
 using LocalCommunityBoard.WpfUI.ViewModels;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -23,6 +24,7 @@ using Microsoft.Extensions.DependencyInjection;
 public partial class AnnouncementDetailsView : UserControl
 {
     private readonly ICommentService commentService;
+    private readonly IReportService reportService;
     private readonly UserSession session;
     private readonly AnnouncementViewModel announcement;
 
@@ -32,13 +34,14 @@ public partial class AnnouncementDetailsView : UserControl
         this.DataContext = announcement;
 
         this.commentService = App.Services.GetRequiredService<ICommentService>();
+        this.reportService = App.Services.GetRequiredService<IReportService>();
         this.session = App.Services.GetRequiredService<UserSession>();
         this.announcement = announcement;
 
         // Load comments asynchronously after UI is ready
         _ = this.LoadCommentsAsync();
 
-        // ADDED: при завантаженні — підтягнути лічильник лайків і стан кнопки
+        // ADDED: ��� ����������� � ��������� �������� ����� � ���� ������
         this.Loaded += async (_, __) =>
         {
             await this.RefreshLikesAsync();
@@ -146,6 +149,39 @@ public partial class AnnouncementDetailsView : UserControl
         }
         catch
         {
+        }
+    }
+
+    private async void ReportButton_Click(object sender, RoutedEventArgs e)
+    {
+        if (!this.session.IsLoggedIn || this.session.CurrentUser == null)
+        {
+            MessageBox.Show("You must be logged in to report a comment.", "Error", MessageBoxButton.OK, MessageBoxImage.Warning);
+            return;
+        }
+
+        if (sender is Button button && button.Tag is int commentId)
+        {
+            // Prompt for reason
+            string reason = Microsoft.VisualBasic.Interaction.InputBox(
+                "Enter reason for reporting this comment:",
+                "Report Comment",
+                "Inappropriate content");
+
+            if (string.IsNullOrWhiteSpace(reason))
+            {
+                return;
+            }
+
+            try
+            {
+                await this.reportService.ReportCommentAsync(this.session.CurrentUser.Id, commentId, reason);
+                MessageBox.Show("Comment reported successfully.", "Success", MessageBoxButton.OK, MessageBoxImage.Information);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Failed to report comment: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
     }
 }
