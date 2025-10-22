@@ -23,6 +23,7 @@ using Microsoft.Extensions.DependencyInjection;
 /// handling.</remarks>
 public partial class AnnouncementDetailsView : UserControl
 {
+    private const string ErrorText = "An error occurred while loading the announcement details.";
     private readonly ICommentService commentService;
     private readonly IReportService reportService;
     private readonly UserSession session;
@@ -58,7 +59,7 @@ public partial class AnnouncementDetailsView : UserControl
         }
         catch (Exception ex)
         {
-            MessageBox.Show($"Failed to load comments: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            MessageBox.Show($"Failed to load comments: {ex.Message}", ErrorText, MessageBoxButton.OK, MessageBoxImage.Error);
         }
     }
 
@@ -66,14 +67,14 @@ public partial class AnnouncementDetailsView : UserControl
     {
         if (!this.session.IsLoggedIn || this.session.CurrentUser == null)
         {
-            MessageBox.Show("You must be logged in to post a comment.", "Error", MessageBoxButton.OK, MessageBoxImage.Warning);
+            MessageBox.Show("You must be logged in to post a comment.", ErrorText, MessageBoxButton.OK, MessageBoxImage.Warning);
             return;
         }
 
         var body = this.CommentBox.Text.Trim();
         if (string.IsNullOrWhiteSpace(body))
         {
-            MessageBox.Show("Comment cannot be empty.", "Error", MessageBoxButton.OK, MessageBoxImage.Warning);
+            MessageBox.Show("Comment cannot be empty.", ErrorText, MessageBoxButton.OK, MessageBoxImage.Warning);
             return;
         }
 
@@ -85,7 +86,7 @@ public partial class AnnouncementDetailsView : UserControl
         }
         catch (Exception ex)
         {
-            MessageBox.Show($"Failed to post comment: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            MessageBox.Show($"Failed to post comment: {ex.Message}", ErrorText, MessageBoxButton.OK, MessageBoxImage.Error);
         }
     }
 
@@ -111,7 +112,7 @@ public partial class AnnouncementDetailsView : UserControl
         }
         catch (Exception ex)
         {
-            MessageBox.Show($"Failed to toggle like: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            MessageBox.Show($"Failed to toggle like: {ex.Message}", ErrorText, MessageBoxButton.OK, MessageBoxImage.Error);
         }
     }
 
@@ -126,6 +127,7 @@ public partial class AnnouncementDetailsView : UserControl
         }
         catch
         {
+            // Intentionally ignored: UI update is non-critical if like count fails to load.
         }
     }
 
@@ -149,6 +151,7 @@ public partial class AnnouncementDetailsView : UserControl
         }
         catch
         {
+            // Intentionally ignored: UI update is non-critical if like state fails to load.
         }
     }
 
@@ -156,7 +159,7 @@ public partial class AnnouncementDetailsView : UserControl
     {
         if (!this.session.IsLoggedIn || this.session.CurrentUser == null)
         {
-            MessageBox.Show("You must be logged in to report a comment.", "Error", MessageBoxButton.OK, MessageBoxImage.Warning);
+            MessageBox.Show("You must be logged in to report a comment.", ErrorText, MessageBoxButton.OK, MessageBoxImage.Warning);
             return;
         }
 
@@ -180,7 +183,7 @@ public partial class AnnouncementDetailsView : UserControl
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Failed to report comment: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show($"Failed to report comment: {ex.Message}", ErrorText, MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
     }

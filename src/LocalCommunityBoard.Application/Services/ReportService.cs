@@ -47,6 +47,13 @@ public class ReportService : IReportService
             throw new InvalidOperationException("You have already reported this comment.");
         }
 
+        // Check that you are not reporting your own comment
+        if (comment.UserId == reporterId)
+        {
+            this.logger.LogWarning("User {ReporterId} attempted to report their own comment {CommentId}", reporterId, commentId);
+            throw new InvalidOperationException("You cannot report your own comment.");
+        }
+
         var report = new Report
         {
             ReporterId = reporterId,
