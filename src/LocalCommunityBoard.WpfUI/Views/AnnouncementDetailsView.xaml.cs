@@ -187,4 +187,44 @@ public partial class AnnouncementDetailsView : UserControl
             }
         }
     }
+
+    private async void ReportAnnouncement_Click(object sender, RoutedEventArgs e)
+    {
+        if (!this.session.IsLoggedIn || this.session.CurrentUser == null)
+        {
+            MessageBox.Show("You must be logged in to report an announcement.", "Error", MessageBoxButton.OK, MessageBoxImage.Warning);
+            return;
+        }
+
+        if (this.DataContext is AnnouncementViewModel vm)
+        {
+            string reason = Microsoft.VisualBasic.Interaction.InputBox(
+                "Enter reason for reporting this announcement:",
+                "Report Announcement",
+                "Inappropriate content");
+
+            if (string.IsNullOrWhiteSpace(reason))
+            {
+                return;
+            }
+
+            try
+            {
+                await this.reportService.ReportAnnouncementAsync(this.session.CurrentUser.Id, vm.Id, reason);
+                MessageBox.Show("Announcement reported successfully.", "Success", MessageBoxButton.OK, MessageBoxImage.Information);
+            }
+            catch (ArgumentException aex)
+            {
+                MessageBox.Show(aex.Message, "Validation Error", MessageBoxButton.OK, MessageBoxImage.Warning);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Failed to report announcement: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+        else
+        {
+            MessageBox.Show("Cannot report announcement: DataContext is invalid.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+        }
+    }
 }

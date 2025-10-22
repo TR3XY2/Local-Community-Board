@@ -20,6 +20,7 @@ public class ReportServiceTests
 {
     private readonly Mock<IReportRepository> mockReportRepository;
     private readonly Mock<ICommentRepository> mockCommentRepository;
+    private readonly Mock<IAnnouncementRepository> mockAnnouncementRepository;
     private readonly Mock<ILogger<ReportService>> mockLogger;
     private readonly ReportService reportService;
 
@@ -27,12 +28,14 @@ public class ReportServiceTests
     {
         this.mockReportRepository = new Mock<IReportRepository>();
         this.mockCommentRepository = new Mock<ICommentRepository>();
+        this.mockAnnouncementRepository = new Mock<IAnnouncementRepository>();
         this.mockLogger = new Mock<ILogger<ReportService>>();
 
         this.reportService = new ReportService(
             this.mockReportRepository.Object,
             this.mockCommentRepository.Object,
-            this.mockLogger.Object);
+            this.mockLogger.Object,
+            this.mockAnnouncementRepository.Object);
     }
 
     [Fact]
@@ -368,5 +371,167 @@ public class ReportServiceTests
         Assert.False(result);
         this.mockReportRepository.Verify(repo => repo.Update(It.IsAny<Report>()), Times.Never);
         this.mockReportRepository.Verify(repo => repo.SaveChangesAsync(), Times.Never);
+    }
+
+[Fact]
+    public async Task ReportAnnouncementAsync_CreatesReport_WhenValidDataProvided()
+    {
+        // Arrange
+        const int reporterId = 1;
+        const int announcementId = 2;
+        const string reason = "Inappropriate content";
+        Announcement announcement = new Announcement { Id = announcementId, Title = "Test", Body = "Test body" };
+        Report? capturedReport = null;
+
+        this.mockAnnouncementRepository
+            .Setup(repo => repo.GetByIdAsync(announcementId))
+            .ReturnsAsync(announcement);
+
+        this.mockReportRepository
+            .Setup(repo => repo.HasUserReportedAsync(reporterId, TargetType.Announcement, announcementId))
+            .ReturnsAsync(false);
+
+        this.mockReportRepository
+            .Setup(repo => repo.AddAsync(It.IsAny<Report>()))
+            .Callback<Report>(r => capturedReport = r)
+            .Returns(Task.CompletedTask);
+
+        this.mockReportRepository
+            .Setup(repo => repo.SaveChangesAsync())
+            .Returns(Task.CompletedTask);
+
+        // Act
+        Report result = await this.reportService.ReportAnnouncementAsync(reporterId, announcementId, reason);
+
+        // Assert
+        Assert.NotNull(result);
+        Assert.Equal(reporterId, result.ReporterId);
+        Assert.Equal(TargetType.Announcement, result.TargetType);
+        Assert.Equal(announcementId, result.TargetId);
+        Assert.Equal(reason, result.Reason);
+        Assert.Equal(ReportStatus.Open, result.Status);
+        Assert.NotNull(capturedReport);
+        this.mockReportRepository.Verify(repo => repo.AddAsync(It.IsAny<Report>()), Times.Once);
+        this.mockReportRepository.Verify(repo => repo.SaveChangesAsync(), Times.Once);
+    }
+
+    [Fact]
+    public async Task ReportAnnouncementAsync_ThrowsArgumentException_WhenAnnouncementDoesNotExist()
+    {
+        // Arrange
+        const int reporterId = 1;
+        const int announcementId = 999;
+        const string reason = "Test reason";
+
+        this.mockAnnouncementRepository
+            .Setup(repo => repo.GetByIdAsync(announcementId))
+            .ReturnsAsync((Announcement?)null);
+
+        // Act & Assert
+        ArgumentException exception = await Assert.ThrowsAsync<ArgumentException>(
+            () => this.reportService.ReportAnnouncementAsync(reporterId, announcementId, reason));
+
+        Assert.Contains($"Post with ID {announcementId} does not exist", exception.Message);
+        this.mockReportRepository.Verify(repo => repo.AddAsync(It.IsAny<Report>()), Times.Never);
+        this.mockReportRepository.Verify(repo => repo.SaveChangesAsync(), Times.Never);
+    }
+
+    [Fact]
+    public async Task ReportAnnouncementAsync_ThrowsInvalidOperationException_WhenUserAlreadyReported()
+    {
+        // Arrange
+        const int reporterId = 1;
+        const int announcementId = 2;
+        const string reason = "Test reason";
+        Announcement announcement = new Announcement { Id = announcementId, Title = "Test", Body = "Test body" };
+
+        this.mockAnnouncementRepository
+            .Setup(repo => repo.GetByIdAsync(announcementId))
+            .ReturnsAsync(announcement);
+
+        this.mockReportRepository
+            .Setup(repo => repo.HasUserReportedAsync(reporterId, TargetType.Announcement, announcementId))
+            .ReturnsAsync(true);
+
+        // Act & Assert
+        InvalidOperationException exception = await Assert.ThrowsAsync<InvalidOperationException>(
+            () => this.reportService.ReportAnnouncementAsync(reporterId, announcementId, reason));
+
+        Assert.Equal("You have already reported this post.", exception.Message);
+        this.mockReportRepository.Verify(repo => repo.AddAsync(It.IsAny<Report>()), Times.Never);
+        this.mockReportRepository.Verify(repo => repo.SaveChangesAsync(), Times.Never);
+    }
+
+    [Fact]
+    public async Task ReportAnnouncementAsync_TrimsReason_WhenReasonHasWhitespace()
+    {
+        // Arrange
+        const int reporterId = 1;
+        const int announcementId = 2;
+        const string reason = "  Spam announcement  ";
+        Announcement announcement = new Announcement { Id = announcementId, Title = "Test", Body = "Test body" };
+        Report? capturedReport = null;
+
+        this.mockAnnouncementRepository
+            .Setup(repo => repo.GetByIdAsync(announcementId))
+            .ReturnsAsync(announcement);
+
+        this.mockReportRepository
+            .Setup(repo => repo.HasUserReportedAsync(reporterId, TargetType.Announcement, announcementId))
+            .ReturnsAsync(false);
+
+        this.mockReportRepository
+            .Setup(repo => repo.AddAsync(It.IsAny<Report>()))
+            .Callback<Report>(r => capturedReport = r)
+            .Returns(Task.CompletedTask);
+
+        this.mockReportRepository
+            .Setup(repo => repo.SaveChangesAsync())
+            .Returns(Task.CompletedTask);
+
+        // Act
+        Report result = await this.reportService.ReportAnnouncementAsync(reporterId, announcementId, reason);
+
+        // Assert
+        Assert.Equal("Spam announcement", result.Reason);
+        Assert.Equal("Spam announcement", capturedReport?.Reason);
+    }
+
+    [Fact]
+    public async Task ReportAnnouncementAsync_SetsCreatedAtToUtcNow()
+    {
+        // Arrange
+        const int reporterId = 1;
+        const int announcementId = 2;
+        const string reason = "Test reason";
+        Announcement announcement = new Announcement { Id = announcementId, Title = "Test", Body = "Test body" };
+        DateTime beforeCall = DateTime.UtcNow;
+        Report? capturedReport = null;
+
+        this.mockAnnouncementRepository
+            .Setup(repo => repo.GetByIdAsync(announcementId))
+            .ReturnsAsync(announcement);
+
+        this.mockReportRepository
+            .Setup(repo => repo.HasUserReportedAsync(reporterId, TargetType.Announcement, announcementId))
+            .ReturnsAsync(false);
+
+        this.mockReportRepository
+            .Setup(repo => repo.AddAsync(It.IsAny<Report>()))
+            .Callback<Report>(r => capturedReport = r)
+            .Returns(Task.CompletedTask);
+
+        this.mockReportRepository
+            .Setup(repo => repo.SaveChangesAsync())
+            .Returns(Task.CompletedTask);
+
+        // Act
+        Report result = await this.reportService.ReportAnnouncementAsync(reporterId, announcementId, reason);
+        DateTime afterCall = DateTime.UtcNow;
+
+        // Assert
+        Assert.NotNull(capturedReport);
+        Assert.InRange(capturedReport.CreatedAt, beforeCall, afterCall);
+        Assert.Equal(DateTimeKind.Utc, capturedReport.CreatedAt.Kind);
     }
 }
