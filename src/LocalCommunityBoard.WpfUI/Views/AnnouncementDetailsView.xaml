@@ -11,6 +11,18 @@
 
             <Separator Margin="0,20,0,20"/>
 
+            <!-- Likes -->
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,10,0,0">
+                <ToggleButton x:Name="LikeBtn"
+                        Width="120"
+                        Click="LikeBtn_Click">
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                        <TextBlock Text="👍" FontSize="16" Margin="0,0,6,0"/>
+                        <TextBlock x:Name="LikeCountText" Text="0"/>
+                    </StackPanel>
+                </ToggleButton>
+            </StackPanel>
+            
             <!-- Comments Section -->
             <TextBlock Text="Comments" FontSize="20" FontWeight="Bold" Margin="0,0,0,10"/>
             <ItemsControl x:Name="CommentsList">
@@ -26,17 +38,6 @@
                     </DataTemplate>
                 </ItemsControl.ItemTemplate>
             </ItemsControl>
-            <!-- Likes -->
-            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,10,0,0">
-                <ToggleButton x:Name="LikeBtn"
-                Width="120"
-                Click="LikeBtn_Click">
-                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                        <TextBlock Text="👍" FontSize="16" Margin="0,0,6,0"/>
-                        <TextBlock x:Name="LikeCountText" Text="0"/>
-                    </StackPanel>
-                </ToggleButton>
-            </StackPanel>
 
             <!-- Add Comment -->
             <TextBox x:Name="CommentBox" Height="60" TextWrapping="Wrap" Margin="0,15,0,5" />
