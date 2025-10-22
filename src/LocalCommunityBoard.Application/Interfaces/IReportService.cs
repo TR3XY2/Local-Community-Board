@@ -43,4 +43,6 @@ public interface IReportService
     /// <param name="status">The new status.</param>
     /// <returns>True if successful; otherwise false.</returns>
     Task<bool> UpdateReportStatusAsync(int reportId, ReportStatus status);
+
+    Task<Report> ReportAnnouncementAsync(int reporterId, int postId, string reason);
 }

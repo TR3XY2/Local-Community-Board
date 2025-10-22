@@ -15,6 +15,7 @@ using Microsoft.Extensions.Logging;
 /// </summary>
 public class ReportService : IReportService
 {
+    private readonly IAnnouncementRepository announcementRepository;
     private readonly IReportRepository reportRepository;
     private readonly ICommentRepository commentRepository;
     private readonly ILogger<ReportService> logger;
@@ -22,11 +23,13 @@ public class ReportService : IReportService
     public ReportService(
         IReportRepository reportRepository,
         ICommentRepository commentRepository,
-        ILogger<ReportService> logger)
+        ILogger<ReportService> logger,
+        IAnnouncementRepository announcementRepository)
     {
         this.reportRepository = reportRepository;
         this.commentRepository = commentRepository;
         this.logger = logger;
+        this.announcementRepository = announcementRepository;
     }
 
     /// <inheritdoc/>
@@ -91,5 +94,37 @@ public class ReportService : IReportService
 
         this.logger.LogInformation("Report {ReportId} status updated to {Status}", reportId, status);
         return true;
+    }
+
+    public async Task<Report> ReportAnnouncementAsync(int reporterId, int postId, string reason)
+    {
+        var post = await this.announcementRepository.GetByIdAsync(postId);
+        if (post == null)
+        {
+            this.logger.LogWarning("Attempted to report non-existent post ID {PostId}", postId);
+            throw new ArgumentException($"Post with ID {postId} does not exist.");
+        }
+
+        if (await this.reportRepository.HasUserReportedAsync(reporterId, TargetType.Announcement, postId))
+        {
+            this.logger.LogWarning("User {ReporterId} attempted to report post {PostId} multiple times", reporterId, postId);
+            throw new InvalidOperationException("You have already reported this post.");
+        }
+
+        var report = new Report
+        {
+            ReporterId = reporterId,
+            TargetType = TargetType.Announcement,
+            TargetId = postId,
+            Reason = reason?.Trim(),
+            Status = ReportStatus.Open,
+            CreatedAt = DateTime.UtcNow,
+        };
+
+        await this.reportRepository.AddAsync(report);
+        await this.reportRepository.SaveChangesAsync();
+
+        this.logger.LogInformation("User {ReporterId} reported post {PostId}", reporterId, postId);
+        return report;
     }
 }
