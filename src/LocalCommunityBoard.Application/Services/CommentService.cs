@@ -7,18 +7,22 @@ namespace LocalCommunityBoard.Application.Services;
 using LocalCommunityBoard.Application.Interfaces;
 using LocalCommunityBoard.Domain.Entities;
 using LocalCommunityBoard.Domain.Interfaces;
+using Microsoft.Extensions.Logging;
 
 public class CommentService : ICommentService
 {
     private readonly ICommentRepository commentRepository;
+    private readonly ILogger<CommentService> logger;
 
-    public CommentService(ICommentRepository commentRepository)
+    public CommentService(ICommentRepository commentRepository, ILogger<CommentService> logger)
     {
         this.commentRepository = commentRepository;
+        this.logger = logger;
     }
 
     public async Task<IEnumerable<Comment>> GetCommentsForAnnouncementAsync(int announcementId)
     {
+        this.logger.LogInformation("Fetching comments for announcement ID {AnnouncementId}", announcementId);
         return await this.commentRepository.GetByAnnouncementIdAsync(announcementId);
     }
 
@@ -26,6 +30,7 @@ public class CommentService : ICommentService
     {
         if (string.IsNullOrWhiteSpace(body))
         {
+            this.logger.LogWarning("User {UserId} attempted to add an empty comment to announcement {AnnouncementId}", userId, announcementId);
             throw new ArgumentException("Comment cannot be empty.");
         }
 
@@ -41,6 +46,7 @@ public class CommentService : ICommentService
         await this.commentRepository.AddAsync(comment);
         await this.commentRepository.SaveChangesAsync();
 
+        this.logger.LogInformation("User {UserId} added a comment (ID: {CommentId}) to announcement {AnnouncementId}", userId, comment.Id, announcementId);
         return comment;
     }
 }
