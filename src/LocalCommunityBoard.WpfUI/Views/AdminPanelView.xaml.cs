@@ -4,8 +4,10 @@
 
 namespace LocalCommunityBoard.WpfUI.Views;
 
+using System.Windows;
 using System.Windows.Controls;
 using LocalCommunityBoard.Application.Interfaces;
+using LocalCommunityBoard.Domain.Entities;
 using Microsoft.Extensions.DependencyInjection;
 
 /// <summary>
@@ -29,5 +31,25 @@ public partial class AdminPanelView : UserControl
     {
         var users = await this.userService.GetAllUsersAsync();
         this.UsersGrid.ItemsSource = users;
+    }
+
+    private void EditUser_Click(object sender, RoutedEventArgs e)
+    {
+        if (sender is not Button btn || btn.DataContext is not User user)
+        {
+            return;
+        }
+
+        // Navigate to edit view
+        if (Application.Current.MainWindow is MainWindow mainWindow)
+        {
+            var editView = new EditUserView(user, this.userService, async () =>
+            {
+                // This callback will refresh the user list after save
+                await this.LoadUsersAsync();
+            });
+
+            mainWindow.MainContent.Content = editView;
+        }
     }
 }

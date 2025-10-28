@@ -30,7 +30,7 @@
                                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                                     <Button Content="Block" Margin="3" Width="60" IsEnabled="False"/>
                                     <Button Content="Unblock" Margin="3" Width="70" IsEnabled="False"/>
-                                    <Button Content="Edit" Margin="3" Width="50" IsEnabled="False"/>
+                                    <Button Content="Edit" Margin="3" Width="50" IsEnabled="True" Click="EditUser_Click"/>
                                 </StackPanel>
                             </DataTemplate>
                         </DataGridTemplateColumn.CellTemplate>
