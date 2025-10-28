@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using LocalCommunityBoard.Application.Services;
 using LocalCommunityBoard.Domain.Entities;
 using LocalCommunityBoard.Domain.Interfaces;
+using Microsoft.Extensions.Logging;
 using Moq;
 using Xunit;
 
@@ -17,12 +18,14 @@ using Xunit;
 public class CommentServiceTests
 {
     private readonly Mock<ICommentRepository> mockCommentRepository;
+    private readonly Mock<ILogger<CommentService>> mockLogger; // Add mock logger
     private readonly CommentService commentService;
 
     public CommentServiceTests()
     {
         this.mockCommentRepository = new Mock<ICommentRepository>();
-        this.commentService = new CommentService(this.mockCommentRepository.Object);
+        this.mockLogger = new Mock<ILogger<CommentService>>();
+        this.commentService = new CommentService(this.mockCommentRepository.Object, this.mockLogger.Object);
     }
 
     [Fact]
@@ -54,7 +57,7 @@ public class CommentServiceTests
     {
         // Arrange
         const int announcementId = 1;
-        List<Comment> expectedComments = new List<Comment>();
+        List<Comment> expectedComments = [];
 
         this.mockCommentRepository
             .Setup(repo => repo.GetByAnnouncementIdAsync(announcementId))
@@ -197,6 +200,7 @@ public class CommentServiceTests
 
         // Act
         Comment result = await this.commentService.AddCommentAsync(userId, announcementId, body);
+        Console.WriteLine(result);
         DateTime afterCall = DateTime.UtcNow;
 
         // Assert

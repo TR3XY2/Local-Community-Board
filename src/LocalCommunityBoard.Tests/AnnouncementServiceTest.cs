@@ -7,6 +7,7 @@ namespace LocalCommunityBoard.Application.Tests.Services;
 using LocalCommunityBoard.Application.Services;
 using LocalCommunityBoard.Domain.Entities;
 using LocalCommunityBoard.Domain.Interfaces;
+using Microsoft.Extensions.Logging;
 using Moq;
 using Xunit;
 
@@ -23,18 +24,21 @@ public class AnnouncementServiceTests
 
     /// <summary>
     /// Initializes a new instance of the <see cref="AnnouncementServiceTests"/> class.
-    /// Setup is done in constructor as per best practices.
-    /// </summary>
+    // Add the required logger dependency to the AnnouncementServiceTests constructor
+    private readonly Mock<ILogger<AnnouncementService>> mockLogger;
+
     public AnnouncementServiceTests()
     {
         this.mockAnnouncementRepository = new Mock<IAnnouncementRepository>();
         this.mockLocationRepository = new Mock<IRepository<Location>>();
         this.mockCategoryRepository = new Mock<IRepository<Category>>();
+        this.mockLogger = new Mock<ILogger<AnnouncementService>>();
 
         this.sut = new AnnouncementService(
             this.mockAnnouncementRepository.Object,
             this.mockLocationRepository.Object,
-            this.mockCategoryRepository.Object);
+            this.mockCategoryRepository.Object,
+            this.mockLogger.Object); // Pass the mock logger
     }
 
     #region GetAnnouncementsPagedAsync Tests
@@ -107,7 +111,7 @@ public class AnnouncementServiceTests
     {
         // Arrange
         const string street = "TestStreet";
-        var date = new DateTime(2025, 10, 15);
+        var date = new DateTime(2025, 10, 15, 0, 0, 0, DateTimeKind.Utc);
 
         this.mockAnnouncementRepository
             .Setup(r => r.GetFilteredPagedAsync(null, null, street, null, date, 1, 9))
@@ -321,7 +325,6 @@ public class AnnouncementServiceTests
         const string body = "Test Body";
         const int categoryId = 1;
         const int locationId = 1;
-        IEnumerable<string> imageUrls = new List<string> { "http://example.com/image.jpg" };
 
         this.mockCategoryRepository
             .Setup(r => r.GetByIdAsync(categoryId))

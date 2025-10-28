@@ -2,12 +2,13 @@
 // Copyright (c) PlaceholderCompany. All rights reserved.
 // </copyright>
 
-namespace LocalCommunityBoard.Tests.Application.Services;
+namespace LocalCommunityBoard.Tests;
 
 using LocalCommunityBoard.Application.Services;
 using LocalCommunityBoard.Domain.Entities;
 using LocalCommunityBoard.Domain.Enums;
 using LocalCommunityBoard.Domain.Interfaces;
+using Microsoft.Extensions.Logging;
 using Moq;
 using Xunit;
 
@@ -17,12 +18,14 @@ using Xunit;
 public class ReactionServiceTests
 {
     private readonly Mock<IReactionRepository> mockReactionRepository;
+    private readonly Mock<ILogger<ReactionService>> mockLogger;
     private readonly ReactionService reactionService;
 
     public ReactionServiceTests()
     {
-        this.mockReactionRepository = new Mock<IReactionRepository>();
-        this.reactionService = new ReactionService(this.mockReactionRepository.Object);
+        mockReactionRepository = new Mock<IReactionRepository>();
+        mockLogger = new Mock<ILogger<ReactionService>>();
+        reactionService = new ReactionService(mockReactionRepository.Object, mockLogger.Object);
     }
 
     [Fact]
@@ -33,21 +36,21 @@ public class ReactionServiceTests
         const int userId = 1;
         Reaction? capturedReaction = null;
 
-        this.mockReactionRepository
+        mockReactionRepository
             .Setup(repo => repo.GetByAnnouncementAndUserAsync(announcementId, userId, ReactionType.Like))
             .ReturnsAsync((Reaction?)null);
 
-        this.mockReactionRepository
+        mockReactionRepository
             .Setup(repo => repo.AddAsync(It.IsAny<Reaction>()))
             .Callback<Reaction>(r => capturedReaction = r)
             .Returns(Task.CompletedTask);
 
-        this.mockReactionRepository
+        mockReactionRepository
             .Setup(repo => repo.SaveChangesAsync())
             .Returns(Task.CompletedTask);
 
         // Act
-        bool result = await this.reactionService.ToggleLikeAsync(announcementId, userId);
+        bool result = await reactionService.ToggleLikeAsync(announcementId, userId);
 
         // Assert
         Assert.True(result);
@@ -55,9 +58,9 @@ public class ReactionServiceTests
         Assert.Equal(announcementId, capturedReaction.AnnouncementId);
         Assert.Equal(userId, capturedReaction.UserId);
         Assert.Equal(ReactionType.Like, capturedReaction.Type);
-        this.mockReactionRepository.Verify(repo => repo.AddAsync(It.IsAny<Reaction>()), Times.Once);
-        this.mockReactionRepository.Verify(repo => repo.Delete(It.IsAny<Reaction>()), Times.Never);
-        this.mockReactionRepository.Verify(repo => repo.SaveChangesAsync(), Times.Once);
+        mockReactionRepository.Verify(repo => repo.AddAsync(It.IsAny<Reaction>()), Times.Once);
+        mockReactionRepository.Verify(repo => repo.Delete(It.IsAny<Reaction>()), Times.Never);
+        mockReactionRepository.Verify(repo => repo.SaveChangesAsync(), Times.Once);
     }
 
     [Fact]
@@ -74,26 +77,26 @@ public class ReactionServiceTests
             Type = ReactionType.Like,
         };
 
-        this.mockReactionRepository
+        mockReactionRepository
             .Setup(repo => repo.GetByAnnouncementAndUserAsync(announcementId, userId, ReactionType.Like))
             .ReturnsAsync(existingReaction);
 
-        this.mockReactionRepository
+        mockReactionRepository
             .Setup(repo => repo.Delete(existingReaction))
             .Verifiable();
 
-        this.mockReactionRepository
+        mockReactionRepository
             .Setup(repo => repo.SaveChangesAsync())
             .Returns(Task.CompletedTask);
 
         // Act
-        bool result = await this.reactionService.ToggleLikeAsync(announcementId, userId);
+        bool result = await reactionService.ToggleLikeAsync(announcementId, userId);
 
         // Assert
         Assert.False(result);
-        this.mockReactionRepository.Verify(repo => repo.Delete(existingReaction), Times.Once);
-        this.mockReactionRepository.Verify(repo => repo.AddAsync(It.IsAny<Reaction>()), Times.Never);
-        this.mockReactionRepository.Verify(repo => repo.SaveChangesAsync(), Times.Once);
+        mockReactionRepository.Verify(repo => repo.Delete(existingReaction), Times.Once);
+        mockReactionRepository.Verify(repo => repo.AddAsync(It.IsAny<Reaction>()), Times.Never);
+        mockReactionRepository.Verify(repo => repo.SaveChangesAsync(), Times.Once);
     }
 
     [Fact]
@@ -103,16 +106,16 @@ public class ReactionServiceTests
         const int announcementId = 1;
         const int expectedCount = 5;
 
-        this.mockReactionRepository
+        mockReactionRepository
             .Setup(repo => repo.CountByAnnouncementAsync(announcementId, ReactionType.Like))
             .ReturnsAsync(expectedCount);
 
         // Act
-        int result = await this.reactionService.GetLikesCountAsync(announcementId);
+        int result = await reactionService.GetLikesCountAsync(announcementId);
 
         // Assert
         Assert.Equal(expectedCount, result);
-        this.mockReactionRepository.Verify(
+        mockReactionRepository.Verify(
             repo => repo.CountByAnnouncementAsync(announcementId, ReactionType.Like),
             Times.Once);
     }
@@ -123,16 +126,16 @@ public class ReactionServiceTests
         // Arrange
         const int announcementId = 1;
 
-        this.mockReactionRepository
+        mockReactionRepository
             .Setup(repo => repo.CountByAnnouncementAsync(announcementId, ReactionType.Like))
             .ReturnsAsync(0);
 
         // Act
-        int result = await this.reactionService.GetLikesCountAsync(announcementId);
+        int result = await reactionService.GetLikesCountAsync(announcementId);
 
         // Assert
         Assert.Equal(0, result);
-        this.mockReactionRepository.Verify(
+        mockReactionRepository.Verify(
             repo => repo.CountByAnnouncementAsync(announcementId, ReactionType.Like),
             Times.Once);
     }
@@ -151,16 +154,16 @@ public class ReactionServiceTests
             Type = ReactionType.Like,
         };
 
-        this.mockReactionRepository
+        mockReactionRepository
             .Setup(repo => repo.GetByAnnouncementAndUserAsync(announcementId, userId, ReactionType.Like))
             .ReturnsAsync(existingReaction);
 
         // Act
-        bool result = await this.reactionService.HasUserLikedAsync(announcementId, userId);
+        bool result = await reactionService.HasUserLikedAsync(announcementId, userId);
 
         // Assert
         Assert.True(result);
-        this.mockReactionRepository.Verify(
+        mockReactionRepository.Verify(
             repo => repo.GetByAnnouncementAndUserAsync(announcementId, userId, ReactionType.Like),
             Times.Once);
     }
@@ -172,16 +175,16 @@ public class ReactionServiceTests
         const int announcementId = 1;
         const int userId = 1;
 
-        this.mockReactionRepository
+        mockReactionRepository
             .Setup(repo => repo.GetByAnnouncementAndUserAsync(announcementId, userId, ReactionType.Like))
             .ReturnsAsync((Reaction?)null);
 
         // Act
-        bool result = await this.reactionService.HasUserLikedAsync(announcementId, userId);
+        bool result = await reactionService.HasUserLikedAsync(announcementId, userId);
 
         // Assert
         Assert.False(result);
-        this.mockReactionRepository.Verify(
+        mockReactionRepository.Verify(
             repo => repo.GetByAnnouncementAndUserAsync(announcementId, userId, ReactionType.Like),
             Times.Once);
     }
@@ -193,24 +196,24 @@ public class ReactionServiceTests
     public async Task ToggleLikeAsync_WorksWithDifferentIds(int announcementId, int userId)
     {
         // Arrange
-        this.mockReactionRepository
+        mockReactionRepository
             .Setup(repo => repo.GetByAnnouncementAndUserAsync(announcementId, userId, ReactionType.Like))
             .ReturnsAsync((Reaction?)null);
 
-        this.mockReactionRepository
+        mockReactionRepository
             .Setup(repo => repo.AddAsync(It.IsAny<Reaction>()))
             .Returns(Task.CompletedTask);
 
-        this.mockReactionRepository
+        mockReactionRepository
             .Setup(repo => repo.SaveChangesAsync())
             .Returns(Task.CompletedTask);
 
         // Act
-        bool result = await this.reactionService.ToggleLikeAsync(announcementId, userId);
+        bool result = await reactionService.ToggleLikeAsync(announcementId, userId);
 
         // Assert
         Assert.True(result);
-        this.mockReactionRepository.Verify(
+        mockReactionRepository.Verify(
             repo => repo.GetByAnnouncementAndUserAsync(announcementId, userId, ReactionType.Like),
             Times.Once);
     }
