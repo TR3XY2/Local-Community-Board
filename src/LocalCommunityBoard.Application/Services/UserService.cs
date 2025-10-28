@@ -164,5 +164,11 @@ namespace LocalCommunityBoard.Application.Services
             this.logger.LogInformation("User logged out: {Email}", user.Email);
             return user;
         }
+
+        public async Task<IEnumerable<User>> GetAllUsersAsync()
+        {
+            var all = await this.userRepository.GetAllAsync();
+            return all;
+        }
     }
 }

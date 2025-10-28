@@ -24,7 +24,13 @@
                     VerticalAlignment="Center"
                     HorizontalAlignment="Right"
                     Margin="0,0,10,0">
-
+            <Button x:Name="AdminPanelButton"
+                    Content="Admin"
+                    Width="80"
+                    Margin="5,0"
+                    Click="AdminPanel_Click"
+                    Visibility="Collapsed"/>
+            
             <Button x:Name="CreatePostButton"
                     Content="Create Post"
                     Width="100"

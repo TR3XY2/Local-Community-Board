@@ -31,6 +31,11 @@ public partial class MainWindow : Window
 
         this.TopBar.CreatePostRequested += this.TopBar_CreatePostRequested;
 
+        this.TopBar.AdminPanelRequested += (_, _) =>
+        {
+            this.MainContent.Content = new AdminPanelView();
+        };
+
         this.NavigateHome();
         this.userSession = userSession;
     }

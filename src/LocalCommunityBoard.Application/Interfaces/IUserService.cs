@@ -21,4 +21,6 @@ public interface IUserService
     Task<bool> UpdatePersonalInfoAsync(int userId, string? newUsername, string? newEmail);
 
     Task<bool> ChangePasswordAsync(int userId, string oldPassword, string newPassword);
+
+    Task<IEnumerable<User>> GetAllUsersAsync();
 }

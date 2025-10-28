@@ -41,15 +41,19 @@ public partial class TopBar : UserControl
 
     public event RoutedEventHandler? CreatePostRequested;
 
+    public event RoutedEventHandler? AdminPanelRequested;
+
     private void UpdateUI()
     {
         bool loggedIn = this.session?.IsLoggedIn == true;
+        bool isAdmin = this.session?.CurrentUser?.Role?.Name == "Admin" || this.session?.CurrentUser?.RoleId == 2;
 
-        this.CreatePostButton.Visibility = loggedIn ? Visibility.Visible : Visibility.Collapsed;
         this.LoginButton.Visibility = loggedIn ? Visibility.Collapsed : Visibility.Visible;
         this.SignupButton.Visibility = loggedIn ? Visibility.Collapsed : Visibility.Visible;
         this.LogoutButton.Visibility = loggedIn ? Visibility.Visible : Visibility.Collapsed;
         this.ProfileButton.Visibility = loggedIn ? Visibility.Visible : Visibility.Collapsed;
+        this.CreatePostButton.Visibility = loggedIn ? Visibility.Visible : Visibility.Collapsed;
+        this.AdminPanelButton.Visibility = isAdmin ? Visibility.Visible : Visibility.Collapsed;
     }
 
     private void Login_Click(object sender, RoutedEventArgs e)
@@ -86,5 +90,10 @@ public partial class TopBar : UserControl
     private void CreatePost_Click(object sender, RoutedEventArgs e)
     {
         this.CreatePostRequested?.Invoke(this, e);
+    }
+
+    private void AdminPanel_Click(object sender, RoutedEventArgs e)
+    {
+        this.AdminPanelRequested?.Invoke(this, e);
     }
 }
