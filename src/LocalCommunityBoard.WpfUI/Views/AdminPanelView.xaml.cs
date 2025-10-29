@@ -71,14 +71,14 @@ public partial class AdminPanelView : UserControl
             var result = await this.userService.BlockUserAsync(user.Id);
             if (!result)
             {
-                MessageBox.Show("Не вдалося заблокувати користувача. Можливо це адмін або користувача не існує.", "Error", MessageBoxButton.OK, MessageBoxImage.Warning);
+                MessageBox.Show("Unable to block user. This may be an administrator or the user does not exist.", "Error", MessageBoxButton.OK, MessageBoxImage.Warning);
             }
 
             await this.LoadUsersAsync();
         }
         catch (Exception ex)
         {
-            MessageBox.Show($"Помилка при блокуванні: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            MessageBox.Show($"Error during blocking: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
         }
     }
 }

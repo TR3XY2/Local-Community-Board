@@ -1,1 +1,1 @@
-C:\Users\ells\Desktop\prog\Local-Community-Board\.sonarqube\out\1
+C:\Users\ells\Desktop\prog\enger\Local-Community-Board\.sonarqube\out\1

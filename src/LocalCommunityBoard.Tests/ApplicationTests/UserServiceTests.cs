@@ -940,4 +940,259 @@ public class UserServiceTests
     }
 
     #endregion
+
+    #region GetAllUsersAsync Tests
+
+    /// <summary>
+    /// Tests that GetAllUsersAsync returns all users correctly from the repository.
+    /// </summary>
+    [Fact]
+    public async Task GetAllUsersAsync_WhenUsersExist_ReturnsAllUsers()
+    {
+        // Arrange
+        var users = new List<User>
+        {
+            new() { Id = 1, Username = "user1", Email = "user1@example.com" },
+            new() { Id = 2, Username = "user2", Email = "user2@example.com" }
+        };
+
+        this.mockUserRepository
+            .Setup(x => x.GetAllAsync())
+            .ReturnsAsync(users);
+
+        // Act
+        var result = await this.sut.GetAllUsersAsync();
+
+        // Assert
+        Assert.NotNull(result);
+        var userList = result.ToList();
+        Assert.Equal(2, userList.Count);
+        Assert.Equal("user1", userList[0].Username);
+        Assert.Equal("user2@example.com", userList[1].Email);
+
+        this.mockUserRepository.Verify(x => x.GetAllAsync(), Times.Once);
+    }
+
+    /// <summary>
+    /// Tests that GetAllUsersAsync returns an empty list when no users exist.
+    /// </summary>
+    [Fact]
+    public async Task GetAllUsersAsync_WhenNoUsersExist_ReturnsEmptyList()
+    {
+        // Arrange
+        this.mockUserRepository
+            .Setup(x => x.GetAllAsync())
+            .ReturnsAsync(new List<User>());
+
+        // Act
+        var result = await this.sut.GetAllUsersAsync();
+
+        // Assert
+        Assert.NotNull(result);
+        Assert.Empty(result);
+
+        this.mockUserRepository.Verify(x => x.GetAllAsync(), Times.Once);
+    }
+
+    /// <summary>
+    /// Tests that GetAllUsersAsync logs an error and throws if the repository throws an exception.
+    /// </summary>
+    [Fact]
+    public async Task GetAllUsersAsync_WhenRepositoryThrows_LogsErrorAndThrows()
+    {
+        // Arrange
+        this.mockUserRepository
+            .Setup(x => x.GetAllAsync())
+            .ThrowsAsync(new Exception("Database failure"));
+
+        // Act & Assert
+        var ex = await Assert.ThrowsAsync<Exception>(() => this.sut.GetAllUsersAsync());
+        Assert.Equal("Database failure", ex.Message);
+
+        this.mockUserRepository.Verify(x => x.GetAllAsync(), Times.Once);
+    }
+
+    #endregion
+
+    #region AdminUpdateUserAsync Tests
+
+    /// <summary>
+    /// Tests successful admin update of username, email, and password.
+    /// Positive test for admin-level modification.
+    /// </summary>
+    [Fact]
+    public async Task AdminUpdateUserAsync_WithValidUpdates_UpdatesUserSuccessfully()
+    {
+        // Arrange
+        const int userId = 1;
+        var existingUser = new User
+        {
+            Id = userId,
+            Username = "olduser",
+            Email = "old@example.com",
+            Password = "oldhashed",
+        };
+
+        this.mockUserRepository
+            .Setup(x => x.GetByIdAsync(userId))
+            .ReturnsAsync(existingUser);
+
+        this.mockUserRepository
+            .Setup(x => x.EmailExistsAsync(It.IsAny<string>()))
+            .ReturnsAsync(false);
+
+        this.mockUserRepository
+            .Setup(x => x.Update(It.IsAny<User>()))
+            .Verifiable();
+
+        this.mockUserRepository
+            .Setup(x => x.SaveChangesAsync())
+            .Returns(Task.CompletedTask);
+
+        // Act
+        var result = await this.sut.AdminUpdateUserAsync(
+            userId,
+            "newuser",
+            "new@example.com",
+            "NewPassword123");
+
+        // Assert
+        Assert.True(result);
+        Assert.Equal("newuser", existingUser.Username);
+        Assert.Equal("new@example.com", existingUser.Email);
+        Assert.NotEqual("NewPassword123", existingUser.Password); // Password should be hashed
+
+        this.mockUserRepository.Verify(x => x.Update(It.IsAny<User>()), Times.Once);
+        this.mockUserRepository.Verify(x => x.SaveChangesAsync(), Times.Once);
+    }
+
+    /// <summary>
+    /// Tests that AdminUpdateUserAsync throws when user not found.
+    /// </summary>
+    [Fact]
+    public async Task AdminUpdateUserAsync_WithNonExistentUser_ThrowsInvalidOperationException()
+    {
+        // Arrange
+        const int userId = 999;
+
+        this.mockUserRepository
+            .Setup(x => x.GetByIdAsync(userId))
+            .ReturnsAsync((User?)null);
+
+        // Act & Assert
+        await Assert.ThrowsAsync<InvalidOperationException>(
+            () => this.sut.AdminUpdateUserAsync(userId, "name", "email@example.com", "password"));
+    }
+
+    /// <summary>
+    /// Tests that AdminUpdateUserAsync throws when new email is already in use.
+    /// </summary>
+    [Fact]
+    public async Task AdminUpdateUserAsync_WithExistingEmail_ThrowsInvalidOperationException()
+    {
+        // Arrange
+        const int userId = 1;
+        var existingUser = new User
+        {
+            Id = userId,
+            Username = "testuser",
+            Email = "old@example.com",
+        };
+
+        this.mockUserRepository
+            .Setup(x => x.GetByIdAsync(userId))
+            .ReturnsAsync(existingUser);
+
+        this.mockUserRepository
+            .Setup(x => x.EmailExistsAsync("used@example.com"))
+            .ReturnsAsync(true);
+
+        // Act & Assert
+        var exception = await Assert.ThrowsAsync<InvalidOperationException>(
+            () => this.sut.AdminUpdateUserAsync(userId, null, "used@example.com", null));
+
+        Assert.Equal("Email is already in use by another account.", exception.Message);
+    }
+
+    /// <summary>
+    /// Tests that AdminUpdateUserAsync throws if new password is too short.
+    /// </summary>
+    [Fact]
+    public async Task AdminUpdateUserAsync_WithShortPassword_ThrowsArgumentException()
+    {
+        // Arrange
+        const int userId = 1;
+        var existingUser = new User
+        {
+            Id = userId,
+            Username = "user",
+            Email = "user@example.com",
+            Password = "old",
+        };
+
+        this.mockUserRepository
+            .Setup(x => x.GetByIdAsync(userId))
+            .ReturnsAsync(existingUser);
+
+        // Act & Assert
+        var ex = await Assert.ThrowsAsync<ArgumentException>(
+            () => this.sut.AdminUpdateUserAsync(userId, null, null, "123"));
+
+        Assert.Equal("Password must be at least 6 characters long.", ex.Message);
+    }
+
+    #endregion
+
+    #region BlockUserAsync Tests
+
+    /// <summary>
+    /// Tests successful blocking of a user.
+    /// Positive admin operation test.
+    /// </summary>
+    [Fact]
+    public async Task BlockUserAsync_WithValidUser_BlocksSuccessfully()
+    {
+        // Arrange
+        const int userId = 1;
+
+        this.mockUserRepository
+            .Setup(x => x.SetStatusAsync(userId, UserStatus.Blocked))
+            .ReturnsAsync(true);
+
+        // Act
+        var result = await this.sut.BlockUserAsync(userId);
+
+        // Assert
+        Assert.True(result);
+
+        this.mockUserRepository.Verify(
+            x => x.SetStatusAsync(userId, UserStatus.Blocked),
+            Times.Once);
+    }
+
+    /// <summary>
+    /// Tests failed attempt to block user (e.g., admin account).
+    /// </summary>
+    [Fact]
+    public async Task BlockUserAsync_WhenRepositoryReturnsFalse_LogsWarningAndReturnsFalse()
+    {
+        // Arrange
+        const int userId = 2;
+
+        this.mockUserRepository
+            .Setup(x => x.SetStatusAsync(userId, UserStatus.Blocked))
+            .ReturnsAsync(false);
+
+        // Act
+        var result = await this.sut.BlockUserAsync(userId);
+
+        // Assert
+        Assert.False(result);
+
+        this.mockUserRepository.Verify(
+            x => x.SetStatusAsync(userId, UserStatus.Blocked),
+            Times.Once);
+    }
+
+    #endregion
 }

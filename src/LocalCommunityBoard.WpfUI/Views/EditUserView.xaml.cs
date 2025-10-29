@@ -17,6 +17,7 @@ using LocalCommunityBoard.Domain.Entities;
 /// </summary>
 public partial class EditUserView : UserControl
 {
+    private const string ValidationErrorTitle = "Validation Error";
     private readonly User user;
     private readonly IUserService userService;
     private readonly Func<Task>? onSaveCallback;
@@ -35,6 +36,14 @@ public partial class EditUserView : UserControl
         this.onSaveCallback = onSaveCallback;
 
         this.LoadUserData();
+    }
+
+    private static void NavigateBack()
+    {
+        if (Application.Current.MainWindow is MainWindow mainWindow)
+        {
+            mainWindow.MainContent.Content = new AdminPanelView();
+        }
     }
 
     /// <summary>
@@ -62,7 +71,7 @@ public partial class EditUserView : UserControl
             {
                 MessageBox.Show(
                     "Username cannot be empty.",
-                    "Validation Error",
+                    ValidationErrorTitle,
                     MessageBoxButton.OK,
                     MessageBoxImage.Warning);
                 return;
@@ -73,28 +82,17 @@ public partial class EditUserView : UserControl
             {
                 MessageBox.Show(
                     "Email cannot be empty.",
-                    "Validation Error",
+                    ValidationErrorTitle,
                     MessageBoxButton.OK,
                     MessageBoxImage.Warning);
                 return;
             }
 
-            if (!email.Contains("@") || !email.Contains("."))
+            if (!email.Contains('@') || !email.Contains('.'))
             {
                 MessageBox.Show(
                     "Please enter a valid email address.",
-                    "Validation Error",
-                    MessageBoxButton.OK,
-                    MessageBoxImage.Warning);
-                return;
-            }
-
-            // Validate password if provided
-            if (!string.IsNullOrWhiteSpace(newPassword) && newPassword.Length < 6)
-            {
-                MessageBox.Show(
-                    "Password must be at least 6 characters long.",
-                    "Validation Error",
+                    ValidationErrorTitle,
                     MessageBoxButton.OK,
                     MessageBoxImage.Warning);
                 return;
@@ -103,23 +101,21 @@ public partial class EditUserView : UserControl
             // Store old values for display
             var oldUsername = this.user.Username;
             var oldEmail = this.user.Email;
-            var passwordChanged = false;
+            var passwordChanged = !string.IsNullOrWhiteSpace(newPassword);
 
-            // Update user
-            this.user.Username = username;
-            this.user.Email = email;
-
-            // Update password if provided
-            if (!string.IsNullOrWhiteSpace(newPassword))
-            {
-                this.user.Password = PasswordHasher.HashPassword(newPassword);
-                passwordChanged = true;
-            }
-
-            var success = await this.userService.UpdateAsync(this.user);
+            // Use service method for admin update
+            var success = await this.userService.AdminUpdateUserAsync(
+                this.user.Id,
+                username,
+                email,
+                string.IsNullOrWhiteSpace(newPassword) ? null : newPassword);
 
             if (success)
             {
+                // Update local user object for display
+                this.user.Username = username;
+                this.user.Email = email;
+
                 var message = $"User '{username}' updated successfully.\n\n" +
                               $"Username: {oldUsername} → {username}\n" +
                               $"Email: {oldEmail} → {email}\n";
@@ -142,7 +138,7 @@ public partial class EditUserView : UserControl
                 }
 
                 // Navigate back to admin panel
-                this.NavigateBack();
+                NavigateBack();
             }
             else
             {
@@ -153,11 +149,19 @@ public partial class EditUserView : UserControl
                     MessageBoxImage.Error);
             }
         }
+        catch (ArgumentException ex)
+        {
+            MessageBox.Show(
+                ex.Message,
+                ValidationErrorTitle,
+                MessageBoxButton.OK,
+                MessageBoxImage.Warning);
+        }
         catch (InvalidOperationException ex)
         {
             MessageBox.Show(
-                $"Validation error: {ex.Message}",
-                "Validation Error",
+                ex.Message,
+                "Error",
                 MessageBoxButton.OK,
                 MessageBoxImage.Warning);
         }
@@ -184,18 +188,7 @@ public partial class EditUserView : UserControl
 
         if (result == MessageBoxResult.Yes)
         {
-            this.NavigateBack();
-        }
-    }
-
-    /// <summary>
-    /// Navigates back to the admin panel.
-    /// </summary>
-    private void NavigateBack()
-    {
-        if (Application.Current.MainWindow is MainWindow mainWindow)
-        {
-            mainWindow.MainContent.Content = new AdminPanelView();
+            NavigateBack();
         }
     }
 }

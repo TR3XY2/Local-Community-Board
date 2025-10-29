@@ -172,6 +172,63 @@ namespace LocalCommunityBoard.Application.Services
             return all;
         }
 
+        /// <summary>
+        /// Allows an admin to update another user's information, including username, email, role, and password.
+        /// </summary>
+        public async Task<bool> AdminUpdateUserAsync(int userId, string? newUsername, string? newEmail, string? newPassword)
+        {
+            var user = await this.userRepository.GetByIdAsync(userId);
+            if (user == null)
+            {
+                throw new InvalidOperationException("User not found");
+            }
+
+            // Update username if provided
+            if (!string.IsNullOrWhiteSpace(newUsername) && newUsername != user.Username)
+            {
+                this.logger.LogInformation(
+                    "Admin updating username for user {UserId} from {OldUsername} to {NewUsername}",
+                    userId,
+                    user.Username,
+                    newUsername);
+                user.Username = newUsername;
+            }
+
+            // Update email if provided
+            if (!string.IsNullOrWhiteSpace(newEmail) && newEmail != user.Email)
+            {
+                if (await this.userRepository.EmailExistsAsync(newEmail))
+                {
+                    throw new InvalidOperationException("Email is already in use by another account.");
+                }
+
+                this.logger.LogInformation(
+                    "Admin updating email for user {UserId} from {OldEmail} to {NewEmail}",
+                    userId,
+                    user.Email,
+                    newEmail);
+                user.Email = newEmail;
+            }
+
+            // Update password if provided (admin can change without old password)
+            if (!string.IsNullOrWhiteSpace(newPassword))
+            {
+                if (newPassword.Length < 6)
+                {
+                    throw new ArgumentException("Password must be at least 6 characters long.");
+                }
+
+                user.Password = PasswordHasher.HashPassword(newPassword);
+                this.logger.LogInformation("Admin updated password for user {UserId}", userId);
+            }
+
+            this.userRepository.Update(user);
+            await this.userRepository.SaveChangesAsync();
+
+            this.logger.LogInformation("Admin successfully updated user {UserId}", userId);
+            return true;
+        }
+
         public async Task<bool> BlockUserAsync(int userId)
         {
             // SetStatusAsync already prevents blocking admins

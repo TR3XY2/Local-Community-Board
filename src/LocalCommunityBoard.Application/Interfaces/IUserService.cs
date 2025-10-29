@@ -24,5 +24,7 @@ public interface IUserService
 
     Task<IEnumerable<User>> GetAllUsersAsync();
 
+    Task<bool> AdminUpdateUserAsync(int userId, string? newUsername, string? newEmail, string? newPassword);
+
     Task<bool> BlockUserAsync(int userId);
 }
