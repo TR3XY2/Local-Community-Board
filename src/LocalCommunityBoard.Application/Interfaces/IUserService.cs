@@ -24,5 +24,7 @@ public interface IUserService
 
     Task<IEnumerable<User>> GetAllUsersAsync();
 
+    Task<bool> UnblockUserAsync(int userId);
+
     Task<bool> BlockUserAsync(int userId);
 }

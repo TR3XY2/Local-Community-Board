@@ -81,4 +81,49 @@ public partial class AdminPanelView : UserControl
             MessageBox.Show($"Помилка при блокуванні: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
         }
     }
+
+    private async void UnblockUser_Click(object sender, RoutedEventArgs e)
+    {
+        if (sender is not Button btn || btn.DataContext is not User user)
+        {
+            return;
+        }
+
+        var confirm = MessageBox.Show(
+            $"Unblock user '{user.Username}'?",
+            "Confirm unblock",
+            MessageBoxButton.YesNo,
+            MessageBoxImage.Question);
+
+        if (confirm != MessageBoxResult.Yes)
+        {
+            return;
+        }
+
+        try
+        {
+            var result = await this.userService.UnblockUserAsync(user.Id);
+            if (!result)
+            {
+                MessageBox.Show(
+                    "Не вдалось розблокувати користувача. Ймовірно користувач не існує.",
+                    "Error",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Warning);
+
+                return;
+            }
+
+            // оновлюємо таблицю після успішної зміни статусу
+            await this.LoadUsersAsync();
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show(
+                $"Помилка при розблокуванні: {ex.Message}",
+                "Error",
+                MessageBoxButton.OK,
+                MessageBoxImage.Error);
+        }
+    }
 }

@@ -3,6 +3,10 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              Background="#FFF8F8F8">
     <Grid Margin="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="417*"/>
+            <RowDefinition Height="16*"/>
+        </Grid.RowDefinitions>
         <StackPanel>
             <TextBlock Text="Admin Panel"
                        FontSize="24"
@@ -43,7 +47,32 @@
                                             </Style>
                                         </Button.Style>
                                     </Button>
-                                    <Button Content="Unblock" Margin="3" Width="70" IsEnabled="False"/>
+                                    <Button Content="Unblock"
+        Margin="3"
+        Width="70"
+        Click="UnblockUser_Click">
+                                        <Button.Style>
+                                            <Style TargetType="Button">
+                                                <Setter Property="IsEnabled" Value="False"/>
+                                                <Style.Triggers>
+
+                                                    <!-- Якщо юзер зараз Blocked -> дозволяємо розблок -->
+                                                    <DataTrigger Binding="{Binding Status}" Value="Blocked">
+                                                        <Setter Property="IsEnabled" Value="True"/>
+                                                    </DataTrigger>
+
+                                                    <!-- (опція) Якщо Role.Name == Admin -> не даємо ніякої возні
+                     Можна додати аналогічно до Block-кнопки:
+                <DataTrigger Binding="{Binding Role.Name}" Value="Admin">
+                    <Setter Property="IsEnabled" Value="False"/>
+                </DataTrigger>
+                -->
+
+                                                </Style.Triggers>
+                                            </Style>
+                                        </Button.Style>
+                                    </Button>
+
                                     <Button Content="Edit" Margin="3" Width="50" IsEnabled="True" Click="EditUser_Click"/>
                                 </StackPanel>
                             </DataTemplate>
