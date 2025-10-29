@@ -66,17 +66,18 @@ namespace LocalCommunityBoard.Application.Services
             if (user == null)
             {
                 this.logger.LogWarning("Login failed: user with email '{Email}' not found", email);
-                return null;
+                return null; // невірний email
             }
 
             var isValid = PasswordHasher.VerifyPassword(password, user.Password);
             if (!isValid)
             {
                 this.logger.LogWarning("Login failed: incorrect password for user '{Email}'", email);
-                return null;
+                return null; // неправильний пароль
             }
 
-            this.logger.LogInformation("User logged in successfully: {Email}", email);
+            // user повертається навіть якщо Status == Blocked
+            this.logger.LogInformation("User attempted login: {Email}, Status: {Status}", email, user.Status);
             return user;
         }
 
@@ -169,6 +170,22 @@ namespace LocalCommunityBoard.Application.Services
         {
             var all = await this.userRepository.GetAllAsync();
             return all;
+        }
+
+        public async Task<bool> BlockUserAsync(int userId)
+        {
+            // SetStatusAsync already prevents blocking admins
+            var result = await this.userRepository.SetStatusAsync(userId, UserStatus.Blocked);
+            if (result)
+            {
+                this.logger.LogInformation("User {UserId} blocked by admin.", userId);
+            }
+            else
+            {
+                this.logger.LogWarning("Failed to block user {UserId}. Possibly admin or not found.", userId);
+            }
+
+            return result;
         }
     }
 }

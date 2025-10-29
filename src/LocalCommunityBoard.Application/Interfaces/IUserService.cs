@@ -23,4 +23,6 @@ public interface IUserService
     Task<bool> ChangePasswordAsync(int userId, string oldPassword, string newPassword);
 
     Task<IEnumerable<User>> GetAllUsersAsync();
+
+    Task<bool> BlockUserAsync(int userId);
 }

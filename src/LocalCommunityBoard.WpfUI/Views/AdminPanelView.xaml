@@ -28,7 +28,21 @@
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
                                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                                    <Button Content="Block" Margin="3" Width="60" IsEnabled="False"/>
+                                    <Button Content="Block" Margin="3" Width="60" Click="BlockUser_Click">
+                                        <Button.Style>
+                                            <Style TargetType="Button">
+                                                <Setter Property="IsEnabled" Value="False"/>
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding Role.Name}" Value="Admin">
+                                                        <Setter Property="IsEnabled" Value="False"/>
+                                                    </DataTrigger>
+                                                    <DataTrigger Binding="{Binding Status}" Value="Active">
+                                                        <Setter Property="IsEnabled" Value="True"/>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </Button.Style>
+                                    </Button>
                                     <Button Content="Unblock" Margin="3" Width="70" IsEnabled="False"/>
                                     <Button Content="Edit" Margin="3" Width="50" IsEnabled="True" Click="EditUser_Click"/>
                                 </StackPanel>

@@ -5,6 +5,7 @@
 namespace LocalCommunityBoard.Domain.Interfaces;
 
 using LocalCommunityBoard.Domain.Entities;
+using LocalCommunityBoard.Domain.Enums;
 
 /// <summary>
 /// Interface for user-related data access operations.
@@ -18,4 +19,6 @@ public interface IUserRepository : IRepository<User>
     Task<bool> EmailExistsAsync(string email);
 
     Task<bool> UsernameExistsAsync(string username);
+
+    Task<bool> SetStatusAsync(int userId, UserStatus newStatus);
 }

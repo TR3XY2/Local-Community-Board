@@ -52,4 +52,33 @@ public partial class AdminPanelView : UserControl
             mainWindow.MainContent.Content = editView;
         }
     }
+
+    private async void BlockUser_Click(object sender, RoutedEventArgs e)
+    {
+        if (sender is not Button btn || btn.DataContext is not User user)
+        {
+            return;
+        }
+
+        var confirm = MessageBox.Show($"Block user '{user.Username}'?", "Confirm block", MessageBoxButton.YesNo, MessageBoxImage.Question);
+        if (confirm != MessageBoxResult.Yes)
+        {
+            return;
+        }
+
+        try
+        {
+            var result = await this.userService.BlockUserAsync(user.Id);
+            if (!result)
+            {
+                MessageBox.Show("Не вдалося заблокувати користувача. Можливо це адмін або користувача не існує.", "Error", MessageBoxButton.OK, MessageBoxImage.Warning);
+            }
+
+            await this.LoadUsersAsync();
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show($"Помилка при блокуванні: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+        }
+    }
 }

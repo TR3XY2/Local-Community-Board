@@ -7,6 +7,7 @@ namespace LocalCommunityBoard.WpfUI.Views;
 using System.Windows;
 using LocalCommunityBoard.Application.Interfaces;
 using LocalCommunityBoard.Application.Services;
+using LocalCommunityBoard.Domain.Enums;
 using Microsoft.Extensions.DependencyInjection;
 
 /// <summary>
@@ -33,16 +34,22 @@ public partial class LoginWindow : Window
         var password = this.PasswordBox.Password;
 
         var user = await this.userService.LoginAsync(email, password);
-        if (user != null)
-        {
-            this.session.Login(user);
-            MessageBox.Show($"Welcome, {user.Username}!", "Login Successful", MessageBoxButton.OK, MessageBoxImage.Information);
-            this.DialogResult = true;
-            this.Close();
-        }
-        else
+        if (user == null)
         {
             MessageBox.Show("Invalid email or password.", "Login Failed", MessageBoxButton.OK, MessageBoxImage.Error);
+            return;
         }
+
+        if (user.Status == UserStatus.Blocked)
+        {
+            MessageBox.Show("Your account is blocked.", "Login Failed", MessageBoxButton.OK, MessageBoxImage.Error);
+            return;
+        }
+
+        // Успішний вхід
+        this.session.Login(user);
+        MessageBox.Show($"Welcome, {user.Username}!", "Login Successful", MessageBoxButton.OK, MessageBoxImage.Information);
+        this.DialogResult = true;
+        this.Close();
     }
 }

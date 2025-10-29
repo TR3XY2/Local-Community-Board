@@ -5,6 +5,7 @@
 namespace LocalCommunityBoard.Infrastructure.Repositories;
 
 using LocalCommunityBoard.Domain.Entities;
+using LocalCommunityBoard.Domain.Enums;
 using LocalCommunityBoard.Domain.Interfaces;
 using LocalCommunityBoard.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
@@ -36,4 +37,18 @@ public class UserRepository : Repository<User>, IUserRepository
 
     public async Task<bool> UsernameExistsAsync(string username)
         => await this.DbSet.AnyAsync(u => u.Username == username);
+
+    public async Task<bool> SetStatusAsync(int userId, UserStatus newStatus)
+    {
+        var user = await this.DbSet.FirstOrDefaultAsync(u => u.Id == userId);
+        if (user == null)
+        {
+            return false;
+        }
+
+        user.Status = newStatus;
+
+        await this.Context.SaveChangesAsync();
+        return true;
+    }
 }
