@@ -26,5 +26,7 @@ public interface IUserService
 
     Task<bool> AdminUpdateUserAsync(int userId, string? newUsername, string? newEmail, string? newPassword);
 
+    Task<bool> UnblockUserAsync(int userId);
+
     Task<bool> BlockUserAsync(int userId);
 }
