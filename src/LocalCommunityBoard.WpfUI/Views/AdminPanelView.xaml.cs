@@ -18,6 +18,7 @@ using Microsoft.Extensions.DependencyInjection;
 /// instantiated.</remarks>
 public partial class AdminPanelView : UserControl
 {
+    private const string ErrorText = "Error";
     private readonly IUserService userService;
 
     public AdminPanelView()
@@ -71,14 +72,59 @@ public partial class AdminPanelView : UserControl
             var result = await this.userService.BlockUserAsync(user.Id);
             if (!result)
             {
-                MessageBox.Show("Unable to block user. This may be an administrator or the user does not exist.", "Error", MessageBoxButton.OK, MessageBoxImage.Warning);
+                MessageBox.Show("Unable to block user. This may be an administrator or the user does not exist.", ErrorText, MessageBoxButton.OK, MessageBoxImage.Warning);
             }
 
             await this.LoadUsersAsync();
         }
         catch (Exception ex)
         {
-            MessageBox.Show($"Error during blocking: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            MessageBox.Show($"Error during blocking: {ex.Message}", ErrorText, MessageBoxButton.OK, MessageBoxImage.Error);
+        }
+    }
+
+    private async void UnblockUser_Click(object sender, RoutedEventArgs e)
+    {
+        if (sender is not Button btn || btn.DataContext is not User user)
+        {
+            return;
+        }
+
+        var confirm = MessageBox.Show(
+            $"Unblock user '{user.Username}'?",
+            "Confirm unblock",
+            MessageBoxButton.YesNo,
+            MessageBoxImage.Question);
+
+        if (confirm != MessageBoxResult.Yes)
+        {
+            return;
+        }
+
+        try
+        {
+            var result = await this.userService.UnblockUserAsync(user.Id);
+            if (!result)
+            {
+                MessageBox.Show(
+                    "Не вдалось розблокувати користувача. Ймовірно користувач не існує.",
+                    ErrorText,
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Warning);
+
+                return;
+            }
+
+            // оновлюємо таблицю після успішної зміни статусу
+            await this.LoadUsersAsync();
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show(
+                $"Помилка при розблокуванні: {ex.Message}",
+                ErrorText,
+                MessageBoxButton.OK,
+                MessageBoxImage.Error);
         }
     }
 }

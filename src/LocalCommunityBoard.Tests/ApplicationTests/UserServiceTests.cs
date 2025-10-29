@@ -1195,4 +1195,103 @@ public class UserServiceTests
     }
 
     #endregion
+
+    #region UnblockUserAsync Tests
+
+    /// <summary>
+    /// Tests successful user unblocking — repository returns true.
+    /// Positive test case.
+    /// </summary>
+    [Fact]
+    public async Task UnblockUserAsync_WithValidUserId_SetsStatusToActiveAndReturnsTrue()
+    {
+        // Arrange
+        const int userId = 1;
+
+        this.mockUserRepository
+            .Setup(x => x.SetStatusAsync(userId, UserStatus.Active))
+            .ReturnsAsync(true);
+
+        // Act
+        var result = await this.sut.UnblockUserAsync(userId);
+
+        // Assert
+        Assert.True(result);
+
+        this.mockUserRepository.Verify(
+            x => x.SetStatusAsync(userId, UserStatus.Active),
+            Times.Once);
+
+        // Verify that logger logs success
+        this.mockLogger.Verify(
+            x => x.Log(
+                LogLevel.Information,
+                It.IsAny<EventId>(),
+                It.Is<It.IsAnyType>((v, _) => v.ToString()!.Contains("unblocked by admin")),
+                null,
+                It.IsAny<Func<It.IsAnyType, Exception?, string>>()),
+            Times.Once);
+    }
+
+    /// <summary>
+    /// Tests unsuccessful user unblocking — repository returns false.
+    /// Negative test case.
+    /// </summary>
+    [Fact]
+    public async Task UnblockUserAsync_WhenRepositoryReturnsFalse_LogsWarningAndReturnsFalse()
+    {
+        // Arrange
+        const int userId = 999;
+
+        this.mockUserRepository
+            .Setup(x => x.SetStatusAsync(userId, UserStatus.Active))
+            .ReturnsAsync(false);
+
+        // Act
+        var result = await this.sut.UnblockUserAsync(userId);
+
+        // Assert
+        Assert.False(result);
+
+        this.mockUserRepository.Verify(
+            x => x.SetStatusAsync(userId, UserStatus.Active),
+            Times.Once);
+
+        // Verify that logger logs warning
+        this.mockLogger.Verify(
+            x => x.Log(
+                LogLevel.Warning,
+                It.IsAny<EventId>(),
+                It.Is<It.IsAnyType>((v, _) => v.ToString()!.Contains("Failed to unblock user")),
+                null,
+                It.IsAny<Func<It.IsAnyType, Exception?, string>>()),
+            Times.Once);
+    }
+
+    /// <summary>
+    /// Tests boundary values for user IDs during unblock operation.
+    /// Ensures repository is always called.
+    /// </summary>
+    [Theory]
+    [InlineData(1)]
+    [InlineData(0)]
+    [InlineData(-5)]
+    [InlineData(int.MaxValue)]
+    public async Task UnblockUserAsync_WithVariousUserIds_CallsRepository(int userId)
+    {
+        // Arrange
+        this.mockUserRepository
+            .Setup(x => x.SetStatusAsync(userId, UserStatus.Active))
+            .ReturnsAsync(true);
+
+        // Act
+        await this.sut.UnblockUserAsync(userId);
+
+        // Assert
+        this.mockUserRepository.Verify(
+            x => x.SetStatusAsync(userId, UserStatus.Active),
+            Times.Once);
+    }
+
+    #endregion
 }

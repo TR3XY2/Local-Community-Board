@@ -244,5 +244,22 @@ namespace LocalCommunityBoard.Application.Services
 
             return result;
         }
+
+        public async Task<bool> UnblockUserAsync(int userId)
+        {
+            // розблок = повернути статус Active
+            var result = await this.userRepository.SetStatusAsync(userId, UserStatus.Active);
+
+            if (result)
+            {
+                this.logger.LogInformation("User {UserId} unblocked by admin.", userId);
+            }
+            else
+            {
+                this.logger.LogWarning("Failed to unblock user {UserId}. Possibly not found.", userId);
+            }
+
+            return result;
+        }
     }
 }
