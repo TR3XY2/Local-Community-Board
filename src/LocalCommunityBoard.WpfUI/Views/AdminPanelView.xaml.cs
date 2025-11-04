@@ -35,6 +35,7 @@ public partial class AdminPanelView : UserControl
     {
         await this.LoadUsersAsync();
         await this.LoadReportedAnnouncementsAsync();
+        await this.LoadReportedCommentsAsync();
     }
 
     private async Task LoadUsersAsync()
@@ -52,6 +53,17 @@ public partial class AdminPanelView : UserControl
             .ToList();
 
         this.ReportedAnnouncementsGrid.ItemsSource = announcementReports;
+    }
+
+    private async Task LoadReportedCommentsAsync()
+    {
+        var reports = await this.reportService.GetReportsByStatusAsync(ReportStatus.Open);
+        var commentReports = reports
+            .Where(r => r.TargetType == TargetType.Comment)
+            .OrderByDescending(r => r.CreatedAt)
+            .ToList();
+
+        this.ReportedCommentsGrid.ItemsSource = commentReports;
     }
 
     private void EditUser_Click(object sender, RoutedEventArgs e)
@@ -156,5 +168,15 @@ public partial class AdminPanelView : UserControl
     private void DeleteAnnouncement_Click(object sender, RoutedEventArgs e)
     {
         MessageBox.Show("Delete announcement feature not implemented yet.", "Info", MessageBoxButton.OK, MessageBoxImage.Information);
+    }
+
+    private void EditComment_Click(object sender, RoutedEventArgs e)
+    {
+        MessageBox.Show("Edit comment feature not implemented yet.", "Info", MessageBoxButton.OK, MessageBoxImage.Information);
+    }
+
+    private void DeleteComment_Click(object sender, RoutedEventArgs e)
+    {
+        MessageBox.Show("Delete comment feature not implemented yet.", "Info", MessageBoxButton.OK, MessageBoxImage.Information);
     }
 }
