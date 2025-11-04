@@ -11,18 +11,12 @@
                        Margin="0,0,0,20"/>
 
             <!-- Users -->
-            <TextBlock Text="List of Users:"
-                       FontSize="16"
-                       FontWeight="SemiBold"
-                       Margin="0,0,0,10"/>
-
             <DataGrid x:Name="UsersGrid"
                       AutoGenerateColumns="False"
                       CanUserAddRows="False"
                       IsReadOnly="True"
                       HeadersVisibility="Column"
-                      Height="350"
-                      Margin="0,0,0,20">
+                      Height="350">
                 <DataGrid.Columns>
                     <DataGridTextColumn Header="ID" Binding="{Binding Id}" Width="Auto"/>
                     <DataGridTextColumn Header="Username" Binding="{Binding Username}" Width="*"/>
@@ -33,9 +27,38 @@
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
                                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                                    <Button Content="Block" Margin="3" Width="60" Click="BlockUser_Click"/>
-                                    <Button Content="Unblock" Margin="3" Width="70" Click="UnblockUser_Click"/>
-                                    <Button Content="Edit" Margin="3" Width="50" Click="EditUser_Click"/>
+                                    <Button Content="Block" Margin="3" Width="60" Click="BlockUser_Click">
+                                        <Button.Style>
+                                            <Style TargetType="Button">
+                                                <Setter Property="IsEnabled" Value="False"/>
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding Role.Name}" Value="Admin">
+                                                        <Setter Property="IsEnabled" Value="False"/>
+                                                    </DataTrigger>
+                                                    <DataTrigger Binding="{Binding Status}" Value="Active">
+                                                        <Setter Property="IsEnabled" Value="True"/>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </Button.Style>
+                                    </Button>
+                                    <Button Content="Unblock"
+                                            Margin="3"
+                                            Width="70"
+                                            Click="UnblockUser_Click">
+                                        <Button.Style>
+                                            <Style TargetType="Button">
+                                                <Setter Property="IsEnabled" Value="False"/>
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding Status}" Value="Blocked">
+                                                        <Setter Property="IsEnabled" Value="True"/>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </Button.Style>
+                                    </Button>
+
+                                    <Button Content="Edit" Margin="3" Width="50" IsEnabled="True" Click="EditUser_Click"/>
                                 </StackPanel>
                             </DataTemplate>
                         </DataGridTemplateColumn.CellTemplate>
