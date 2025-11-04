@@ -2,26 +2,27 @@
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              Background="#FFF8F8F8">
-    <Grid Margin="20">
-        <Grid.RowDefinitions>
-            <RowDefinition Height="417*"/>
-            <RowDefinition Height="16*"/>
-        </Grid.RowDefinitions>
-        <StackPanel>
+    <ScrollViewer VerticalScrollBarVisibility="Auto">
+        <StackPanel Margin="20">
+            <!-- Header -->
             <TextBlock Text="Admin Panel"
                        FontSize="24"
                        FontWeight="Bold"
                        Margin="0,0,0,20"/>
 
-            <TextBlock Text="List of Users:" FontSize="16" FontWeight="SemiBold" Margin="0,0,0,10"/>
+            <!-- Users -->
+            <TextBlock Text="List of Users:"
+                       FontSize="16"
+                       FontWeight="SemiBold"
+                       Margin="0,0,0,10"/>
 
-            <!-- Users Table -->
             <DataGrid x:Name="UsersGrid"
                       AutoGenerateColumns="False"
                       CanUserAddRows="False"
                       IsReadOnly="True"
                       HeadersVisibility="Column"
-                      Height="350">
+                      Height="350"
+                      Margin="0,0,0,20">
                 <DataGrid.Columns>
                     <DataGridTextColumn Header="ID" Binding="{Binding Id}" Width="Auto"/>
                     <DataGridTextColumn Header="Username" Binding="{Binding Username}" Width="*"/>
@@ -32,48 +33,42 @@
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
                                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                                    <Button Content="Block" Margin="3" Width="60" Click="BlockUser_Click">
-                                        <Button.Style>
-                                            <Style TargetType="Button">
-                                                <Setter Property="IsEnabled" Value="False"/>
-                                                <Style.Triggers>
-                                                    <DataTrigger Binding="{Binding Role.Name}" Value="Admin">
-                                                        <Setter Property="IsEnabled" Value="False"/>
-                                                    </DataTrigger>
-                                                    <DataTrigger Binding="{Binding Status}" Value="Active">
-                                                        <Setter Property="IsEnabled" Value="True"/>
-                                                    </DataTrigger>
-                                                </Style.Triggers>
-                                            </Style>
-                                        </Button.Style>
-                                    </Button>
-                                    <Button Content="Unblock"
-        Margin="3"
-        Width="70"
-        Click="UnblockUser_Click">
-                                        <Button.Style>
-                                            <Style TargetType="Button">
-                                                <Setter Property="IsEnabled" Value="False"/>
-                                                <Style.Triggers>
+                                    <Button Content="Block" Margin="3" Width="60" Click="BlockUser_Click"/>
+                                    <Button Content="Unblock" Margin="3" Width="70" Click="UnblockUser_Click"/>
+                                    <Button Content="Edit" Margin="3" Width="50" Click="EditUser_Click"/>
+                                </StackPanel>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+                </DataGrid.Columns>
+            </DataGrid>
 
-                                                    <!-- Якщо юзер зараз Blocked -> дозволяємо розблок -->
-                                                    <DataTrigger Binding="{Binding Status}" Value="Blocked">
-                                                        <Setter Property="IsEnabled" Value="True"/>
-                                                    </DataTrigger>
+            <!-- Reported Announcements -->
+            <TextBlock Text="Reported Announcements:"
+                       FontSize="16"
+                       FontWeight="SemiBold"
+                       Margin="0,10,0,10"/>
 
-                                                    <!-- (опція) Якщо Role.Name == Admin -> не даємо ніякої возні
-                     Можна додати аналогічно до Block-кнопки:
-                <DataTrigger Binding="{Binding Role.Name}" Value="Admin">
-                    <Setter Property="IsEnabled" Value="False"/>
-                </DataTrigger>
-                -->
+            <DataGrid x:Name="ReportedAnnouncementsGrid"
+                      AutoGenerateColumns="False"
+                      CanUserAddRows="False"
+                      IsReadOnly="True"
+                      HeadersVisibility="Column"
+                      Height="350">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="Report ID" Binding="{Binding Id}" Width="80"/>
+                    <DataGridTextColumn Header="Post ID" Binding="{Binding TargetId}" Width="80"/>
+                    <DataGridTextColumn Header="Reporter ID" Binding="{Binding ReporterId}" Width="100"/>
+                    <DataGridTextColumn Header="Reason" Binding="{Binding Reason}" Width="*"/>
+                    <DataGridTextColumn Header="Status" Binding="{Binding Status}" Width="100"/>
+                    <DataGridTextColumn Header="Created At" Binding="{Binding CreatedAt}" Width="150"/>
 
-                                                </Style.Triggers>
-                                            </Style>
-                                        </Button.Style>
-                                    </Button>
-
-                                    <Button Content="Edit" Margin="3" Width="50" IsEnabled="True" Click="EditUser_Click"/>
+                    <DataGridTemplateColumn Header="Actions" Width="150">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                    <Button Content="Edit" Margin="3" Width="60" Click="EditAnnouncement_Click"/>
+                                    <Button Content="Delete" Margin="3" Width="70" Click="DeleteAnnouncement_Click"/>
                                 </StackPanel>
                             </DataTemplate>
                         </DataGridTemplateColumn.CellTemplate>
@@ -81,5 +76,5 @@
                 </DataGrid.Columns>
             </DataGrid>
         </StackPanel>
-    </Grid>
+    </ScrollViewer>
 </UserControl>

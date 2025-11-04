@@ -8,6 +8,7 @@ using System.Windows;
 using System.Windows.Controls;
 using LocalCommunityBoard.Application.Interfaces;
 using LocalCommunityBoard.Domain.Entities;
+using LocalCommunityBoard.Domain.Enums;
 using Microsoft.Extensions.DependencyInjection;
 
 /// <summary>
@@ -20,18 +21,37 @@ public partial class AdminPanelView : UserControl
 {
     private const string ErrorText = "Error";
     private readonly IUserService userService;
+    private readonly IReportService reportService;
 
     public AdminPanelView()
     {
         this.InitializeComponent();
         this.userService = App.Services.GetRequiredService<IUserService>();
-        _ = this.LoadUsersAsync();
+        this.reportService = App.Services.GetRequiredService<IReportService>();
+        _ = this.LoadDataAsync();
+    }
+
+    private async Task LoadDataAsync()
+    {
+        await this.LoadUsersAsync();
+        await this.LoadReportedAnnouncementsAsync();
     }
 
     private async Task LoadUsersAsync()
     {
         var users = await this.userService.GetAllUsersAsync();
         this.UsersGrid.ItemsSource = users;
+    }
+
+    private async Task LoadReportedAnnouncementsAsync()
+    {
+        var reports = await this.reportService.GetReportsByStatusAsync(ReportStatus.Open);
+        var announcementReports = reports
+            .Where(r => r.TargetType == TargetType.Announcement)
+            .OrderByDescending(r => r.CreatedAt)
+            .ToList();
+
+        this.ReportedAnnouncementsGrid.ItemsSource = announcementReports;
     }
 
     private void EditUser_Click(object sender, RoutedEventArgs e)
@@ -126,5 +146,15 @@ public partial class AdminPanelView : UserControl
                 MessageBoxButton.OK,
                 MessageBoxImage.Error);
         }
+    }
+
+    private void EditAnnouncement_Click(object sender, RoutedEventArgs e)
+    {
+        MessageBox.Show("Edit announcement feature not implemented yet.", "Info", MessageBoxButton.OK, MessageBoxImage.Information);
+    }
+
+    private void DeleteAnnouncement_Click(object sender, RoutedEventArgs e)
+    {
+        MessageBox.Show("Delete announcement feature not implemented yet.", "Info", MessageBoxButton.OK, MessageBoxImage.Information);
     }
 }
