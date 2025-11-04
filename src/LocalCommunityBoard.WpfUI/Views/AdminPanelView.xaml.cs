@@ -175,8 +175,68 @@ public partial class AdminPanelView : UserControl
         MessageBox.Show("Edit comment feature not implemented yet.", "Info", MessageBoxButton.OK, MessageBoxImage.Information);
     }
 
-    private void DeleteComment_Click(object sender, RoutedEventArgs e)
+    private async void DeleteComment_Click(object sender, RoutedEventArgs e)
     {
-        MessageBox.Show("Delete comment feature not implemented yet.", "Info", MessageBoxButton.OK, MessageBoxImage.Information);
+        if (sender is not Button btn || btn.DataContext is not Report report)
+        {
+            return;
+        }
+
+        if (report.TargetType != TargetType.Comment)
+        {
+            return;
+        }
+
+        var confirm = MessageBox.Show(
+            $"Delete comment (ID={report.TargetId}) for report (ID={report.Id})?",
+            "Confirm delete",
+            MessageBoxButton.YesNo,
+            MessageBoxImage.Warning);
+
+        if (confirm != MessageBoxResult.Yes)
+        {
+            return;
+        }
+
+        btn.IsEnabled = false;
+        try
+        {
+            var deleted = await this.reportService.DeleteCommentByReportAsync(report.Id);
+            if (!deleted)
+            {
+                MessageBox.Show(
+                    "Comment was not deleted (it may already be removed).",
+                    "Info",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Information);
+            }
+            else
+            {
+                // Mark the report as closed to reflect that action was taken.
+                try
+                {
+                    await this.reportService.UpdateReportStatusAsync(report.Id, ReportStatus.Closed);
+                }
+                catch
+                {
+                    // Non-fatal: if updating the report status fails, continue to refresh UI.
+                }
+            }
+
+            // Refresh the comments reports grid (fix: was previously refreshing announcements).
+            await this.LoadReportedCommentsAsync();
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show(
+                $"Error while deleting comment: {ex.Message}",
+                ErrorText,
+                MessageBoxButton.OK,
+                MessageBoxImage.Error);
+        }
+        finally
+        {
+            btn.IsEnabled = true;
+        }
     }
 }

@@ -44,5 +44,7 @@ public interface IReportService
     /// <returns>True if successful; otherwise false.</returns>
     Task<bool> UpdateReportStatusAsync(int reportId, ReportStatus status);
 
+    Task<bool> DeleteCommentByReportAsync(int reportId);
+
     Task<Report> ReportAnnouncementAsync(int reporterId, int postId, string reason);
 }

@@ -32,6 +32,49 @@ public class ReportService : IReportService
         this.announcementRepository = announcementRepository;
     }
 
+    public async Task<bool> DeleteCommentByReportAsync(int reportId)
+    {
+        var report = await this.reportRepository.GetByIdAsync(reportId);
+        if (report is null)
+        {
+            this.logger.LogWarning("DeleteCommentByReportAsync: report {ReportId} not found", reportId);
+            return false;
+        }
+
+        if (report.TargetType != TargetType.Comment)
+        {
+            this.logger.LogWarning("DeleteCommentByReportAsync: report {ReportId} is not for a Comment", reportId);
+            return false;
+        }
+
+        var commentId = report.TargetId;
+
+        var comment = await this.commentRepository.GetByIdAsync(commentId);
+        if (comment is null)
+        {
+            this.logger.LogWarning("DeleteCommentByReportAsync: comment {CommentId} not found", commentId);
+            this.reportRepository.Delete(report);
+            await this.reportRepository.SaveChangesAsync();
+            return false;
+        }
+
+        var relatedReports = await this.reportRepository.GetByTargetAsync(TargetType.Comment, commentId);
+        foreach (var r in relatedReports)
+        {
+            this.reportRepository.Delete(r);
+        }
+
+        this.commentRepository.Delete(comment);
+
+        await this.reportRepository.SaveChangesAsync();
+        await this.commentRepository.SaveChangesAsync();
+
+        this.logger.LogInformation(
+            "DeleteCommentByReportAsync: comment {CommentId} deleted by report {ReportId}", commentId, reportId);
+
+        return true;
+    }
+
     /// <inheritdoc/>
     public async Task<Report> ReportCommentAsync(int reporterId, int commentId, string reason)
     {
