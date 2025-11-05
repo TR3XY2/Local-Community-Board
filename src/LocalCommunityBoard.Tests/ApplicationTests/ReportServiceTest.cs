@@ -534,4 +534,320 @@ public class ReportServiceTests
         Assert.InRange(capturedReport.CreatedAt, beforeCall, afterCall);
         Assert.Equal(DateTimeKind.Utc, capturedReport.CreatedAt.Kind);
     }
+
+    [Fact]
+    public async Task DeleteCommentByReportAsync_ReturnsFalse_WhenReportNotFound()
+    {
+        // Arrange
+        const int reportId = 999;
+        mockReportRepository
+            .Setup(r => r.GetByIdAsync(reportId))
+            .ReturnsAsync((Report?)null);
+
+        // Act
+        bool result = await reportService.DeleteCommentByReportAsync(reportId);
+
+        // Assert
+        Assert.False(result);
+        mockLogger.Verify(
+            l => l.Log(
+                LogLevel.Warning,
+                It.IsAny<EventId>(),
+                It.Is<It.IsAnyType>((v, t) => v.ToString()!.Contains($"report {reportId} not found")),
+                null,
+                It.IsAny<Func<It.IsAnyType, Exception?, string>>()),
+            Times.Once);
+
+        mockReportRepository.Verify(r => r.Delete(It.IsAny<Report>()), Times.Never);
+        mockCommentRepository.Verify(r => r.Delete(It.IsAny<Comment>()), Times.Never);
+        mockReportRepository.Verify(r => r.SaveChangesAsync(), Times.Never);
+        mockCommentRepository.Verify(r => r.SaveChangesAsync(), Times.Never);
+    }
+
+    [Fact]
+    public async Task DeleteCommentByReportAsync_ReturnsFalse_WhenReportIsNotForComment()
+    {
+        // Arrange
+        const int reportId = 1;
+        var report = new Report { Id = reportId, TargetType = TargetType.Announcement, TargetId = 10 };
+        mockReportRepository
+            .Setup(r => r.GetByIdAsync(reportId))
+            .ReturnsAsync(report);
+
+        // Act
+        bool result = await reportService.DeleteCommentByReportAsync(reportId);
+
+        // Assert
+        Assert.False(result);
+        mockLogger.Verify(
+            l => l.Log(
+                LogLevel.Warning,
+                It.IsAny<EventId>(),
+                It.Is<It.IsAnyType>((v, t) => v.ToString()!.Contains($"report {reportId} is not for a Comment")),
+                null,
+                It.IsAny<Func<It.IsAnyType, Exception?, string>>()),
+            Times.Once);
+
+        mockReportRepository.Verify(r => r.Delete(It.IsAny<Report>()), Times.Never);
+        mockCommentRepository.Verify(r => r.Delete(It.IsAny<Comment>()), Times.Never);
+        mockReportRepository.Verify(r => r.SaveChangesAsync(), Times.Never);
+        mockCommentRepository.Verify(r => r.SaveChangesAsync(), Times.Never);
+    }
+
+    [Fact]
+    public async Task DeleteCommentByReportAsync_DeletesReportOnly_WhenCommentNotFound()
+    {
+        // Arrange
+        const int reportId = 1;
+        const int commentId = 5;
+        var report = new Report { Id = reportId, TargetType = TargetType.Comment, TargetId = commentId };
+        Report? capturedReport = null;
+
+        mockReportRepository
+            .Setup(r => r.GetByIdAsync(reportId))
+            .ReturnsAsync(report);
+        mockCommentRepository
+            .Setup(r => r.GetByIdAsync(commentId))
+            .ReturnsAsync((Comment?)null);
+        mockReportRepository
+            .Setup(r => r.Delete(It.IsAny<Report>()))
+            .Callback<Report>(r => capturedReport = r)
+            .Verifiable();
+        mockReportRepository
+            .Setup(r => r.SaveChangesAsync())
+            .Returns(Task.CompletedTask);
+
+        // Act
+        bool result = await reportService.DeleteCommentByReportAsync(reportId);
+
+        // Assert
+        Assert.False(result);
+        mockLogger.Verify(
+            l => l.Log(
+                LogLevel.Warning,
+                It.IsAny<EventId>(),
+                It.Is<It.IsAnyType>((v, t) => v.ToString()!.Contains($"comment {commentId} not found")),
+                null,
+                It.IsAny<Func<It.IsAnyType, Exception?, string>>()),
+            Times.Once);
+
+        mockReportRepository.Verify(r => r.Delete(report), Times.Once);
+        mockReportRepository.Verify(r => r.SaveChangesAsync(), Times.Once);
+        mockCommentRepository.Verify(r => r.Delete(It.IsAny<Comment>()), Times.Never);
+        mockCommentRepository.Verify(r => r.SaveChangesAsync(), Times.Never);
+    }
+
+    [Fact]
+    public async Task DeleteCommentByReportAsync_DeletesCommentAndAllRelatedReports_WhenValid()
+    {
+        // Arrange
+        const int reportId = 1;
+        const int commentId = 10;
+        var triggeringReport = new Report { Id = reportId, TargetType = TargetType.Comment, TargetId = commentId };
+        var relatedReports = new List<Report>
+        {
+            new Report { Id = 2, TargetType = TargetType.Comment, TargetId = commentId },
+            new Report { Id = 3, TargetType = TargetType.Comment, TargetId = commentId }
+        };
+        var comment = new Comment { Id = commentId, UserId = 4, Body = "offending comment" };
+
+        mockReportRepository
+            .Setup(r => r.GetByIdAsync(reportId))
+            .ReturnsAsync(triggeringReport);
+        mockCommentRepository
+            .Setup(r => r.GetByIdAsync(commentId))
+            .ReturnsAsync(comment);
+        mockReportRepository
+            .Setup(r => r.GetByTargetAsync(TargetType.Comment, commentId))
+            .ReturnsAsync(relatedReports);
+        mockReportRepository
+            .Setup(r => r.Delete(It.IsAny<Report>()))
+            .Verifiable();
+        mockCommentRepository
+            .Setup(r => r.Delete(It.IsAny<Comment>()))
+            .Verifiable();
+        mockReportRepository
+            .Setup(r => r.SaveChangesAsync())
+            .Returns(Task.CompletedTask);
+        mockCommentRepository
+            .Setup(r => r.SaveChangesAsync())
+            .Returns(Task.CompletedTask);
+
+        // Act
+        bool result = await reportService.DeleteCommentByReportAsync(reportId);
+
+        // Assert
+        Assert.True(result);
+        mockLogger.Verify(
+            l => l.Log(
+                LogLevel.Information,
+                It.IsAny<EventId>(),
+                It.Is<It.IsAnyType>((v, t) => v.ToString()!
+                    .Contains($"comment {commentId} deleted by report {reportId}")),
+                null,
+                It.IsAny<Func<It.IsAnyType, Exception?, string>>()),
+            Times.Once);
+
+        // All reports for the comment (including the triggering one) must be deleted
+        mockReportRepository.Verify(r => r.Delete(It.IsAny<Report>()), Times.Exactly(relatedReports.Count));
+        mockCommentRepository.Verify(r => r.Delete(comment), Times.Once);
+        mockReportRepository.Verify(r => r.SaveChangesAsync(), Times.Once);
+        mockCommentRepository.Verify(r => r.SaveChangesAsync(), Times.Once);
+    }
+
+    [Fact]
+    public async Task DeleteAnnouncementByReportAsync_ReturnsFalse_WhenReportNotFound()
+    {
+        // Arrange
+        const int reportId = 999;
+        mockReportRepository
+            .Setup(r => r.GetByIdAsync(reportId))
+            .ReturnsAsync((Report?)null);
+
+        // Act
+        bool result = await reportService.DeleteAnnouncementByReportAsync(reportId);
+
+        // Assert
+        Assert.False(result);
+        mockLogger.Verify(
+            l => l.Log(
+                LogLevel.Warning,
+                It.IsAny<EventId>(),
+                It.Is<It.IsAnyType>((v, t) => v.ToString()!.Contains($"report {reportId} not found")),
+                null,
+                It.IsAny<Func<It.IsAnyType, Exception?, string>>()),
+            Times.Once);
+
+        mockReportRepository.Verify(r => r.Delete(It.IsAny<Report>()), Times.Never);
+        mockAnnouncementRepository.Verify(r => r.Delete(It.IsAny<Announcement>()), Times.Never);
+        mockReportRepository.Verify(r => r.SaveChangesAsync(), Times.Never);
+        mockAnnouncementRepository.Verify(r => r.SaveChangesAsync(), Times.Never);
+    }
+
+    [Fact]
+    public async Task DeleteAnnouncementByReportAsync_ReturnsFalse_WhenReportIsNotForAnnouncement()
+    {
+        // Arrange
+        const int reportId = 1;
+        var report = new Report { Id = reportId, TargetType = TargetType.Comment, TargetId = 10 };
+        mockReportRepository
+            .Setup(r => r.GetByIdAsync(reportId))
+            .ReturnsAsync(report);
+
+        // Act
+        bool result = await reportService.DeleteAnnouncementByReportAsync(reportId);
+
+        // Assert
+        Assert.False(result);
+        mockLogger.Verify(
+            l => l.Log(
+                LogLevel.Warning,
+                It.IsAny<EventId>(),
+                It.Is<It.IsAnyType>((v, t) => v.ToString()!.Contains($"report {reportId} is not for an Announcement")),
+                null,
+                It.IsAny<Func<It.IsAnyType, Exception?, string>>()),
+            Times.Once);
+
+        mockReportRepository.Verify(r => r.Delete(It.IsAny<Report>()), Times.Never);
+        mockAnnouncementRepository.Verify(r => r.Delete(It.IsAny<Announcement>()), Times.Never);
+        mockReportRepository.Verify(r => r.SaveChangesAsync(), Times.Never);
+        mockAnnouncementRepository.Verify(r => r.SaveChangesAsync(), Times.Never);
+    }
+
+    [Fact]
+    public async Task DeleteAnnouncementByReportAsync_DeletesReportOnly_WhenAnnouncementNotFound()
+    {
+        // Arrange
+        const int reportId = 1;
+        const int announcementId = 5;
+        var report = new Report { Id = reportId, TargetType = TargetType.Announcement, TargetId = announcementId };
+        mockReportRepository
+            .Setup(r => r.GetByIdAsync(reportId))
+            .ReturnsAsync(report);
+        mockAnnouncementRepository
+            .Setup(r => r.GetByIdAsync(announcementId))
+            .ReturnsAsync((Announcement?)null);
+        mockReportRepository
+            .Setup(r => r.Delete(It.IsAny<Report>()))
+            .Verifiable();
+        mockReportRepository
+            .Setup(r => r.SaveChangesAsync())
+            .Returns(Task.CompletedTask);
+
+        // Act
+        bool result = await reportService.DeleteAnnouncementByReportAsync(reportId);
+
+        // Assert
+        Assert.False(result);
+        mockLogger.Verify(
+            l => l.Log(
+                LogLevel.Warning,
+                It.IsAny<EventId>(),
+                It.Is<It.IsAnyType>((v, t) => v.ToString()!.Contains($"announcement {announcementId} not found")),
+                null,
+                It.IsAny<Func<It.IsAnyType, Exception?, string>>()),
+            Times.Once);
+
+        mockReportRepository.Verify(r => r.Delete(report), Times.Once);
+        mockReportRepository.Verify(r => r.SaveChangesAsync(), Times.Once);
+        mockAnnouncementRepository.Verify(r => r.Delete(It.IsAny<Announcement>()), Times.Never);
+        mockAnnouncementRepository.Verify(r => r.SaveChangesAsync(), Times.Never);
+    }
+
+    [Fact]
+    public async Task DeleteAnnouncementByReportAsync_DeletesAnnouncementAndAllRelatedReports_WhenValid()
+    {
+        // Arrange
+        const int reportId = 1;
+        const int announcementId = 20;
+        var triggeringReport = new Report { Id = reportId, TargetType = TargetType.Announcement, TargetId = announcementId };
+        var relatedReports = new List<Report>
+        {
+            new Report { Id = 2, TargetType = TargetType.Announcement, TargetId = announcementId },
+            new Report { Id = 3, TargetType = TargetType.Announcement, TargetId = announcementId }
+        };
+        var announcement = new Announcement { Id = announcementId, Title = "spam", Body = "spam" };
+
+        mockReportRepository
+            .Setup(r => r.GetByIdAsync(reportId))
+            .ReturnsAsync(triggeringReport);
+        mockAnnouncementRepository
+            .Setup(r => r.GetByIdAsync(announcementId))
+            .ReturnsAsync(announcement);
+        mockReportRepository
+            .Setup(r => r.GetByTargetAsync(TargetType.Announcement, announcementId))
+            .ReturnsAsync(relatedReports);
+        mockReportRepository
+            .Setup(r => r.Delete(It.IsAny<Report>()))
+            .Verifiable();
+        mockAnnouncementRepository
+            .Setup(r => r.Delete(It.IsAny<Announcement>()))
+            .Verifiable();
+        mockReportRepository
+            .Setup(r => r.SaveChangesAsync())
+            .Returns(Task.CompletedTask);
+        mockAnnouncementRepository
+            .Setup(r => r.SaveChangesAsync())
+            .Returns(Task.CompletedTask);
+
+        // Act
+        bool result = await reportService.DeleteAnnouncementByReportAsync(reportId);
+
+        // Assert
+        Assert.True(result);
+        mockLogger.Verify(
+            l => l.Log(
+                LogLevel.Information,
+                It.IsAny<EventId>(),
+                It.Is<It.IsAnyType>((v, t) => v.ToString()!
+                    .Contains($"announcement {announcementId} deleted by report {reportId}")),
+                null,
+                It.IsAny<Func<It.IsAnyType, Exception?, string>>()),
+            Times.Once);
+
+        mockReportRepository.Verify(r => r.Delete(It.IsAny<Report>()), Times.Exactly(relatedReports.Count));
+        mockAnnouncementRepository.Verify(r => r.Delete(announcement), Times.Once);
+        mockReportRepository.Verify(r => r.SaveChangesAsync(), Times.Once);
+        mockAnnouncementRepository.Verify(r => r.SaveChangesAsync(), Times.Once);
+    }
 }
