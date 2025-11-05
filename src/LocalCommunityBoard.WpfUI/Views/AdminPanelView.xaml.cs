@@ -165,9 +165,68 @@ public partial class AdminPanelView : UserControl
         MessageBox.Show("Edit announcement feature not implemented yet.", "Info", MessageBoxButton.OK, MessageBoxImage.Information);
     }
 
-    private void DeleteAnnouncement_Click(object sender, RoutedEventArgs e)
+    private async void DeleteAnnouncement_Click(object sender, RoutedEventArgs e)
     {
-        MessageBox.Show("Delete announcement feature not implemented yet.", "Info", MessageBoxButton.OK, MessageBoxImage.Information);
+        if (sender is not Button btn || btn.DataContext is not Report report)
+        {
+            return;
+        }
+
+        if (report.TargetType != TargetType.Announcement)
+        {
+            return;
+        }
+
+        var confirm = MessageBox.Show(
+            $"Видалити оголошення (ID={report.TargetId}) для звіту (ID={report.Id})?",
+            "Підтвердження видалення",
+            MessageBoxButton.YesNo,
+            MessageBoxImage.Warning);
+
+        if (confirm != MessageBoxResult.Yes)
+        {
+            return;
+        }
+
+        btn.IsEnabled = false;
+
+        try
+        {
+            var deleted = await this.reportService.DeleteAnnouncementByReportAsync(report.Id);
+
+            if (!deleted)
+            {
+                MessageBox.Show(
+                    "Оголошення не було видалено (можливо, воно вже видалене).",
+                    "Інформація",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Information);
+            }
+            else
+            {
+                try
+                {
+                    await this.reportService.UpdateReportStatusAsync(report.Id, ReportStatus.Closed);
+                }
+                catch
+                {
+                }
+            }
+
+            await this.LoadReportedAnnouncementsAsync();
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show(
+                $"Помилка при видаленні оголошення: {ex.Message}",
+                ErrorText,
+                MessageBoxButton.OK,
+                MessageBoxImage.Error);
+        }
+        finally
+        {
+            btn.IsEnabled = true;
+        }
     }
 
     private void EditComment_Click(object sender, RoutedEventArgs e)

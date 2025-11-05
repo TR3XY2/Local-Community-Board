@@ -47,4 +47,6 @@ public interface IReportService
     Task<bool> DeleteCommentByReportAsync(int reportId);
 
     Task<Report> ReportAnnouncementAsync(int reporterId, int postId, string reason);
+
+    Task<bool> DeleteAnnouncementByReportAsync(int reportId);
 }

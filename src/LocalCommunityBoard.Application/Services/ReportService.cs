@@ -177,4 +177,49 @@ public class ReportService : IReportService
         this.logger.LogInformation("User {ReporterId} reported post {PostId}", reporterId, postId);
         return report;
     }
+
+    public async Task<bool> DeleteAnnouncementByReportAsync(int reportId)
+    {
+        var report = await this.reportRepository.GetByIdAsync(reportId);
+        if (report is null)
+        {
+            this.logger.LogWarning("DeleteAnnouncementByReportAsync: report {ReportId} not found", reportId);
+            return false;
+        }
+
+        if (report.TargetType != TargetType.Announcement)
+        {
+            this.logger.LogWarning("DeleteAnnouncementByReportAsync: report {ReportId} is not for an Announcement", reportId);
+            return false;
+        }
+
+        var announcementId = report.TargetId;
+
+        var announcement = await this.announcementRepository.GetByIdAsync(announcementId);
+        if (announcement is null)
+        {
+            this.logger.LogWarning("DeleteAnnouncementByReportAsync: announcement {AnnouncementId} not found", announcementId);
+            this.reportRepository.Delete(report);
+            await this.reportRepository.SaveChangesAsync();
+            return false;
+        }
+
+        var relatedReports = await this.reportRepository.GetByTargetAsync(TargetType.Announcement, announcementId);
+        foreach (var r in relatedReports)
+        {
+            this.reportRepository.Delete(r);
+        }
+
+        this.announcementRepository.Delete(announcement);
+
+        await this.announcementRepository.SaveChangesAsync();
+        await this.reportRepository.SaveChangesAsync();
+
+        this.logger.LogInformation(
+            "DeleteAnnouncementByReportAsync: announcement {AnnouncementId} deleted by report {ReportId}",
+            announcementId,
+            reportId);
+
+        return true;
+    }
 }
