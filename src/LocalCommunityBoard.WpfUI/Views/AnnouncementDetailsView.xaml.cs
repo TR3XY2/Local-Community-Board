@@ -47,6 +47,10 @@ public partial class AnnouncementDetailsView : UserControl
         {
             await this.RefreshLikesAsync();
             await this.UpdateLikeVisualAsync();
+
+            // 🔥 ДОДАТИ ОЦЕ:
+            await this.RefreshDislikesAsync();
+            await this.UpdateDislikeVisualAsync();
         };
     }
 
@@ -102,18 +106,69 @@ public partial class AnnouncementDetailsView : UserControl
         try
         {
             var reactionService = App.Services.GetRequiredService<IReactionService>();
-
-            // toggle like в БД
             await reactionService.ToggleLikeAsync(this.announcement.Id, this.session.CurrentUser.Id);
 
-            // оновити лічильник і візуальний стан
+            // оновити лайки
             await this.RefreshLikesAsync();
             await this.UpdateLikeVisualAsync();
+
+            // 🔥 ОБОВʼЯЗКОВО: оновити дизлайки, бо могли знятись
+            await this.RefreshDislikesAsync();
+            await this.UpdateDislikeVisualAsync();
         }
         catch (Exception ex)
         {
             MessageBox.Show($"Failed to toggle like: {ex.Message}", ErrorText, MessageBoxButton.OK, MessageBoxImage.Error);
         }
+    }
+
+    private async void DislikeBtn_Click(object sender, RoutedEventArgs e)
+    {
+        if (!this.session.IsLoggedIn || this.session.CurrentUser is null)
+        {
+            MessageBox.Show("You must be logged in to dislike.", "Info", MessageBoxButton.OK, MessageBoxImage.Information);
+            return;
+        }
+
+        try
+        {
+            var reactionService = App.Services.GetRequiredService<IReactionService>();
+
+            await reactionService.ToggleDislikeAsync(this.announcement.Id, this.session.CurrentUser.Id);
+
+            // оновити дизлайки
+            await this.RefreshDislikesAsync();
+            await this.UpdateDislikeVisualAsync();
+
+            // 🔥 ТЕЖ ОБОВʼЯЗКОВО: оновити лайки, бо могли знятись
+            await this.RefreshLikesAsync();
+            await this.UpdateLikeVisualAsync();
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show($"Failed to toggle dislike: {ex.Message}", ErrorText, MessageBoxButton.OK, MessageBoxImage.Error);
+        }
+    }
+
+    private async Task RefreshDislikesAsync()
+    {
+        var reactions = App.Services.GetRequiredService<IReactionService>();
+        var count = await reactions.GetDislikesCountAsync(this.announcement.Id);
+        this.DislikeCountText.Text = count.ToString();
+    }
+
+    private async Task UpdateDislikeVisualAsync()
+    {
+        var userId = this.session.CurrentUser?.Id ?? 0;
+        if (userId == 0)
+        {
+            this.DislikeBtn.IsEnabled = false;
+            return;
+        }
+
+        var reactions = App.Services.GetRequiredService<IReactionService>();
+        var has = await reactions.HasUserDislikedAsync(this.announcement.Id, userId);
+        this.DislikeBtn.Opacity = has ? 1.0 : 0.85;
     }
 
     // ADDED: підтягнути кількість лайків

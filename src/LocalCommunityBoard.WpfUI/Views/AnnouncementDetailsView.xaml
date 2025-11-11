@@ -13,15 +13,23 @@
 
             <!-- Likes -->
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,10,0,0">
-                <ToggleButton x:Name="LikeBtn"
-                        Width="120"
-                        Click="LikeBtn_Click">
-                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                <!-- LIKE -->
+                <ToggleButton x:Name="LikeBtn" Width="120" Margin="0,0,10,0" Click="LikeBtn_Click">
+                    <StackPanel Orientation="Horizontal">
                         <TextBlock Text="👍" FontSize="16" Margin="0,0,6,0"/>
                         <TextBlock x:Name="LikeCountText" Text="0"/>
                     </StackPanel>
                 </ToggleButton>
+
+                <!-- DISLIKE -->
+                <ToggleButton x:Name="DislikeBtn" Width="120" Click="DislikeBtn_Click">
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="👎" FontSize="16" Margin="0,0,6,0"/>
+                        <TextBlock x:Name="DislikeCountText" Text="0"/>
+                    </StackPanel>
+                </ToggleButton>
             </StackPanel>
+
 
             <Button Content="Report this Announcement"
                     Width="200"

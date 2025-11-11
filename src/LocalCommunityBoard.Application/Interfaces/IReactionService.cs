@@ -35,4 +35,10 @@ public interface IReactionService
     /// <param name="userId">The user identifier.</param>
     /// <returns><c>true</c> if the user liked it; otherwise <c>false</c>.</returns>
     Task<bool> HasUserLikedAsync(int announcementId, int userId);
+
+    Task<bool> ToggleDislikeAsync(int announcementId, int userId);
+
+    Task<int> GetDislikesCountAsync(int announcementId);
+
+    Task<bool> HasUserDislikedAsync(int announcementId, int userId);
 }
