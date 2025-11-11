@@ -11,4 +11,8 @@ public interface ICommentService
     Task<IEnumerable<Comment>> GetCommentsForAnnouncementAsync(int announcementId);
 
     Task<Comment> AddCommentAsync(int userId, int announcementId, string body, int? parentCommentId = null);
+
+    Task<bool> UpdateReportedCommentAsync(int commentId, string newBody);
+
+    Task<Comment?> GetByIdAsync(int commentId);
 }

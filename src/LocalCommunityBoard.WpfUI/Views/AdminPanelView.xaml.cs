@@ -22,12 +22,14 @@ public partial class AdminPanelView : UserControl
     private const string ErrorText = "Error";
     private readonly IUserService userService;
     private readonly IReportService reportService;
+    private readonly ICommentService commentService;
 
     public AdminPanelView()
     {
         this.InitializeComponent();
         this.userService = App.Services.GetRequiredService<IUserService>();
         this.reportService = App.Services.GetRequiredService<IReportService>();
+        this.commentService = App.Services.GetRequiredService<ICommentService>();
         _ = this.LoadDataAsync();
     }
 
@@ -231,7 +233,46 @@ public partial class AdminPanelView : UserControl
 
     private void EditComment_Click(object sender, RoutedEventArgs e)
     {
-        MessageBox.Show("Edit comment feature not implemented yet.", "Info", MessageBoxButton.OK, MessageBoxImage.Information);
+        if (sender is not Button btn || btn.DataContext is not Report report)
+        {
+            return;
+        }
+
+        if (report.TargetType != TargetType.Comment)
+        {
+            return;
+        }
+
+        try
+        {
+            var comment = this.commentService.GetByIdAsync(report.TargetId).Result;
+
+            if (comment == null)
+            {
+                MessageBox.Show(
+                    "Comment not found. It may have been deleted.",
+                    ErrorText,
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Warning);
+                return;
+            }
+
+            var editWindow = new EditCommentWindow(comment, this.commentService, async () =>
+            {
+                // Refresh the reported comments grid after save
+                await this.LoadReportedCommentsAsync();
+            });
+
+            editWindow.ShowDialog();
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show(
+                $"Error while opening edit window: {ex.Message}",
+                ErrorText,
+                MessageBoxButton.OK,
+                MessageBoxImage.Error);
+        }
     }
 
     private async void DeleteComment_Click(object sender, RoutedEventArgs e)
