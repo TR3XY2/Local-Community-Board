@@ -222,4 +222,22 @@ public class ReportService : IReportService
 
         return true;
     }
+
+    public async Task<Announcement?> GetAnnouncementByReportAsync(int reportId)
+    {
+        var report = await this.reportRepository.GetByIdAsync(reportId);
+        if (report is null || report.TargetType != TargetType.Announcement)
+        {
+            this.logger.LogWarning("GetAnnouncementByReportAsync: Report {ReportId} invalid or not found", reportId);
+            return null;
+        }
+
+        var announcement = await this.announcementRepository.GetByIdAsync(report.TargetId);
+        if (announcement is null)
+        {
+            this.logger.LogWarning("GetAnnouncementByReportAsync: Announcement {AnnouncementId} not found", report.TargetId);
+        }
+
+        return announcement;
+    }
 }

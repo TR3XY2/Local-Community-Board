@@ -49,4 +49,6 @@ public interface IReportService
     Task<Report> ReportAnnouncementAsync(int reporterId, int postId, string reason);
 
     Task<bool> DeleteAnnouncementByReportAsync(int reportId);
+
+    Task<Announcement?> GetAnnouncementByReportAsync(int reportId);
 }

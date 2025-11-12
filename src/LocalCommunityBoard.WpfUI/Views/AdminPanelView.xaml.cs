@@ -23,6 +23,7 @@ public partial class AdminPanelView : UserControl
     private readonly IUserService userService;
     private readonly IReportService reportService;
     private readonly ICommentService commentService;
+    private readonly IAnnouncementService announcementService;
 
     public AdminPanelView()
     {
@@ -30,6 +31,7 @@ public partial class AdminPanelView : UserControl
         this.userService = App.Services.GetRequiredService<IUserService>();
         this.reportService = App.Services.GetRequiredService<IReportService>();
         this.commentService = App.Services.GetRequiredService<ICommentService>();
+        this.announcementService = App.Services.GetRequiredService<IAnnouncementService>();
         _ = this.LoadDataAsync();
     }
 
@@ -162,9 +164,38 @@ public partial class AdminPanelView : UserControl
         }
     }
 
-    private void EditAnnouncement_Click(object sender, RoutedEventArgs e)
+    private async void EditAnnouncement_Click(object sender, RoutedEventArgs e)
     {
-        MessageBox.Show("Edit announcement feature not implemented yet.", "Info", MessageBoxButton.OK, MessageBoxImage.Information);
+        if (sender is not Button btn || btn.DataContext is not Report report)
+        {
+            return;
+        }
+
+        if (report.TargetType != TargetType.Announcement)
+        {
+            return;
+        }
+
+        var announcement = await this.reportService.GetAnnouncementByReportAsync(report.Id);
+        if (announcement is null)
+        {
+            MessageBox.Show("Оголошення не знайдено або вже видалено.", "Помилка", MessageBoxButton.OK, MessageBoxImage.Warning);
+            return;
+        }
+
+        var editView = new EditAnnouncementView(
+            announcement,
+            this.announcementService,
+            async () =>
+            {
+                await this.reportService.UpdateReportStatusAsync(report.Id, ReportStatus.Closed);
+                await this.LoadReportedAnnouncementsAsync();
+            });
+
+        if (Application.Current.MainWindow is MainWindow mainWindow)
+        {
+            mainWindow.MainContent.Content = editView;
+        }
     }
 
     private async void DeleteAnnouncement_Click(object sender, RoutedEventArgs e)
