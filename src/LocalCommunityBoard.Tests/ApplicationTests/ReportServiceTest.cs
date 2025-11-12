@@ -850,4 +850,183 @@ public class ReportServiceTests
         mockReportRepository.Verify(r => r.SaveChangesAsync(), Times.Once);
         mockAnnouncementRepository.Verify(r => r.SaveChangesAsync(), Times.Once);
     }
+
+    [Fact]
+    public async Task GetAnnouncementByReportAsync_ReturnsAnnouncement_WhenReportAndAnnouncementExist()
+    {
+        // Arrange
+        const int reportId = 1;
+        const int announcementId = 10;
+        var report = new Report
+        {
+            Id = reportId,
+            TargetType = TargetType.Announcement,
+            TargetId = announcementId,
+            ReporterId = 1,
+        };
+        var announcement = new Announcement
+        {
+            Id = announcementId,
+            Title = "Test Announcement",
+            Body = "Test Body",
+        };
+
+        this.mockReportRepository
+            .Setup(repo => repo.GetByIdAsync(reportId))
+            .ReturnsAsync(report);
+
+        this.mockAnnouncementRepository
+            .Setup(repo => repo.GetByIdAsync(announcementId))
+            .ReturnsAsync(announcement);
+
+        // Act
+        Announcement? result = await this.reportService.GetAnnouncementByReportAsync(reportId);
+
+        // Assert
+        Assert.NotNull(result);
+        Assert.Equal(announcementId, result.Id);
+        Assert.Equal("Test Announcement", result.Title);
+        Assert.Equal("Test Body", result.Body);
+        this.mockReportRepository.Verify(repo => repo.GetByIdAsync(reportId), Times.Once);
+        this.mockAnnouncementRepository.Verify(repo => repo.GetByIdAsync(announcementId), Times.Once);
+    }
+
+    [Fact]
+    public async Task GetAnnouncementByReportAsync_ReturnsNull_WhenReportDoesNotExist()
+    {
+        // Arrange
+        const int reportId = 999;
+
+        this.mockReportRepository
+            .Setup(repo => repo.GetByIdAsync(reportId))
+            .ReturnsAsync((Report?)null);
+
+        // Act
+        Announcement? result = await this.reportService.GetAnnouncementByReportAsync(reportId);
+
+        // Assert
+        Assert.Null(result);
+        this.mockLogger.Verify(
+            l => l.Log(
+                LogLevel.Warning,
+                It.IsAny<EventId>(),
+                It.Is<It.IsAnyType>((v, t) => v.ToString()!.Contains($"Report {reportId} invalid or not found")),
+                null,
+                It.IsAny<Func<It.IsAnyType, Exception?, string>>()),
+            Times.Once);
+        this.mockReportRepository.Verify(repo => repo.GetByIdAsync(reportId), Times.Once);
+        this.mockAnnouncementRepository.Verify(repo => repo.GetByIdAsync(It.IsAny<int>()), Times.Never);
+    }
+
+    [Fact]
+    public async Task GetAnnouncementByReportAsync_ReturnsNull_WhenReportIsNotForAnnouncement()
+    {
+        // Arrange
+        const int reportId = 1;
+        var report = new Report
+        {
+            Id = reportId,
+            TargetType = TargetType.Comment,
+            TargetId = 5,
+            ReporterId = 1,
+        };
+
+        this.mockReportRepository
+            .Setup(repo => repo.GetByIdAsync(reportId))
+            .ReturnsAsync(report);
+
+        // Act
+        Announcement? result = await this.reportService.GetAnnouncementByReportAsync(reportId);
+
+        // Assert
+        Assert.Null(result);
+        this.mockLogger.Verify(
+            l => l.Log(
+                LogLevel.Warning,
+                It.IsAny<EventId>(),
+                It.Is<It.IsAnyType>((v, t) => v.ToString()!.Contains($"Report {reportId} invalid or not found")),
+                null,
+                It.IsAny<Func<It.IsAnyType, Exception?, string>>()),
+            Times.Once);
+        this.mockReportRepository.Verify(repo => repo.GetByIdAsync(reportId), Times.Once);
+        this.mockAnnouncementRepository.Verify(repo => repo.GetByIdAsync(It.IsAny<int>()), Times.Never);
+    }
+
+    [Fact]
+    public async Task GetAnnouncementByReportAsync_ReturnsNull_WhenAnnouncementDoesNotExist()
+    {
+        // Arrange
+        const int reportId = 1;
+        const int announcementId = 10;
+        var report = new Report
+        {
+            Id = reportId,
+            TargetType = TargetType.Announcement,
+            TargetId = announcementId,
+            ReporterId = 1,
+        };
+
+        this.mockReportRepository
+            .Setup(repo => repo.GetByIdAsync(reportId))
+            .ReturnsAsync(report);
+
+        this.mockAnnouncementRepository
+            .Setup(repo => repo.GetByIdAsync(announcementId))
+            .ReturnsAsync((Announcement?)null);
+
+        // Act
+        Announcement? result = await this.reportService.GetAnnouncementByReportAsync(reportId);
+
+        // Assert
+        Assert.Null(result);
+        this.mockLogger.Verify(
+            l => l.Log(
+                LogLevel.Warning,
+                It.IsAny<EventId>(),
+                It.Is<It.IsAnyType>((v, t) => v.ToString()!.Contains($"Announcement {announcementId} not found")),
+                null,
+                It.IsAny<Func<It.IsAnyType, Exception?, string>>()),
+            Times.Once);
+        this.mockReportRepository.Verify(repo => repo.GetByIdAsync(reportId), Times.Once);
+        this.mockAnnouncementRepository.Verify(repo => repo.GetByIdAsync(announcementId), Times.Once);
+    }
+
+    [Theory]
+    [InlineData(1, 10)]
+    [InlineData(5, 20)]
+    [InlineData(10, 30)]
+    public async Task GetAnnouncementByReportAsync_WorksWithDifferentIds(int reportId, int announcementId)
+    {
+        // Arrange
+        var report = new Report
+        {
+            Id = reportId,
+            TargetType = TargetType.Announcement,
+            TargetId = announcementId,
+            ReporterId = 1,
+        };
+        var announcement = new Announcement
+        {
+            Id = announcementId,
+            Title = "Test",
+            Body = "Test",
+        };
+
+        this.mockReportRepository
+            .Setup(repo => repo.GetByIdAsync(reportId))
+            .ReturnsAsync(report);
+
+        this.mockAnnouncementRepository
+            .Setup(repo => repo.GetByIdAsync(announcementId))
+            .ReturnsAsync(announcement);
+
+        // Act
+        Announcement? result = await this.reportService.GetAnnouncementByReportAsync(reportId);
+
+        // Assert
+        Assert.NotNull(result);
+        Assert.Equal(announcementId, result.Id);
+        this.mockReportRepository.Verify(repo => repo.GetByIdAsync(reportId), Times.Once);
+        this.mockAnnouncementRepository.Verify(repo => repo.GetByIdAsync(announcementId), Times.Once);
+    }
 }
