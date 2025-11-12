@@ -15,4 +15,6 @@ public interface ICommentService
     Task<bool> UpdateReportedCommentAsync(int commentId, string newBody);
 
     Task<Comment?> GetByIdAsync(int commentId);
+
+    Task<bool> DeleteCommentAsync(int commentId, int userId);
 }

@@ -77,4 +77,26 @@ public class CommentService : ICommentService
     {
         return await this.commentRepository.GetByIdAsync(commentId);
     }
+
+    public async Task<bool> DeleteCommentAsync(int commentId, int userId)
+    {
+        var comment = await this.commentRepository.GetByIdAsync(commentId);
+        if (comment == null)
+        {
+            this.logger.LogWarning("Delete failed: comment {CommentId} not found", commentId);
+            return false;
+        }
+
+        if (comment.UserId != userId)
+        {
+            this.logger.LogWarning("User {UserId} attempted to delete comment {CommentId} not owned by them", userId, commentId);
+            throw new UnauthorizedAccessException("You can delete only your own comments.");
+        }
+
+        this.commentRepository.Delete(comment);
+        await this.commentRepository.SaveChangesAsync();
+
+        this.logger.LogInformation("User {UserId} deleted comment {CommentId}", userId, commentId);
+        return true;
+    }
 }

@@ -282,4 +282,47 @@ public partial class AnnouncementDetailsView : UserControl
             MessageBox.Show("Cannot report announcement: DataContext is invalid.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
         }
     }
+
+    private async void DeleteButton_Click(object sender, RoutedEventArgs e)
+    {
+        if (!this.session.IsLoggedIn || this.session.CurrentUser == null)
+        {
+            MessageBox.Show("You must be logged in to delete comments.", ErrorText, MessageBoxButton.OK, MessageBoxImage.Warning);
+            return;
+        }
+
+        if (sender is not Button button || button.Tag is not int commentId)
+        {
+            return;
+        }
+
+        var confirm = MessageBox.Show("Are you sure you want to delete this comment?", "Confirm Delete", MessageBoxButton.YesNo, MessageBoxImage.Question);
+
+        if (confirm != MessageBoxResult.Yes)
+        {
+            return;
+        }
+
+        try
+        {
+            bool result = await this.commentService.DeleteCommentAsync(commentId, this.session.CurrentUser.Id);
+            if (result)
+            {
+                MessageBox.Show("Comment deleted successfully.", "Success", MessageBoxButton.OK, MessageBoxImage.Information);
+                await this.LoadCommentsAsync();
+            }
+            else
+            {
+                MessageBox.Show("Failed to delete comment (not found).", "Error", MessageBoxButton.OK, MessageBoxImage.Warning);
+            }
+        }
+        catch (UnauthorizedAccessException)
+        {
+            MessageBox.Show("You can delete only your own comments.", "Access Denied", MessageBoxButton.OK, MessageBoxImage.Warning);
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show($"Failed to delete comment: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+        }
+    }
 }
