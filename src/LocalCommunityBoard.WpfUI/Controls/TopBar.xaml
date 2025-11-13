@@ -32,8 +32,8 @@
                     Visibility="Collapsed"/>
             
             <Button x:Name="CreatePostButton"
-                    Content="Create Post"
-                    Width="100"
+                    Content="Create Announcement"
+                    Width="130"
                     Margin="5,0"
                     Click="CreatePost_Click"
                     Visibility="Collapsed"/>

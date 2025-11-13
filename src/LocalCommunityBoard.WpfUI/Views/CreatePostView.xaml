@@ -5,7 +5,7 @@
              MinHeight="300" MinWidth="520">
     <Grid Margin="16">
         <StackPanel>
-            <TextBlock Text="Create New Post" FontSize="18" FontWeight="SemiBold" Margin="0,0,0,12"/>
+            <TextBlock Text="Create New Announcement" FontSize="18" FontWeight="SemiBold" Margin="0,0,0,12"/>
 
             <TextBlock Text="Title" />
             <TextBox x:Name="TitleTextBox" Margin="0,4,0,8"/>
