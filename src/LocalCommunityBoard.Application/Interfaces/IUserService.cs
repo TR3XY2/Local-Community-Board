@@ -29,4 +29,6 @@ public interface IUserService
     Task<bool> UnblockUserAsync(int userId);
 
     Task<bool> BlockUserAsync(int userId);
+
+    Task<bool> DeleteUserByAdminAsync(int userId);
 }

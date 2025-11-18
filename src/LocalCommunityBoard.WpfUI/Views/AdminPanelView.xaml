@@ -23,7 +23,7 @@
                     <DataGridTextColumn Header="Email" Binding="{Binding Email}" Width="*"/>
                     <DataGridTextColumn Header="Role" Binding="{Binding Role.Name}" Width="*"/>
                     <DataGridTextColumn Header="Status" Binding="{Binding Status}" Width="*"/>
-                    <DataGridTemplateColumn Header="Actions" Width="200">
+                    <DataGridTemplateColumn Header="Actions" Width="400">
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
                                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
@@ -59,6 +59,19 @@
                                     </Button>
 
                                     <Button Content="Edit" Margin="3" Width="50" IsEnabled="True" Click="EditUser_Click"/>
+                                    <Button Content="Delete" Margin="3" Width="60" Click="DeleteUser_Click">
+                                    <Button.Style>
+                                        <Style TargetType="Button">
+                                            <Style.Triggers>
+                                                <!-- Disable delete for Admin accounts -->
+                                                <DataTrigger Binding="{Binding Role.Name}" Value="Admin">
+                                                    <Setter Property="IsEnabled" Value="False"/>
+                                                    <Setter Property="Opacity" Value="0.5"/>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </Button.Style>
+                                </Button>
                                 </StackPanel>
                             </DataTemplate>
                         </DataGridTemplateColumn.CellTemplate>

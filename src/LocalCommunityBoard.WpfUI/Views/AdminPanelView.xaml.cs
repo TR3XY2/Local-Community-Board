@@ -370,4 +370,81 @@ public partial class AdminPanelView : UserControl
             btn.IsEnabled = true;
         }
     }
+
+    private async void DeleteUser_Click(object sender, RoutedEventArgs e)
+    {
+        if (sender is not Button btn || btn.DataContext is not User user)
+        {
+            return;
+        }
+
+        // Extra safety check - prevent deletion of admins
+        if (user.RoleId == 2)
+        {
+            MessageBox.Show(
+                "Cannot delete administrator accounts.",
+                "Operation Not Allowed",
+                MessageBoxButton.OK,
+                MessageBoxImage.Warning);
+            return;
+        }
+
+        // Single confirmation
+        var confirm = MessageBox.Show(
+            $"Delete user '{user.Username}'?\n\n",
+            "Confirm Account Deletion",
+            MessageBoxButton.YesNo,
+            MessageBoxImage.Warning);
+
+        if (confirm != MessageBoxResult.Yes)
+        {
+            return;
+        }
+
+        btn.IsEnabled = false;
+
+        try
+        {
+            var result = await this.userService.DeleteUserByAdminAsync(user.Id);
+
+            if (result)
+            {
+                MessageBox.Show(
+                    $"User '{user.Username}' has been deleted successfully.",
+                    "Success",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Information);
+
+                await this.LoadUsersAsync();
+            }
+            else
+            {
+                MessageBox.Show(
+                    "Failed to delete user. The user may not exist.",
+                    ErrorText,
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Warning);
+            }
+        }
+        catch (InvalidOperationException ex)
+        {
+            MessageBox.Show(
+                ex.Message,
+                "Operation Not Allowed",
+                MessageBoxButton.OK,
+                MessageBoxImage.Warning);
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show(
+                $"Error while deleting user: {ex.Message}",
+                ErrorText,
+                MessageBoxButton.OK,
+                MessageBoxImage.Error);
+        }
+        finally
+        {
+            btn.IsEnabled = true;
+        }
+    }
 }

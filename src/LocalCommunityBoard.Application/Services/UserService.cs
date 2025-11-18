@@ -261,5 +261,36 @@ namespace LocalCommunityBoard.Application.Services
 
             return result;
         }
+
+        public async Task<bool> DeleteUserByAdminAsync(int userId)
+        {
+            var user = await this.userRepository.GetByIdAsync(userId);
+            if (user == null)
+            {
+                this.logger.LogWarning("AdminDeleteUserAsync: User {UserId} not found", userId);
+                return false;
+            }
+
+            // Prevent deletion of admin accounts
+            if (user.RoleId == 2)
+            {
+                this.logger.LogWarning(
+                    "AdminDeleteUserAsync: Attempted to delete admin user {UserId} ({Username})",
+                    userId,
+                    user.Username);
+                throw new InvalidOperationException("Cannot delete administrator accounts.");
+            }
+
+            this.userRepository.Delete(user);
+            await this.userRepository.SaveChangesAsync();
+
+            this.logger.LogInformation(
+                "AdminDeleteUserAsync: User {UserId} ({Username}, {Email}) deleted successfully",
+                userId,
+                user.Username,
+                user.Email);
+
+            return true;
+        }
     }
 }
