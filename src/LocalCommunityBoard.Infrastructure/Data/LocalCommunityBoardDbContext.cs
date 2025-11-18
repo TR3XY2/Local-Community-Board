@@ -137,6 +137,7 @@ public class LocalCommunityBoardDbContext : DbContext
 
         modelBuilder.Entity<Role>().HasData(
         new Role { Id = 1, Name = "User", Description = "Regular user" },
-        new Role { Id = 2, Name = "Admin", Description = "Administrator" });
+        new Role { Id = 2, Name = "Admin", Description = "Administrator" },
+        new Role { Id = 3, Name = "SuperAdmin", Description = "Main admin" });
     }
 }
