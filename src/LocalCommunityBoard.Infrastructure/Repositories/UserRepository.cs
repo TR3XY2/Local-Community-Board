@@ -24,6 +24,13 @@ public class UserRepository : Repository<User>, IUserRepository
     {
     }
 
+    public override async Task<IEnumerable<User>> GetAllAsync()
+    {
+        return await this.DbSet
+            .Include(u => u.Role)
+            .ToListAsync();
+    }
+
     public async Task<User?> GetByEmailAsync(string email)
         => await this.DbSet.Include(u => u.Role)
                        .FirstOrDefaultAsync(u => u.Email == email);

@@ -31,7 +31,7 @@ public class Repository<T>(LocalCommunityBoardDbContext context) : IRepository<T
 
     public async Task<T?> GetByIdAsync(int id) => await this.DbSet.FindAsync(id);
 
-    public async Task<IEnumerable<T>> GetAllAsync() => await this.DbSet.ToListAsync();
+    public virtual async Task<IEnumerable<T>> GetAllAsync() => await this.DbSet.ToListAsync();
 
     public async Task AddAsync(T entity) => await this.DbSet.AddAsync(entity);
 
