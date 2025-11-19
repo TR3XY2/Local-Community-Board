@@ -105,6 +105,16 @@
                     </DataTemplate>
                 </ItemsControl.ItemTemplate>
             </ItemsControl>
+            <!-- Delete Account -->
+            <Separator Margin="0,30,0,15"/>
+
+            <Button Content="Delete My Account"
+                    Width="180"
+                    HorizontalAlignment="Center"
+                    Background="#CC0000"
+                    Foreground="White"
+                    Padding="6"
+                    Click="DeleteAccount_Click"/>
 
         </StackPanel>
     </ScrollViewer>

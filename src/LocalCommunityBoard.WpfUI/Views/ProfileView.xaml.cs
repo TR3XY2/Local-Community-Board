@@ -9,6 +9,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Navigation;
 using LocalCommunityBoard.Application.Interfaces;
 using LocalCommunityBoard.Application.Services;
 using LocalCommunityBoard.Domain.Entities;
@@ -177,7 +178,6 @@ public partial class ProfileView : UserControl
                 return;
             }
 
-            // Після успішного видалення — оновлюємо список
             await this.LoadMyAnnouncementsAsync();
 
             this.StatusText.Visibility = Visibility.Visible;
@@ -245,6 +245,72 @@ public partial class ProfileView : UserControl
             this.StatusText.Visibility = Visibility.Visible;
             this.StatusText.Foreground = System.Windows.Media.Brushes.Red;
             this.StatusText.Text = $"Error: {ex.Message}";
+        }
+    }
+
+    private async void DeleteAccount_Click(object sender, RoutedEventArgs e)
+    {
+        if (!this.session.IsLoggedIn || this.session.CurrentUser == null)
+        {
+            MessageBox.Show(
+                "You must be logged in to delete your account.",
+                ErrorTitle,
+                MessageBoxButton.OK,
+                MessageBoxImage.Error);
+            return;
+        }
+
+        var confirm = MessageBox.Show(
+            "Are you sure you want to permanently delete your account?\nThis action cannot be undone.",
+            "Confirm Deletion",
+            MessageBoxButton.YesNo,
+            MessageBoxImage.Warning);
+
+        if (confirm != MessageBoxResult.Yes)
+        {
+            return;
+        }
+
+        string password = Microsoft.VisualBasic.Interaction.InputBox(
+            "Please enter your password to confirm:",
+            "Password Confirmation",
+            string.Empty);
+
+        if (string.IsNullOrWhiteSpace(password))
+        {
+            MessageBox.Show("Password is required.", ErrorTitle, MessageBoxButton.OK, MessageBoxImage.Error);
+            return;
+        }
+
+        try
+        {
+            var userId = this.session.CurrentUser.Id;
+
+            bool ok = await this.userService.DeleteOwnAccountAsync(userId, password);
+
+            if (!ok)
+            {
+                MessageBox.Show("Failed to delete your account.", ErrorTitle, MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+
+            this.session.Logout();
+
+            MessageBox.Show("Your account has been deleted.", "Account Deleted", MessageBoxButton.OK, MessageBoxImage.Information);
+
+            var nav = NavigationService.GetNavigationService(this);
+            if (nav != null)
+            {
+                nav.Navigate(new LoginWindow());
+            }
+            else
+            {
+                MessageBox.Show("Please restart the application.", "Logout", MessageBoxButton.OK, MessageBoxImage.Information);
+            }
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show($"Error: {ex.Message}", ErrorTitle, MessageBoxButton.OK, MessageBoxImage.Error);
         }
     }
 }

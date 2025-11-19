@@ -292,5 +292,47 @@ namespace LocalCommunityBoard.Application.Services
 
             return true;
         }
+
+        /// <summary>
+        /// Allows a user to delete their own account (self-deletion).
+        /// </summary>
+        public async Task<bool> DeleteOwnAccountAsync(int userId, string password)
+        {
+            var user = await this.userRepository.GetByIdAsync(userId);
+            if (user == null)
+            {
+                this.logger.LogWarning("DeleteOwnAccountAsync: User {UserId} not found", userId);
+                return false;
+            }
+
+            // Заборона самовидалення адміністраторів
+            if (user.RoleId == 2)
+            {
+                this.logger.LogWarning(
+                    "DeleteOwnAccountAsync: Admin user {UserId} attempted self-deletion",
+                    userId);
+                throw new InvalidOperationException("Administrators cannot delete their own accounts.");
+            }
+
+            // Підтвердження пароля (користувач має підтвердити дію)
+            var isValidPassword = PasswordHasher.VerifyPassword(password, user.Password);
+            if (!isValidPassword)
+            {
+                this.logger.LogWarning(
+                    "DeleteOwnAccountAsync: Incorrect password for user {UserId}",
+                    userId);
+                throw new UnauthorizedAccessException("Password is incorrect.");
+            }
+
+            this.userRepository.Delete(user);
+            await this.userRepository.SaveChangesAsync();
+
+            this.logger.LogInformation(
+                "DeleteOwnAccountAsync: User {UserId} ({Email}) deleted their account",
+                userId,
+                user.Email);
+
+            return true;
+        }
     }
 }
