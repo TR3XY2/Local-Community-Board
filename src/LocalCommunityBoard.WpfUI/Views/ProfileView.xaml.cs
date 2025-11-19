@@ -296,17 +296,13 @@ public partial class ProfileView : UserControl
 
             this.session.Logout();
 
-            MessageBox.Show("Your account has been deleted.", "Account Deleted", MessageBoxButton.OK, MessageBoxImage.Information);
+            if (Application.Current.MainWindow is MainWindow mw)
+            {
+                mw.TopBar.UpdateUIFromOutside();
+                mw.NavigateHome();
+            }
 
-            var nav = NavigationService.GetNavigationService(this);
-            if (nav != null)
-            {
-                nav.Navigate(new LoginWindow());
-            }
-            else
-            {
-                MessageBox.Show("Please restart the application.", "Logout", MessageBoxButton.OK, MessageBoxImage.Information);
-            }
+            MessageBox.Show("Your account has been deleted.", "Account Deleted", MessageBoxButton.OK, MessageBoxImage.Information);
         }
         catch (Exception ex)
         {

@@ -16,7 +16,7 @@
                       CanUserAddRows="False"
                       IsReadOnly="True"
                       HeadersVisibility="Column"
-                      Height="350">
+                      Height="350" Width="946">
                 <DataGrid.Columns>
                     <DataGridTextColumn Header="ID" Binding="{Binding Id}" Width="Auto"/>
                     <DataGridTextColumn Header="Username" Binding="{Binding Username}" Width="*"/>
@@ -27,6 +27,46 @@
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
                                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                    <Button x:Name="GiveAdminButton"
+                                            Content="Give Admin"
+                                            Margin="3"
+                                            Width="90"
+                                            Click="GiveAdmin_Click">
+                                        <Button.Style>
+                                            <Style TargetType="Button">
+                                                <Setter Property="Visibility" Value="Collapsed"/>
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding RoleId}" Value="2">
+                                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                                    </DataTrigger>
+                                                    <DataTrigger Binding="{Binding RoleId}" Value="3">
+                                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </Button.Style>
+                                    </Button>
+                                    <Button x:Name="DemoteAdminButton"
+                                            Content="Remove Admin"
+                                            Margin="3"
+                                            Width="110"
+                                            Click="DemoteAdmin_Click">
+                                        <Button.Style>
+                                            <Style TargetType="Button">
+                                                <Setter Property="Visibility" Value="Collapsed"/>
+                                                <Style.Triggers>
+                                                    <!-- приховати для User -->
+                                                    <DataTrigger Binding="{Binding RoleId}" Value="1">
+                                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                                    </DataTrigger>
+                                                    <!-- приховати для SuperAdmin -->
+                                                    <DataTrigger Binding="{Binding RoleId}" Value="3">
+                                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </Button.Style>
+                                    </Button>
                                     <Button Content="Block" Margin="3" Width="60" Click="BlockUser_Click">
                                         <Button.Style>
                                             <Style TargetType="Button">
@@ -111,6 +151,29 @@
                     </DataGridTemplateColumn>
                 </DataGrid.Columns>
             </DataGrid>
+            
+            <Button x:Name="DemoteAdminButton"
+        Content="Remove Admin"
+        Margin="3"
+        Width="110"
+        Click="DemoteAdmin_Click">
+                <Button.Style>
+                    <Style TargetType="Button">
+                        <!-- За замовчуванням приховано; покажемо з коду, якщо поточний користувач — SuperAdmin -->
+                        <Setter Property="Visibility" Value="Collapsed"/>
+                        <Style.Triggers>
+                            <!-- Не показувати для користувачів, що НЕ є Admin -->
+                            <DataTrigger Binding="{Binding RoleId}" Value="1">
+                                <Setter Property="Visibility" Value="Collapsed"/>
+                            </DataTrigger>
+                            <!-- Не показувати для SuperAdmin (про всяк випадок) -->
+                            <DataTrigger Binding="{Binding RoleId}" Value="3">
+                                <Setter Property="Visibility" Value="Collapsed"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </Button.Style>
+            </Button>
 
             <!-- Reported Comments -->
             <TextBlock Text="Reported Comments:"

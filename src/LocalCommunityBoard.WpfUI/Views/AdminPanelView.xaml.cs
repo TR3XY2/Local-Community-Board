@@ -6,7 +6,9 @@ namespace LocalCommunityBoard.WpfUI.Views;
 
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Media;
 using LocalCommunityBoard.Application.Interfaces;
+using LocalCommunityBoard.Application.Services;
 using LocalCommunityBoard.Domain.Entities;
 using LocalCommunityBoard.Domain.Enums;
 using Microsoft.Extensions.DependencyInjection;
@@ -24,15 +26,45 @@ public partial class AdminPanelView : UserControl
     private readonly IReportService reportService;
     private readonly ICommentService commentService;
     private readonly IAnnouncementService announcementService;
+    private readonly UserSession session;
 
     public AdminPanelView()
     {
         this.InitializeComponent();
+
+        this.session = App.Services.GetRequiredService<UserSession>();
+
         this.userService = App.Services.GetRequiredService<IUserService>();
         this.reportService = App.Services.GetRequiredService<IReportService>();
         this.commentService = App.Services.GetRequiredService<ICommentService>();
         this.announcementService = App.Services.GetRequiredService<IAnnouncementService>();
+        this.Loaded += this.AdminPanelView_Loaded;
+
         _ = this.LoadDataAsync();
+    }
+
+    private static IEnumerable<T> FindVisualChildren<T>(DependencyObject depObj)
+        where T : DependencyObject
+    {
+        if (depObj == null)
+        {
+            yield break;
+        }
+
+        for (int i = 0; i < VisualTreeHelper.GetChildrenCount(depObj); i++)
+        {
+            DependencyObject child = VisualTreeHelper.GetChild(depObj, i);
+
+            if (child is T t)
+            {
+                yield return t;
+            }
+
+            foreach (T childOfChild in FindVisualChildren<T>(child))
+            {
+                yield return childOfChild;
+            }
+        }
     }
 
     private async Task LoadDataAsync()
@@ -42,10 +74,47 @@ public partial class AdminPanelView : UserControl
         await this.LoadReportedCommentsAsync();
     }
 
+    private void AdminPanelView_Loaded(object sender, RoutedEventArgs e)
+    {
+        this.UpdateButtons();
+    }
+
+    private void UpdateButtons()
+{
+    bool isSuperAdmin = this.session.CurrentUser?.RoleId == 3;
+
+    foreach (var item in this.UsersGrid.Items)
+    {
+        if (this.UsersGrid.ItemContainerGenerator.ContainerFromItem(item) is DataGridRow row)
+        {
+            var user = item as User;
+
+            var giveAdminButton = this.FindButton(row, "GiveAdminButton");
+            if (giveAdminButton != null && user != null)
+            {
+                giveAdminButton.Visibility =
+                    (isSuperAdmin && user.RoleId == 1) ? Visibility.Visible : Visibility.Collapsed;
+            }
+
+            var demoteAdminButton = this.FindButton(row, "DemoteAdminButton");
+            if (demoteAdminButton != null && user != null)
+            {
+                demoteAdminButton.Visibility =
+                    (isSuperAdmin && user.RoleId == 2) ? Visibility.Visible : Visibility.Collapsed;
+            }
+        }
+    }
+}
+
     private async Task LoadUsersAsync()
     {
         var users = await this.userService.GetAllUsersAsync();
+
+        this.UsersGrid.ItemsSource = null;
         this.UsersGrid.ItemsSource = users;
+
+        await Task.Delay(50);
+        this.UpdateButtons();
     }
 
     private async Task LoadReportedAnnouncementsAsync()
@@ -88,6 +157,44 @@ public partial class AdminPanelView : UserControl
 
             mainWindow.MainContent.Content = editView;
         }
+    }
+
+    private async void GiveAdmin_Click(object sender, RoutedEventArgs e)
+    {
+        if (sender is not Button btn || btn.DataContext is not User user)
+        {
+            return;
+        }
+
+        var confirm = MessageBox.Show($"Promote '{user.Username}' to Admin?", "Confirm", MessageBoxButton.YesNo, MessageBoxImage.Question);
+
+        if (confirm != MessageBoxResult.Yes)
+        {
+            return;
+        }
+
+        try
+        {
+            bool ok = await this.userService.PromoteToAdminAsync(user.Id);
+            if (!ok)
+            {
+                MessageBox.Show("Cannot promote this user.", ErrorText);
+                return;
+            }
+
+            await this.LoadUsersAsync();
+            this.UpdateButtons();
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show($"Error: {ex.Message}", ErrorText);
+        }
+    }
+
+    private Button? FindButton(DependencyObject container, string name)
+    {
+        var buttons = FindVisualChildren<Button>(container);
+        return buttons.FirstOrDefault(b => b.Name == name);
     }
 
     private async void BlockUser_Click(object sender, RoutedEventArgs e)
@@ -364,6 +471,53 @@ public partial class AdminPanelView : UserControl
                 ErrorText,
                 MessageBoxButton.OK,
                 MessageBoxImage.Error);
+        }
+        finally
+        {
+            btn.IsEnabled = true;
+        }
+    }
+
+    private async void DemoteAdmin_Click(object sender, RoutedEventArgs e)
+    {
+        if (sender is not Button btn || btn.DataContext is not User user)
+        {
+            return;
+        }
+
+        // додатковий захист (кнопка і так не відобразиться для не-Admin)
+        if (user.RoleId != 2)
+        {
+            return;
+        }
+
+        var confirm = MessageBox.Show(
+            $"Remove Admin role from '{user.Username}'?",
+            "Confirm",
+            MessageBoxButton.YesNo,
+            MessageBoxImage.Question);
+
+        if (confirm != MessageBoxResult.Yes)
+        {
+            return;
+        }
+
+        btn.IsEnabled = false;
+        try
+        {
+            bool ok = await this.userService.DemoteFromAdminAsync(user.Id);
+            if (!ok)
+            {
+                MessageBox.Show("Cannot remove admin role from this user.", ErrorText);
+                return;
+            }
+
+            await this.LoadUsersAsync();
+            this.UpdateButtons();
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show($"Error: {ex.Message}", ErrorText);
         }
         finally
         {

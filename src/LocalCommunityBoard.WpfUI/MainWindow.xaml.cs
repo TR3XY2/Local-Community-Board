@@ -37,6 +37,11 @@ public partial class MainWindow : Window
         this.userSession = userSession;
     }
 
+    public void NavigateHome()
+    {
+        this.MainContent.Content = new MainView(this.announcementService);
+    }
+
     private void TopBar_HomeRequested(object sender, RoutedEventArgs e)
         => this.NavigateHome();
 
@@ -47,12 +52,6 @@ public partial class MainWindow : Window
     {
         // Перехід на сторінку створення оголошення — передаємо announcementService
         this.MainContent.Content = new Views.CreatePostView(this.announcementService, this.userSession);
-    }
-
-    private void NavigateHome()
-    {
-        // Pass the injected service into MainView
-        this.MainContent.Content = new MainView(this.announcementService);
     }
 
     private void NavigateProfile()
