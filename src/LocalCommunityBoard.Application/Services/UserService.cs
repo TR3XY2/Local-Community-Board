@@ -229,6 +229,30 @@ namespace LocalCommunityBoard.Application.Services
             return true;
         }
 
+        public async Task<bool> DemoteFromAdminAsync(int userId)
+        {
+            var user = await this.userRepository.GetByIdAsync(userId);
+            if (user == null)
+            {
+                this.logger.LogWarning("DemoteFromAdminAsync: user {UserId} not found", userId);
+                return false;
+            }
+
+            // лиш для Admin (RoleId == 2); SuperAdmin ми не чіпаємо
+            if (user.RoleId != 2)
+            {
+                this.logger.LogWarning("DemoteFromAdminAsync: user {UserId} is not Admin", userId);
+                return false;
+            }
+
+            user.RoleId = 1; // User
+            this.userRepository.Update(user);
+            await this.userRepository.SaveChangesAsync();
+
+            this.logger.LogInformation("DemoteFromAdminAsync: user {UserId} demoted to User", userId);
+            return true;
+        }
+
         public async Task<bool> BlockUserAsync(int userId)
         {
             // SetStatusAsync already prevents blocking admins
