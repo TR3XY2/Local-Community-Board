@@ -262,6 +262,25 @@ namespace LocalCommunityBoard.Application.Services
             return result;
         }
 
+        public async Task<bool> PromoteToAdminAsync(int userId)
+        {
+            var user = await this.userRepository.GetByIdAsync(userId);
+            if (user == null)
+            {
+                return false;
+            }
+
+            if (user.RoleId == 2 || user.RoleId == 3)
+            {
+                return false;
+            }
+
+            user.RoleId = 2;
+            this.userRepository.Update(user);
+            await this.userRepository.SaveChangesAsync();
+            return true;
+        }
+
         public async Task<bool> DeleteUserByAdminAsync(int userId)
         {
             var user = await this.userRepository.GetByIdAsync(userId);

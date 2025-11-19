@@ -43,10 +43,15 @@ public partial class TopBar : UserControl
 
     public event RoutedEventHandler? AdminPanelRequested;
 
+    public void UpdateUIFromOutside()
+    {
+        this.UpdateUI();
+    }
+
     private void UpdateUI()
     {
         bool loggedIn = this.session?.IsLoggedIn == true;
-        bool isAdmin = this.session?.CurrentUser?.Role?.Name == "Admin" || this.session?.CurrentUser?.RoleId == 2;
+        bool isAdmin = this.session?.CurrentUser?.Role?.Name == "Admin" || this.session?.CurrentUser?.RoleId == 2 || this.session?.CurrentUser?.RoleId == 3 || this.session?.CurrentUser?.Role?.Name == "SuperAdmin";
 
         this.LoginButton.Visibility = loggedIn ? Visibility.Collapsed : Visibility.Visible;
         this.SignupButton.Visibility = loggedIn ? Visibility.Collapsed : Visibility.Visible;

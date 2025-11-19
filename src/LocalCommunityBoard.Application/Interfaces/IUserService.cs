@@ -33,4 +33,6 @@ public interface IUserService
     Task<bool> DeleteUserByAdminAsync(int userId);
 
     Task<bool> DeleteOwnAccountAsync(int userId, string password);
+
+    Task<bool> PromoteToAdminAsync(int userId);
 }
