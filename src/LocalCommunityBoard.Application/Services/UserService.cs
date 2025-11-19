@@ -231,18 +231,36 @@ namespace LocalCommunityBoard.Application.Services
 
         public async Task<bool> BlockUserAsync(int userId)
         {
-            // SetStatusAsync already prevents blocking admins
-            var result = await this.userRepository.SetStatusAsync(userId, UserStatus.Blocked);
-            if (result)
+            var user = await this.userRepository.GetByIdAsync(userId);
+            if (user == null)
             {
-                this.logger.LogInformation("User {UserId} blocked by admin.", userId);
-            }
-            else
-            {
-                this.logger.LogWarning("Failed to block user {UserId}. Possibly admin or not found.", userId);
+                this.logger.LogWarning("AdminBlockUserAsync: User {UserId} not found", userId);
+                return false;
             }
 
-            return result;
+            // Prevent blocking of admin accounts
+            if (user.RoleId == 2)
+            {
+                this.logger.LogWarning(
+                    "AdminBlockUserAsync: Attempted to block admin user {UserId} ({Username})",
+                    userId,
+                    user.Username);
+
+                throw new InvalidOperationException("Cannot block administrator accounts.");
+            }
+
+            user.Status = UserStatus.Blocked;
+
+            this.userRepository.Update(user);
+            await this.userRepository.SaveChangesAsync();
+
+            this.logger.LogInformation(
+                "AdminBlockUserAsync: User {UserId} ({Username}, {Email}) blocked successfully",
+                userId,
+                user.Username,
+                user.Email);
+
+            return true;
         }
 
         public async Task<bool> UnblockUserAsync(int userId)
