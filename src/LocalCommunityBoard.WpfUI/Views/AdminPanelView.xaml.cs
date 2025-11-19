@@ -533,7 +533,7 @@ public partial class AdminPanelView : UserControl
         }
 
         // Extra safety check - prevent deletion of admins
-        if (user.RoleId == 2)
+        if (user.RoleId == 2 || user.RoleId == 3)
         {
             MessageBox.Show(
                 "Cannot delete administrator accounts.",

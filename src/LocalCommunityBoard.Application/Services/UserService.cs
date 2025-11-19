@@ -333,7 +333,7 @@ namespace LocalCommunityBoard.Application.Services
             }
 
             // Prevent deletion of admin accounts
-            if (user.RoleId == 2)
+            if (user.RoleId == 2 || user.RoleId == 3)
             {
                 this.logger.LogWarning(
                     "AdminDeleteUserAsync: Attempted to delete admin user {UserId} ({Username})",

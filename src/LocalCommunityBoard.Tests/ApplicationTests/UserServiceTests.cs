@@ -1146,42 +1146,93 @@ public class UserServiceTests
     #region BlockUserAsync Tests
 
     /// <summary>
-    /// Tests successful blocking of a user.
-    /// Positive admin operation test.
+    /// Tests successful blocking of a regular user.
+    /// Positive test case.
     /// </summary>
     [Fact]
-    public async Task BlockUserAsync_WithValidUser_BlocksSuccessfully()
+    public async Task BlockUserAsync_WithRegularUser_BlocksSuccessfully()
     {
         // Arrange
         const int userId = 1;
+        var user = new User
+        {
+            Id = userId,
+            Username = "regularuser",
+            Email = "user@example.com",
+            RoleId = 1, // Regular user
+            Status = UserStatus.Active,
+        };
 
         this.mockUserRepository
-            .Setup(x => x.SetStatusAsync(userId, UserStatus.Blocked))
-            .ReturnsAsync(true);
+            .Setup(x => x.GetByIdAsync(userId))
+            .ReturnsAsync(user);
+
+        this.mockUserRepository
+            .Setup(x => x.Update(It.IsAny<User>()))
+            .Verifiable();
+
+        this.mockUserRepository
+            .Setup(x => x.SaveChangesAsync())
+            .Returns(Task.CompletedTask);
 
         // Act
         var result = await this.sut.BlockUserAsync(userId);
 
         // Assert
         Assert.True(result);
+        Assert.Equal(UserStatus.Blocked, user.Status);
 
-        this.mockUserRepository.Verify(
-            x => x.SetStatusAsync(userId, UserStatus.Blocked),
-            Times.Once);
+        this.mockUserRepository.Verify(x => x.GetByIdAsync(userId), Times.Once);
+        this.mockUserRepository.Verify(x => x.Update(user), Times.Once);
+        this.mockUserRepository.Verify(x => x.SaveChangesAsync(), Times.Once);
     }
 
     /// <summary>
-    /// Tests failed attempt to block user (e.g., admin account).
+    /// Tests that blocking an admin account throws InvalidOperationException.
+    /// Negative test case - security protection.
     /// </summary>
     [Fact]
-    public async Task BlockUserAsync_WhenRepositoryReturnsFalse_LogsWarningAndReturnsFalse()
+    public async Task BlockUserAsync_WithAdminUser_ThrowsInvalidOperationException()
     {
         // Arrange
         const int userId = 2;
+        var adminUser = new User
+        {
+            Id = userId,
+            Username = "adminuser",
+            Email = "admin@example.com",
+            RoleId = 2, // Admin
+            Status = UserStatus.Active,
+        };
 
         this.mockUserRepository
-            .Setup(x => x.SetStatusAsync(userId, UserStatus.Blocked))
-            .ReturnsAsync(false);
+            .Setup(x => x.GetByIdAsync(userId))
+            .ReturnsAsync(adminUser);
+
+        // Act & Assert
+        var exception = await Assert.ThrowsAsync<InvalidOperationException>(
+            () => this.sut.BlockUserAsync(userId));
+
+        Assert.Equal("Cannot block administrator accounts.", exception.Message);
+
+        // Verify that Update and SaveChanges were never called
+        this.mockUserRepository.Verify(x => x.Update(It.IsAny<User>()), Times.Never);
+        this.mockUserRepository.Verify(x => x.SaveChangesAsync(), Times.Never);
+    }
+
+    /// <summary>
+    /// Tests blocking non-existent user returns false.
+    /// Negative test case.
+    /// </summary>
+    [Fact]
+    public async Task BlockUserAsync_WithNonExistentUser_ReturnsFalse()
+    {
+        // Arrange
+        const int userId = 999;
+
+        this.mockUserRepository
+            .Setup(x => x.GetByIdAsync(userId))
+            .ReturnsAsync((User?)null);
 
         // Act
         var result = await this.sut.BlockUserAsync(userId);
@@ -1189,8 +1240,39 @@ public class UserServiceTests
         // Assert
         Assert.False(result);
 
-        this.mockUserRepository.Verify(
-            x => x.SetStatusAsync(userId, UserStatus.Blocked),
+        this.mockUserRepository.Verify(x => x.GetByIdAsync(userId), Times.Once);
+        this.mockUserRepository.Verify(x => x.Update(It.IsAny<User>()), Times.Never);
+    }
+
+    /// <summary>
+    /// Tests that blocking logs appropriate warning when attempting to block admin.
+    /// </summary>
+    [Fact]
+    public async Task BlockUserAsync_WhenBlockingAdmin_LogsWarning()
+    {
+        // Arrange
+        const int userId = 2;
+        var adminUser = new User
+        {
+            Id = userId,
+            Username = "admin",
+            RoleId = 2,
+        };
+
+        this.mockUserRepository
+            .Setup(x => x.GetByIdAsync(userId))
+            .ReturnsAsync(adminUser);
+
+        // Act & Assert
+        await Assert.ThrowsAsync<InvalidOperationException>(() => this.sut.BlockUserAsync(userId));
+
+        this.mockLogger.Verify(
+            x => x.Log(
+                LogLevel.Warning,
+                It.IsAny<EventId>(),
+                It.Is<It.IsAnyType>((v, _) => v.ToString()!.Contains("Attempted to block admin user")),
+                null,
+                It.IsAny<Func<It.IsAnyType, Exception?, string>>()),
             Times.Once);
     }
 
@@ -1290,6 +1372,600 @@ public class UserServiceTests
         // Assert
         this.mockUserRepository.Verify(
             x => x.SetStatusAsync(userId, UserStatus.Active),
+            Times.Once);
+    }
+
+    #endregion
+
+        #region DemoteFromAdminAsync Tests
+
+    /// <summary>
+    /// Tests successful demotion of admin to regular user.
+    /// Positive test case.
+    /// </summary>
+    [Fact]
+    public async Task DemoteFromAdminAsync_WithAdminUser_DemotesSuccessfully()
+    {
+        // Arrange
+        const int userId = 2;
+        var adminUser = new User
+        {
+            Id = userId,
+            Username = "admin",
+            Email = "admin@example.com",
+            RoleId = 2, // Admin
+        };
+
+        this.mockUserRepository
+            .Setup(x => x.GetByIdAsync(userId))
+            .ReturnsAsync(adminUser);
+
+        this.mockUserRepository
+            .Setup(x => x.Update(It.IsAny<User>()))
+            .Verifiable();
+
+        this.mockUserRepository
+            .Setup(x => x.SaveChangesAsync())
+            .Returns(Task.CompletedTask);
+
+        // Act
+        var result = await this.sut.DemoteFromAdminAsync(userId);
+
+        // Assert
+        Assert.True(result);
+        Assert.Equal(1, adminUser.RoleId); // Should be demoted to User
+
+        this.mockUserRepository.Verify(x => x.Update(adminUser), Times.Once);
+        this.mockUserRepository.Verify(x => x.SaveChangesAsync(), Times.Once);
+    }
+
+    /// <summary>
+    /// Tests that demoting non-admin user returns false.
+    /// Negative test case.
+    /// </summary>
+    [Fact]
+    public async Task DemoteFromAdminAsync_WithRegularUser_ReturnsFalse()
+    {
+        // Arrange
+        const int userId = 1;
+        var regularUser = new User
+        {
+            Id = userId,
+            RoleId = 1, // Regular user
+        };
+
+        this.mockUserRepository
+            .Setup(x => x.GetByIdAsync(userId))
+            .ReturnsAsync(regularUser);
+
+        // Act
+        var result = await this.sut.DemoteFromAdminAsync(userId);
+
+        // Assert
+        Assert.False(result);
+
+        this.mockUserRepository.Verify(x => x.Update(It.IsAny<User>()), Times.Never);
+        this.mockUserRepository.Verify(x => x.SaveChangesAsync(), Times.Never);
+    }
+
+    /// <summary>
+    /// Tests demoting non-existent user returns false.
+    /// Negative test case.
+    /// </summary>
+    [Fact]
+    public async Task DemoteFromAdminAsync_WithNonExistentUser_ReturnsFalse()
+    {
+        // Arrange
+        const int userId = 999;
+
+        this.mockUserRepository
+            .Setup(x => x.GetByIdAsync(userId))
+            .ReturnsAsync((User?)null);
+
+        // Act
+        var result = await this.sut.DemoteFromAdminAsync(userId);
+
+        // Assert
+        Assert.False(result);
+    }
+
+    /// <summary>
+    /// Tests that SuperAdmin (RoleId = 3) cannot be demoted.
+    /// Security test case.
+    /// </summary>
+    [Fact]
+    public async Task DemoteFromAdminAsync_WithSuperAdmin_ReturnsFalse()
+    {
+        // Arrange
+        const int userId = 3;
+        var superAdmin = new User
+        {
+            Id = userId,
+            RoleId = 3, // SuperAdmin
+        };
+
+        this.mockUserRepository
+            .Setup(x => x.GetByIdAsync(userId))
+            .ReturnsAsync(superAdmin);
+
+        // Act
+        var result = await this.sut.DemoteFromAdminAsync(userId);
+
+        // Assert
+        Assert.False(result);
+        Assert.Equal(3, superAdmin.RoleId); // Role should remain unchanged
+
+        this.mockUserRepository.Verify(x => x.Update(It.IsAny<User>()), Times.Never);
+    }
+
+    #endregion
+
+    #region PromoteToAdminAsync Tests
+
+    /// <summary>
+    /// Tests successful promotion of regular user to admin.
+    /// Positive test case.
+    /// </summary>
+    [Fact]
+    public async Task PromoteToAdminAsync_WithRegularUser_PromotesSuccessfully()
+    {
+        // Arrange
+        const int userId = 1;
+        var regularUser = new User
+        {
+            Id = userId,
+            Username = "user",
+            RoleId = 1, // Regular user
+        };
+
+        this.mockUserRepository
+            .Setup(x => x.GetByIdAsync(userId))
+            .ReturnsAsync(regularUser);
+
+        this.mockUserRepository
+            .Setup(x => x.Update(It.IsAny<User>()))
+            .Verifiable();
+
+        this.mockUserRepository
+            .Setup(x => x.SaveChangesAsync())
+            .Returns(Task.CompletedTask);
+
+        // Act
+        var result = await this.sut.PromoteToAdminAsync(userId);
+
+        // Assert
+        Assert.True(result);
+        Assert.Equal(2, regularUser.RoleId); // Should be promoted to Admin
+
+        this.mockUserRepository.Verify(x => x.Update(regularUser), Times.Once);
+        this.mockUserRepository.Verify(x => x.SaveChangesAsync(), Times.Once);
+    }
+
+    /// <summary>
+    /// Tests that promoting already admin user returns false.
+    /// Negative test case.
+    /// </summary>
+    [Fact]
+    public async Task PromoteToAdminAsync_WithExistingAdmin_ReturnsFalse()
+    {
+        // Arrange
+        const int userId = 2;
+        var adminUser = new User
+        {
+            Id = userId,
+            RoleId = 2, // Already admin
+        };
+
+        this.mockUserRepository
+            .Setup(x => x.GetByIdAsync(userId))
+            .ReturnsAsync(adminUser);
+
+        // Act
+        var result = await this.sut.PromoteToAdminAsync(userId);
+
+        // Assert
+        Assert.False(result);
+
+        this.mockUserRepository.Verify(x => x.Update(It.IsAny<User>()), Times.Never);
+    }
+
+    /// <summary>
+    /// Tests promoting non-existent user returns false.
+    /// Negative test case.
+    /// </summary>
+    [Fact]
+    public async Task PromoteToAdminAsync_WithNonExistentUser_ReturnsFalse()
+    {
+        // Arrange
+        const int userId = 999;
+
+        this.mockUserRepository
+            .Setup(x => x.GetByIdAsync(userId))
+            .ReturnsAsync((User?)null);
+
+        // Act
+        var result = await this.sut.PromoteToAdminAsync(userId);
+
+        // Assert
+        Assert.False(result);
+    }
+
+    /// <summary>
+    /// Tests that SuperAdmin cannot be "promoted" again.
+    /// Edge case test.
+    /// </summary>
+    [Fact]
+    public async Task PromoteToAdminAsync_WithSuperAdmin_ReturnsFalse()
+    {
+        // Arrange
+        const int userId = 3;
+        var superAdmin = new User
+        {
+            Id = userId,
+            RoleId = 3, // SuperAdmin
+        };
+
+        this.mockUserRepository
+            .Setup(x => x.GetByIdAsync(userId))
+            .ReturnsAsync(superAdmin);
+
+        // Act
+        var result = await this.sut.PromoteToAdminAsync(userId);
+
+        // Assert
+        Assert.False(result);
+        Assert.Equal(3, superAdmin.RoleId); // Role unchanged
+    }
+
+    #endregion
+
+    #region DeleteUserByAdminAsync Tests
+
+    /// <summary>
+    /// Tests successful deletion of regular user by admin.
+    /// Positive test case.
+    /// </summary>
+    [Fact]
+    public async Task DeleteUserByAdminAsync_WithRegularUser_DeletesSuccessfully()
+    {
+        // Arrange
+        const int userId = 1;
+        var user = new User
+        {
+            Id = userId,
+            Username = "regularuser",
+            Email = "user@example.com",
+            RoleId = 1, // Regular user
+        };
+
+        this.mockUserRepository
+            .Setup(x => x.GetByIdAsync(userId))
+            .ReturnsAsync(user);
+
+        this.mockUserRepository
+            .Setup(x => x.Delete(user))
+            .Verifiable();
+
+        this.mockUserRepository
+            .Setup(x => x.SaveChangesAsync())
+            .Returns(Task.CompletedTask);
+
+        // Act
+        var result = await this.sut.DeleteUserByAdminAsync(userId);
+
+        // Assert
+        Assert.True(result);
+
+        this.mockUserRepository.Verify(x => x.Delete(user), Times.Once);
+        this.mockUserRepository.Verify(x => x.SaveChangesAsync(), Times.Once);
+    }
+
+    /// <summary>
+    /// Tests that admin user cannot be deleted.
+    /// Security test case.
+    /// </summary>
+    [Fact]
+    public async Task DeleteUserByAdminAsync_WithAdminUser_ThrowsInvalidOperationException()
+    {
+        // Arrange
+        const int userId = 2;
+        var adminUser = new User
+        {
+            Id = userId,
+            Username = "admin",
+            RoleId = 2, // Admin
+        };
+
+        this.mockUserRepository
+            .Setup(x => x.GetByIdAsync(userId))
+            .ReturnsAsync(adminUser);
+
+        // Act & Assert
+        var exception = await Assert.ThrowsAsync<InvalidOperationException>(
+            () => this.sut.DeleteUserByAdminAsync(userId));
+
+        Assert.Equal("Cannot delete administrator accounts.", exception.Message);
+
+        this.mockUserRepository.Verify(x => x.Delete(It.IsAny<User>()), Times.Never);
+    }
+
+    /// <summary>
+    /// Tests that SuperAdmin cannot be deleted.
+    /// Security test case.
+    /// </summary>
+    [Fact]
+    public async Task DeleteUserByAdminAsync_WithSuperAdmin_ThrowsInvalidOperationException()
+    {
+        // Arrange
+        const int userId = 3;
+        var superAdmin = new User
+        {
+            Id = userId,
+            Username = "superadmin",
+            RoleId = 3, // SuperAdmin
+        };
+
+        this.mockUserRepository
+            .Setup(x => x.GetByIdAsync(userId))
+            .ReturnsAsync(superAdmin);
+
+        // Act & Assert
+        var exception = await Assert.ThrowsAsync<InvalidOperationException>(
+            () => this.sut.DeleteUserByAdminAsync(userId));
+
+        Assert.Equal("Cannot delete administrator accounts.", exception.Message);
+    }
+
+    /// <summary>
+    /// Tests deletion of non-existent user returns false.
+    /// Negative test case.
+    /// </summary>
+    [Fact]
+    public async Task DeleteUserByAdminAsync_WithNonExistentUser_ReturnsFalse()
+    {
+        // Arrange
+        const int userId = 999;
+
+        this.mockUserRepository
+            .Setup(x => x.GetByIdAsync(userId))
+            .ReturnsAsync((User?)null);
+
+        // Act
+        var result = await this.sut.DeleteUserByAdminAsync(userId);
+
+        // Assert
+        Assert.False(result);
+
+        this.mockUserRepository.Verify(x => x.Delete(It.IsAny<User>()), Times.Never);
+    }
+
+    #endregion
+
+    #region DeleteOwnAccountAsync Tests
+
+    /// <summary>
+    /// Tests successful self-deletion with correct password.
+    /// Positive test case.
+    /// </summary>
+    [Fact]
+    public async Task DeleteOwnAccountAsync_WithCorrectPassword_DeletesSuccessfully()
+    {
+        // Arrange
+        const int userId = 1;
+        const string password = "SecurePass123!";
+        var hashedPassword = LocalCommunityBoard.Application.Security.PasswordHasher.HashPassword(password);
+
+        var user = new User
+        {
+            Id = userId,
+            Username = "user",
+            Email = "user@example.com",
+            Password = hashedPassword,
+            RoleId = 1, // Regular user
+        };
+
+        this.mockUserRepository
+            .Setup(x => x.GetByIdAsync(userId))
+            .ReturnsAsync(user);
+
+        this.mockUserRepository
+            .Setup(x => x.Delete(user))
+            .Verifiable();
+
+        this.mockUserRepository
+            .Setup(x => x.SaveChangesAsync())
+            .Returns(Task.CompletedTask);
+
+        // Act
+        var result = await this.sut.DeleteOwnAccountAsync(userId, password);
+
+        // Assert
+        Assert.True(result);
+
+        this.mockUserRepository.Verify(x => x.Delete(user), Times.Once);
+        this.mockUserRepository.Verify(x => x.SaveChangesAsync(), Times.Once);
+    }
+
+    /// <summary>
+    /// Tests self-deletion with incorrect password throws UnauthorizedAccessException.
+    /// Security test case.
+    /// </summary>
+    [Fact]
+    public async Task DeleteOwnAccountAsync_WithIncorrectPassword_ThrowsUnauthorizedAccessException()
+    {
+        // Arrange
+        const int userId = 1;
+        const string correctPassword = "CorrectPass123!";
+        const string wrongPassword = "WrongPass123!";
+        var hashedPassword = LocalCommunityBoard.Application.Security.PasswordHasher.HashPassword(correctPassword);
+
+        var user = new User
+        {
+            Id = userId,
+            Password = hashedPassword,
+            RoleId = 1,
+        };
+
+        this.mockUserRepository
+            .Setup(x => x.GetByIdAsync(userId))
+            .ReturnsAsync(user);
+
+        // Act & Assert
+        var exception = await Assert.ThrowsAsync<UnauthorizedAccessException>(
+            () => this.sut.DeleteOwnAccountAsync(userId, wrongPassword));
+
+        Assert.Equal("Password is incorrect.", exception.Message);
+
+        this.mockUserRepository.Verify(x => x.Delete(It.IsAny<User>()), Times.Never);
+    }
+
+    /// <summary>
+    /// Tests that admin cannot delete own account.
+    /// Security test case.
+    /// </summary>
+    [Fact]
+    public async Task DeleteOwnAccountAsync_WithAdminUser_ThrowsInvalidOperationException()
+    {
+        // Arrange
+        const int userId = 2;
+        const string password = "AdminPass123!";
+        var hashedPassword = LocalCommunityBoard.Application.Security.PasswordHasher.HashPassword(password);
+
+        var adminUser = new User
+        {
+            Id = userId,
+            Username = "admin",
+            Password = hashedPassword,
+            RoleId = 2, // Admin
+        };
+
+        this.mockUserRepository
+            .Setup(x => x.GetByIdAsync(userId))
+            .ReturnsAsync(adminUser);
+
+        // Act & Assert
+        var exception = await Assert.ThrowsAsync<InvalidOperationException>(
+            () => this.sut.DeleteOwnAccountAsync(userId, password));
+
+        Assert.Equal("Administrators cannot delete their own accounts.", exception.Message);
+
+        this.mockUserRepository.Verify(x => x.Delete(It.IsAny<User>()), Times.Never);
+    }
+
+    /// <summary>
+    /// Tests self-deletion with non-existent user returns false.
+    /// Negative test case.
+    /// </summary>
+    [Fact]
+    public async Task DeleteOwnAccountAsync_WithNonExistentUser_ReturnsFalse()
+    {
+        // Arrange
+        const int userId = 999;
+        const string password = "AnyPass123!";
+
+        this.mockUserRepository
+            .Setup(x => x.GetByIdAsync(userId))
+            .ReturnsAsync((User?)null);
+
+        // Act
+        var result = await this.sut.DeleteOwnAccountAsync(userId, password);
+
+        // Assert
+        Assert.False(result);
+
+        this.mockUserRepository.Verify(x => x.Delete(It.IsAny<User>()), Times.Never);
+    }
+
+    /// <summary>
+    /// Tests that appropriate log is written on successful self-deletion.
+    /// Logging test case.
+    /// </summary>
+    [Fact]
+    public async Task DeleteOwnAccountAsync_WhenSuccessful_LogsInformation()
+    {
+        // Arrange
+        const int userId = 1;
+        const string password = "SecurePass123!";
+        const string email = "user@example.com";
+        var hashedPassword = LocalCommunityBoard.Application.Security.PasswordHasher.HashPassword(password);
+
+        var user = new User
+        {
+            Id = userId,
+            Email = email,
+            Password = hashedPassword,
+            RoleId = 1,
+        };
+
+        this.mockUserRepository
+            .Setup(x => x.GetByIdAsync(userId))
+            .ReturnsAsync(user);
+
+        this.mockUserRepository
+            .Setup(x => x.Delete(user))
+            .Verifiable();
+
+        this.mockUserRepository
+            .Setup(x => x.SaveChangesAsync())
+            .Returns(Task.CompletedTask);
+
+        // Act
+        await this.sut.DeleteOwnAccountAsync(userId, password);
+
+        // Assert
+        this.mockLogger.Verify(
+            x => x.Log(
+                LogLevel.Information,
+                It.IsAny<EventId>(),
+                It.Is<It.IsAnyType>((v, _) => v.ToString()!.Contains("deleted their account")),
+                null,
+                It.IsAny<Func<It.IsAnyType, Exception?, string>>()),
+            Times.Once);
+    }
+
+    #endregion
+
+    #region LoginAsync Additional Tests
+
+    /// <summary>
+    /// Tests that blocked user can still login (returns user object).
+    /// Business logic test - blocked users should be handled at controller level.
+    /// </summary>
+    [Fact]
+    public async Task LoginAsync_WithBlockedUser_ReturnsUser()
+    {
+        // Arrange
+        const string email = "blocked@example.com";
+        const string password = "Pass123!";
+        var hashedPassword = LocalCommunityBoard.Application.Security.PasswordHasher.HashPassword(password);
+
+        var blockedUser = new User
+        {
+            Id = 1,
+            Email = email,
+            Password = hashedPassword,
+            Status = UserStatus.Blocked,
+        };
+
+        this.mockUserRepository
+            .Setup(x => x.GetByEmailAsync(email))
+            .ReturnsAsync(blockedUser);
+
+        // Act
+        var result = await this.sut.LoginAsync(email, password);
+
+        // Assert
+        Assert.NotNull(result);
+        Assert.Equal(UserStatus.Blocked, result.Status);
+
+        // Verify that logger logs the status
+        this.mockLogger.Verify(
+            x => x.Log(
+                LogLevel.Information,
+                It.IsAny<EventId>(),
+                It.Is<It.IsAnyType>((v, _) => v.ToString()!.Contains("Status: Blocked")),
+                null,
+                It.IsAny<Func<It.IsAnyType, Exception?, string>>()),
             Times.Once);
     }
 
