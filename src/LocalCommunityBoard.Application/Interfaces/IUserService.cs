@@ -37,4 +37,6 @@ public interface IUserService
     Task<bool> PromoteToAdminAsync(int userId);
 
     Task<bool> DemoteFromAdminAsync(int userId);
+
+    Task RegisterAsync(object username, object email, object password);
 }

@@ -6,6 +6,7 @@ namespace LocalCommunityBoard.WpfUI.Controls;
 
 using System.Windows;
 using System.Windows.Controls;
+using LocalCommunityBoard.Application.Interfaces;
 using LocalCommunityBoard.Application.Services;
 using LocalCommunityBoard.WpfUI.Views;
 using Microsoft.Extensions.DependencyInjection;
@@ -72,7 +73,12 @@ public partial class TopBar : UserControl
 
     private void Signup_Click(object sender, RoutedEventArgs e)
     {
-        new SignUpWindow().ShowDialog();
+        if (App.Services != null)
+        {
+            var userService = App.Services.GetRequiredService<IUserService>();
+            var window = new SignUpWindow(userService);
+            window.ShowDialog();
+        }
     }
 
     private void Logout_Click(object sender, RoutedEventArgs e)

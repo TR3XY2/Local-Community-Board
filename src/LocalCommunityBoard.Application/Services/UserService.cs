@@ -395,5 +395,10 @@ namespace LocalCommunityBoard.Application.Services
 
             return true;
         }
+
+        public Task RegisterAsync(object username, object email, object password)
+        {
+            throw new NotImplementedException();
+        }
     }
 }
