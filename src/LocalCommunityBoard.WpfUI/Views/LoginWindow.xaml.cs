@@ -5,51 +5,40 @@
 namespace LocalCommunityBoard.WpfUI.Views;
 
 using System.Windows;
+using System.Windows.Controls;
 using LocalCommunityBoard.Application.Interfaces;
 using LocalCommunityBoard.Application.Services;
-using LocalCommunityBoard.Domain.Enums;
+using LocalCommunityBoard.WpfUI.ViewModels;
 using Microsoft.Extensions.DependencyInjection;
 
 /// <summary>
 /// Represents the login window of the application, allowing users to authenticate with their credentials.
 /// </summary>
-/// <remarks>This window provides a user interface for entering an email and password, and attempts to
-/// authenticate the user using the provided credentials. Upon successful login, the user's session is initialized, and
-/// the window closes with a positive dialog result. If authentication fails, an error message is displayed.</remarks>
+/// <remarks>This window provides a user interface for entering an email and password using MVVM pattern
+/// with data binding and commands. The authentication logic is handled by <see cref="LoginViewModel"/>.</remarks>
 public partial class LoginWindow : Window
 {
-    private readonly IUserService userService;
-    private readonly UserSession session;
+    private readonly LoginViewModel viewModel;
 
     public LoginWindow()
     {
         this.InitializeComponent();
-        this.userService = App.Services.GetRequiredService<IUserService>();
-        this.session = App.Services.GetRequiredService<UserSession>();
+
+        var userService = App.Services.GetRequiredService<IUserService>();
+        var session = App.Services.GetRequiredService<UserSession>();
+
+        this.viewModel = new LoginViewModel(userService, session, this);
+        this.DataContext = this.viewModel;
+
+        // Handle PasswordBox binding (PasswordBox doesn't support direct binding for security reasons)
+        this.PasswordBox.PasswordChanged += this.PasswordBox_PasswordChanged;
     }
 
-    private async void Login_Click(object sender, RoutedEventArgs e)
+    private void PasswordBox_PasswordChanged(object sender, RoutedEventArgs e)
     {
-        var email = this.EmailBox.Text;
-        var password = this.PasswordBox.Password;
-
-        var user = await this.userService.LoginAsync(email, password);
-        if (user == null)
+        if (sender is PasswordBox passwordBox)
         {
-            MessageBox.Show("Invalid email or password.", "Login Failed", MessageBoxButton.OK, MessageBoxImage.Error);
-            return;
+            this.viewModel.Password = passwordBox.Password;
         }
-
-        if (user.Status == UserStatus.Blocked)
-        {
-            MessageBox.Show("Your account is blocked.", "Login Failed", MessageBoxButton.OK, MessageBoxImage.Error);
-            return;
-        }
-
-        // Успішний вхід
-        this.session.Login(user);
-        MessageBox.Show($"Welcome, {user.Username}!", "Login Successful", MessageBoxButton.OK, MessageBoxImage.Information);
-        this.DialogResult = true;
-        this.Close();
     }
 }
