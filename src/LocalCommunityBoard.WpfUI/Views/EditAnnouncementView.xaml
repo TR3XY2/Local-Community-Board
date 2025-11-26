@@ -2,18 +2,30 @@
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              Margin="20">
+
     <StackPanel>
-        <TextBlock Text="Редагування оголошення" FontSize="18" FontWeight="Bold" Margin="0,0,0,15"/>
+        <TextBlock Text="Редагування оголошення"
+                   FontSize="18"
+                   FontWeight="Bold"
+                   Margin="0,0,0,15"/>
 
         <TextBlock Text="Заголовок:"/>
-        <TextBox x:Name="TitleTextBox" Margin="0,5,0,10"/>
+        <TextBox Text="{Binding Title, UpdateSourceTrigger=PropertyChanged}"
+                 Margin="0,5,0,10"/>
 
         <TextBlock Text="Текст:"/>
-        <TextBox x:Name="BodyTextBox" Margin="0,5,0,10" AcceptsReturn="True" Height="150"/>
+        <TextBox Text="{Binding Body, UpdateSourceTrigger=PropertyChanged}"
+                 Margin="0,5,0,10"
+                 AcceptsReturn="True"
+                 Height="150"/>
 
         <TextBlock Text="URL зображення:"/>
-        <TextBox x:Name="ImageUrlTextBox" Margin="0,5,0,15"/>
+        <TextBox Text="{Binding ImageUrl, UpdateSourceTrigger=PropertyChanged}"
+                 Margin="0,5,0,15"/>
 
-        <Button Content="Зберегти зміни" Width="130" HorizontalAlignment="Right" Click="Save_Click"/>
+        <Button Content="Зберегти зміни"
+                Width="130"
+                HorizontalAlignment="Right"
+                Command="{Binding SaveCommand}"/>
     </StackPanel>
 </UserControl>
