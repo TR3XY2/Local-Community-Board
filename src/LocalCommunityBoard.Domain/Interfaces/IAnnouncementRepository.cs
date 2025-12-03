@@ -54,4 +54,10 @@ public interface IAnnouncementRepository : IRepository<Announcement>
     string? title = null,
     string? body = null,
     int? categoryId = null);
+
+    Task<Category?> GetCategoryByNameAsync(string name);
+
+    Task<Location?> FindLocationAsync(string city, string? district, string? street);
+
+    Task<Location> CreateLocationAsync(Location location);
 }

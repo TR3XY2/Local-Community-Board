@@ -2,150 +2,113 @@
 // Copyright (c) PlaceholderCompany. All rights reserved.
 // </copyright>
 
-namespace LocalCommunityBoard.WpfUI.Views
+namespace LocalCommunityBoard.WpfUI.Views;
+
+using System.Windows;
+using System.Windows.Controls;
+using LocalCommunityBoard.Application.Interfaces;
+using LocalCommunityBoard.Application.Services;
+
+/// <summary>
+/// Represents a user interface for creating a new post or announcement.
+/// </summary>
+/// <remarks>This control provides functionality for users to input details such as title, body, category,  and
+/// location information for a new post. It validates user input and interacts with the  <see
+/// cref="IAnnouncementService"/> to publish the post. The control also ensures that the user  is logged in before
+/// allowing the post to be created.</remarks>
+public partial class CreatePostView : UserControl
 {
-    using System.Windows;
-    using System.Windows.Controls;
-    using LocalCommunityBoard.Application.Interfaces;
-    using LocalCommunityBoard.Application.Services;
+    private readonly IAnnouncementService announcementService;
+    private readonly UserSession userSession;
 
-    /// <summary>
-    /// Interaction logic for CreatePostView.xaml.
-    /// </summary>
-    public partial class CreatePostView : UserControl
+    public CreatePostView(IAnnouncementService announcementService, UserSession userSession)
     {
-        private const string ValidationTitle = "Validation";
+        this.InitializeComponent();
+        this.announcementService = announcementService;
+        this.userSession = userSession;
+    }
 
-        private static readonly char[] commaSeparator = { ',' };
-        private readonly IAnnouncementService announcementService;
-        private readonly UserSession userSession;
-
-        public CreatePostView(IAnnouncementService announcementService, UserSession userSession)
+    private static void TryNavigateHome()
+    {
+        try
         {
-            this.InitializeComponent();
-            this.announcementService = announcementService;
-            this.userSession = userSession;
-        }
-
-        /// <summary>
-        /// Attempt to navigate back to the home/main view.
-        /// </summary>
-        private static void TryNavigateHome()
-        {
-            try
+            if (Application.Current?.MainWindow is { } mw)
             {
-                if (Application.Current?.MainWindow != null)
-                {
-                    var mw = Application.Current.MainWindow;
-
-                    // Ensure that the accessibility bypass is safe by checking for null and proper access
-                    var mainContentProp = mw.GetType().GetProperty("MainContent", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Public);
-                    if (mainContentProp != null)
-                    {
-                        var contentControl = mainContentProp.GetValue(mw) as ContentControl;
-                        if (contentControl != null)
-                        {
-                            // If there is a NavigateHome method, invoke it safely
-                            var navigateMethod = mw.GetType().GetMethod("NavigateHome", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Public);
-                            if (navigateMethod != null)
-                            {
-                                navigateMethod.Invoke(mw, null);
-                                return;
-                            }
-
-                            // Otherwise, clear the content safely
-                            contentControl.Content = null;
-                        }
-                    }
-                }
-            }
-            catch
-            {
-                // Ignore navigation failure
+                var navigateMethod = mw.GetType().GetMethod("NavigateHome");
+                navigateMethod?.Invoke(mw, null);
             }
         }
-
-        private async void Publish_Click(object sender, RoutedEventArgs e)
+        catch
         {
-            // Валідація простих полів
-            var title = this.TitleTextBox.Text?.Trim() ?? string.Empty;
-            var body = this.BodyTextBox.Text?.Trim() ?? string.Empty;
+            // ignore
+        }
+    }
 
-            if (string.IsNullOrWhiteSpace(title))
-            {
-                MessageBox.Show("Title cannot be empty.", ValidationTitle, MessageBoxButton.OK, MessageBoxImage.Warning);
-                return;
-            }
+    private async void Publish_Click(object sender, RoutedEventArgs e)
+    {
+        var title = this.TitleTextBox.Text?.Trim() ?? string.Empty;
+        var body = this.BodyTextBox.Text?.Trim() ?? string.Empty;
+        var category = (this.CategoryComboBox.SelectedItem as ComboBoxItem)?.Content?.ToString();
+        var city = this.CityTextBox.Text?.Trim() ?? string.Empty;
+        var district = this.DistrictTextBox.Text?.Trim();
+        var street = this.StreetTextBox.Text?.Trim();
+        var imageUrl = this.ImagesTextBox.Text?.Split(',', StringSplitOptions.RemoveEmptyEntries).FirstOrDefault()?.Trim();
 
-            if (string.IsNullOrWhiteSpace(body))
-            {
-                MessageBox.Show("Body cannot be empty.", ValidationTitle, MessageBoxButton.OK, MessageBoxImage.Warning);
-                return;
-            }
-
-            if (!int.TryParse(this.CategoryIdTextBox.Text?.Trim(), out var categoryId))
-            {
-                MessageBox.Show("Please enter a valid numeric Category ID.", ValidationTitle, MessageBoxButton.OK, MessageBoxImage.Warning);
-                return;
-            }
-
-            if (!int.TryParse(this.LocationIdTextBox.Text?.Trim(), out var locationId))
-            {
-                MessageBox.Show("Please enter a valid numeric Location ID.", ValidationTitle, MessageBoxButton.OK, MessageBoxImage.Warning);
-                return;
-            }
-
-            // Парсинг optional полів (images / links)
-            var imageUrls = string.IsNullOrWhiteSpace(this.ImagesTextBox.Text)
-                ? Enumerable.Empty<string>()
-                : this.ImagesTextBox.Text.Split(commaSeparator, StringSplitOptions.RemoveEmptyEntries).Select(s => s.Trim());
-
-            var links = string.IsNullOrWhiteSpace(this.LinksTextBox.Text)
-                ? Enumerable.Empty<string>()
-                : this.LinksTextBox.Text.Split(commaSeparator, StringSplitOptions.RemoveEmptyEntries).Select(s => s.Trim());
-
-            // Отримати userId — декілька способів (fallback)
-            if (this.userSession?.IsLoggedIn != true || this.userSession.CurrentUser == null)
-            {
-                MessageBox.Show("You must be logged in to create a post. Please log in and try again.", "Authentication required", MessageBoxButton.OK, MessageBoxImage.Information);
-                return;
-            }
-
-            int userId = this.userSession.CurrentUser.Id;
-
-            try
-            {
-                // Виклик вашого сервісу
-                await this.announcementService.CreateAnnouncementAsync(
-                    userId,
-                    title,
-                    body,
-                    categoryId,
-                    locationId,
-                    imageUrls,
-                    links);
-
-                MessageBox.Show("Announcement created successfully.", "Success", MessageBoxButton.OK, MessageBoxImage.Information);
-
-                // ПОВЕРНУТИСЬ НА ГОЛОВНУ СТОРІНКУ:
-                // Припущення: вікно MainWindow має ContentControl з ім'ям MainContent
-                // і його DataContext / логіка дозволяє навігацію назад.
-                TryNavigateHome();
-            }
-            catch (ArgumentException aex)
-            {
-                MessageBox.Show(aex.Message, "Validation error", MessageBoxButton.OK, MessageBoxImage.Warning);
-            }
-            catch (Exception ex)
-            {
-                // Логіка логування тут (якщо є ILogger) — наразі просто повідомлення
-                MessageBox.Show($"Failed to create announcement: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-            }
+        if (string.IsNullOrWhiteSpace(title))
+        {
+            MessageBox.Show("Title cannot be empty.", "Validation", MessageBoxButton.OK, MessageBoxImage.Warning);
+            return;
         }
 
-        private void Cancel_Click(object sender, RoutedEventArgs e)
+        if (string.IsNullOrWhiteSpace(body))
         {
+            MessageBox.Show("Body cannot be empty.", "Validation", MessageBoxButton.OK, MessageBoxImage.Warning);
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(category))
+        {
+            MessageBox.Show("Select a category.", "Validation", MessageBoxButton.OK, MessageBoxImage.Warning);
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(city))
+        {
+            MessageBox.Show("City is required.", "Validation", MessageBoxButton.OK, MessageBoxImage.Warning);
+            return;
+        }
+
+        if (this.userSession?.IsLoggedIn != true || this.userSession.CurrentUser == null)
+        {
+            MessageBox.Show("You must be logged in.", "Error", MessageBoxButton.OK, MessageBoxImage.Warning);
+            return;
+        }
+
+        int userId = this.userSession.CurrentUser.Id;
+
+        try
+        {
+            await this.announcementService.CreateAnnouncementAsync(
+                userId,
+                title,
+                body,
+                category,
+                city,
+                district,
+                street,
+                imageUrl);
+
+            MessageBox.Show("Announcement created successfully.", "Success", MessageBoxButton.OK, MessageBoxImage.Information);
             TryNavigateHome();
         }
+        catch (Exception ex)
+        {
+            MessageBox.Show($"Error: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+        }
+    }
+
+    private void Cancel_Click(object sender, RoutedEventArgs e)
+    {
+        TryNavigateHome();
     }
 }

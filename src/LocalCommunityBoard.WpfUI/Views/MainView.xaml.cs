@@ -108,6 +108,20 @@ public partial class MainView : UserControl
 
     private async void ApplyFilters_Click(object sender, RoutedEventArgs e)
     {
+        this.currentPage = 1;
+
+        this.CityInput.Text = string.IsNullOrWhiteSpace(this.CityInput.Text)
+            ? null
+            : this.CityInput.Text.Trim();
+
+        this.DistrictInput.Text = string.IsNullOrWhiteSpace(this.DistrictInput.Text)
+            ? null
+            : this.DistrictInput.Text.Trim();
+
+        this.StreetInput.Text = string.IsNullOrWhiteSpace(this.StreetInput.Text)
+            ? null
+            : this.StreetInput.Text.Trim();
+
         await this.LoadAnnouncementsAsync();
     }
 

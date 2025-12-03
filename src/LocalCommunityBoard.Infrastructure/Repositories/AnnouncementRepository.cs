@@ -34,26 +34,31 @@ public class AnnouncementRepository : Repository<Announcement>, IAnnouncementRep
             .Include(a => a.Location)
             .AsQueryable();
 
-        // --- Location filters ---
         if (!string.IsNullOrWhiteSpace(city))
         {
+            var cityLower = city.Trim().ToLower();
             query = query.Where(a =>
+                a.Location != null &&
                 a.Location.City != null &&
-                a.Location.City.Contains(city, StringComparison.OrdinalIgnoreCase));
+                a.Location.City.ToLower().Contains(cityLower));
         }
 
         if (!string.IsNullOrWhiteSpace(district))
         {
+            var districtLower = district.Trim().ToLower();
             query = query.Where(a =>
+                a.Location != null &&
                 a.Location.District != null &&
-                a.Location.District.Contains(district, StringComparison.OrdinalIgnoreCase));
+                a.Location.District.ToLower().Contains(districtLower));
         }
 
         if (!string.IsNullOrWhiteSpace(street))
         {
+            var streetLower = street.Trim().ToLower();
             query = query.Where(a =>
+                a.Location != null &&
                 a.Location.Street != null &&
-                a.Location.Street.Contains(street, StringComparison.OrdinalIgnoreCase));
+                a.Location.Street.ToLower().Contains(streetLower));
         }
 
         // --- Categories ---
@@ -126,5 +131,28 @@ public class AnnouncementRepository : Repository<Announcement>, IAnnouncementRep
         this.DbSet.Update(announcement);
         await this.SaveChangesAsync();
         return true;
+    }
+
+    public Task<Category?> GetCategoryByNameAsync(string name)
+        => this.Context.Categories.FirstOrDefaultAsync(c => c.Name == name);
+
+    public Task<Location?> FindLocationAsync(string city, string? district, string? street)
+        => this.Context.Locations.FirstOrDefaultAsync(l =>
+            l.City == city &&
+            l.District == district &&
+            l.Street == street);
+
+    public async Task<Location> CreateLocationAsync(Location location)
+    {
+        this.Context.Locations.Add(location);
+        await this.Context.SaveChangesAsync();
+        return location;
+    }
+
+    public async Task<Announcement> AddAnnouncementAsync(Announcement announcement)
+    {
+        this.Context.Announcements.Add(announcement);
+        await this.Context.SaveChangesAsync();
+        return announcement;
     }
 }

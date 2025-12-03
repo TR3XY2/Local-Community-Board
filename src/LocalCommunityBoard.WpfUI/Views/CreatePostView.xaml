@@ -11,49 +11,35 @@
                        FontWeight="SemiBold"
                        Margin="0,0,0,12"/>
 
-            <!-- Title -->
             <TextBlock Text="Title"/>
-            <TextBox x:Name="TitleTextBox"
-                     Margin="0,4,0,8"/>
+            <TextBox x:Name="TitleTextBox" Margin="0,4,0,8"/>
 
-            <!-- Body -->
             <TextBlock Text="Body"/>
             <TextBox x:Name="BodyTextBox"
                      Style="{StaticResource MultiLineTextBoxStyle}"
                      Margin="0,4,0,8"/>
 
-            <!-- Category / Location -->
-            <StackPanel Orientation="Horizontal"
-                        Margin="0,4,0,8"
-                        HorizontalAlignment="Left">
+            <TextBlock Text="Category"/>
+            <ComboBox x:Name="CategoryComboBox"
+                      Width="180"
+                      Margin="0,4,0,8">
+                <ComboBoxItem Content="News"/>
+                <ComboBoxItem Content="Events"/>
+                <ComboBoxItem Content="Posts"/>
+            </ComboBox>
 
-                <StackPanel Margin="0,0,8,0">
-                    <TextBlock Text="Category ID"/>
-                    <TextBox x:Name="CategoryIdTextBox"
-                             Width="120"
-                             Margin="0,4,0,0"/>
-                </StackPanel>
+            <TextBlock Text="City"/>
+            <TextBox x:Name="CityTextBox" Margin="0,4,0,8"/>
 
-                <StackPanel>
-                    <TextBlock Text="Location ID"/>
-                    <TextBox x:Name="LocationIdTextBox"
-                             Width="120"
-                             Margin="0,4,0,0"/>
-                </StackPanel>
+            <TextBlock Text="District (optional)"/>
+            <TextBox x:Name="DistrictTextBox" Margin="0,4,0,8"/>
 
-            </StackPanel>
+            <TextBlock Text="Street (optional)"/>
+            <TextBox x:Name="StreetTextBox" Margin="0,4,0,8"/>
 
-            <!-- Images -->
-            <TextBlock Text="Image URLs (comma separated, optional)"/>
-            <TextBox x:Name="ImagesTextBox"
-                     Margin="0,4,0,8"/>
+            <TextBlock Text="Image URL"/>
+            <TextBox x:Name="ImagesTextBox" Margin="0,4,0,12"/>
 
-            <!-- Links -->
-            <TextBlock Text="Links (comma separated, optional)"/>
-            <TextBox x:Name="LinksTextBox"
-                     Margin="0,4,0,12"/>
-
-            <!-- Buttons -->
             <StackPanel Orientation="Horizontal">
                 <Button Content="Publish" Width="100" Click="Publish_Click"/>
                 <Button Content="Cancel" Width="80" Margin="8,0,0,0" Click="Cancel_Click"/>

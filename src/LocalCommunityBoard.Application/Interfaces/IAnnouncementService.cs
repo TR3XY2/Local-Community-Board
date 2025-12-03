@@ -24,18 +24,6 @@ public interface IAnnouncementService
         int pageSize = 9);
 
     /// <summary>
-    /// Creates a new announcement.
-    /// </summary>
-    Task<Announcement> CreateAnnouncementAsync(
-        int userId,
-        string title,
-        string body,
-        int categoryId,
-        int locationId,
-        IEnumerable<string>? imageUrls = null,
-        IEnumerable<string>? links = null);
-
-    /// <summary>
     /// Updates an existing announcement (only if owned by user).
     /// </summary>
     Task<bool> UpdateAnnouncementAsync(
@@ -57,4 +45,17 @@ public interface IAnnouncementService
     /// <param name="userId">The ID of the user.</param>
     /// <returns>A collection of announcements.</returns>
     Task<IEnumerable<Announcement>> GetAnnouncementsByUserIdAsync(int userId);
+
+    /// <summary>
+    /// Creates a new announcement.
+    /// </summary>
+    Task<Announcement> CreateAnnouncementAsync(
+        int userId,
+        string title,
+        string body,
+        string categoryName,
+        string city,
+        string? district,
+        string? street,
+        string? imageUrl);
 }

@@ -45,50 +45,56 @@ public class AnnouncementService : IAnnouncementService
             city, district, street, categoryIds, date, pageNumber, pageSize);
     }
 
-    /// <inheritdoc/>
     public async Task<Announcement> CreateAnnouncementAsync(
         int userId,
         string title,
         string body,
-        int categoryId,
-        int locationId,
-        IEnumerable<string>? imageUrls = null,
-        IEnumerable<string>? links = null)
+        string categoryName,
+        string city,
+        string? district,
+        string? street,
+        string? imageUrl)
     {
-        // Basic validation
-        if (string.IsNullOrWhiteSpace(title))
+        var categories = await this.categoryRepository.GetAllAsync();
+        var category = categories.FirstOrDefault(c => c.Name.Equals(categoryName, StringComparison.OrdinalIgnoreCase));
+
+        if (category == null)
         {
-            this.logger.LogWarning("User {UserId} attempted to create an announcement with empty title", userId);
-            throw new ArgumentException("Title cannot be empty.");
+            throw new Exception($"Category '{categoryName}' does not exist.");
         }
 
-        // Validate category and location existence (without storing them)
-        if (await this.categoryRepository.GetByIdAsync(categoryId) == null)
-        {
-            this.logger.LogWarning("User {UserId} attempted to use non-existent category ID {CategoryId}", userId, categoryId);
-            throw new ArgumentException($"Category with ID {categoryId} does not exist.");
-        }
+        var locations = await this.locationRepository.GetAllAsync();
+        var location = locations.FirstOrDefault(l =>
+            l.City == city &&
+            l.District == district &&
+            l.Street == street);
 
-        if (await this.locationRepository.GetByIdAsync(locationId) == null)
+        if (location == null)
         {
-            this.logger.LogWarning("User {UserId} attempted to use non-existent location ID {LocationId}", userId, locationId);
-            throw new ArgumentException($"Location with ID {locationId} does not exist.");
+            location = new Location
+            {
+                City = city,
+                District = district,
+                Street = street,
+            };
+
+            await this.locationRepository.AddAsync(location);
+            await this.locationRepository.SaveChangesAsync();
         }
 
         var announcement = new Announcement
         {
             UserId = userId,
-            Title = title.Trim(),
-            Body = body.Trim(),
-            CategoryId = categoryId,
-            LocationId = locationId,
-            CreatedAt = DateTime.UtcNow,
+            Title = title,
+            Body = body,
+            CategoryId = category.Id,
+            LocationId = location.Id,
+            ImageUrl = imageUrl,
         };
 
         await this.announcementRepository.AddAsync(announcement);
         await this.announcementRepository.SaveChangesAsync();
 
-        this.logger.LogInformation("User {UserId} created announcement {AnnouncementId}", userId, announcement.Id);
         return announcement;
     }
 
