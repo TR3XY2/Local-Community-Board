@@ -75,11 +75,10 @@ public partial class App : Application
 
             Services = services.BuildServiceProvider();
 
-            // Run migrations
+            // Run migrations db.Database.Migrate();
             using (var scope = Services.CreateScope())
             {
                 var db = scope.ServiceProvider.GetRequiredService<LocalCommunityBoardDbContext>();
-                db.Database.Migrate();
             }
 
             // Start main window
