@@ -2,8 +2,8 @@
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
 
     <!-- ==========================
-         COMBOBOX (як у мокапі)
-         ========================== -->
+     COMBOBOX (округлий + робочий дропдаун)
+     ========================== -->
     <Style TargetType="ComboBox">
         <Setter Property="Foreground" Value="#555"/>
         <Setter Property="Background" Value="White"/>
@@ -14,43 +14,83 @@
         <Setter Property="Height" Value="48"/>
         <Setter Property="HorizontalContentAlignment" Value="Left"/>
         <Setter Property="VerticalContentAlignment" Value="Center"/>
+        <Setter Property="SnapsToDevicePixels" Value="True"/>
+        <Setter Property="OverridesDefaultStyle" Value="True"/>
 
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="ComboBox">
                     <Grid>
-                        <Border x:Name="Border"
+                        <!-- Кнопка, що керує відкриттям дропдауну -->
+                        <ToggleButton x:Name="ToggleButton"
+                                  Background="Transparent"
+                                  BorderThickness="0"
+                                  Focusable="False"
+                                  ClickMode="Press"
+                                  HorizontalAlignment="Stretch"
+                                  VerticalAlignment="Stretch"
+                                  IsChecked="{Binding IsDropDownOpen,
+                                                      RelativeSource={RelativeSource TemplatedParent},
+                                                      Mode=TwoWay}">
+                            <Border x:Name="Border"
                                 CornerRadius="8"
                                 Background="{TemplateBinding Background}"
                                 BorderThickness="{TemplateBinding BorderThickness}"
-                                BorderBrush="{TemplateBinding BorderBrush}"/>
+                                BorderBrush="{TemplateBinding BorderBrush}">
+                                <Grid>
+                                    <!-- Текст вибраного елемента -->
+                                    <ContentPresenter
+                                    Margin="12,0,32,0"
+                                    VerticalAlignment="Center"
+                                    HorizontalAlignment="Left"
+                                    Content="{TemplateBinding SelectionBoxItem}"
+                                    ContentTemplate="{TemplateBinding SelectionBoxItemTemplate}"
+                                    ContentTemplateSelector="{TemplateBinding ItemTemplateSelector}" />
 
-                        <DockPanel Margin="10,0">
-                            <!-- Текст / вибране значення -->
-                            <ContentPresenter VerticalAlignment="Center"
-                                              Margin="4,0,0,0"
-                                              RecognizesAccessKey="True"/>
+                                    <!-- Стрілочка справа -->
+                                    <Path x:Name="Arrow"
+                                      Data="M 0 0 L 6 4 L 12 0"
+                                      Stroke="#777"
+                                      StrokeThickness="2"
+                                      HorizontalAlignment="Right"
+                                      VerticalAlignment="Center"
+                                      Margin="0,0,14,0" />
+                                </Grid>
+                            </Border>
+                        </ToggleButton>
 
-                            <!-- Стрілочка -->
-                            <Path DockPanel.Dock="Right"
-                                  VerticalAlignment="Center"
-                                  Data="M 0 0 L 8 8 L 16 0"
-                                  Stroke="#888"
-                                  StrokeThickness="2"
-                                  Margin="6"/>
-                        </DockPanel>
+                        <!-- Випадаючий список -->
+                        <Popup x:Name="PART_Popup"
+                           Placement="Bottom"
+                           AllowsTransparency="True"
+                           Focusable="False"
+                           PopupAnimation="Slide"
+                           IsOpen="{Binding IsChecked, ElementName=ToggleButton}">
+                            <Border Background="White"
+                                BorderBrush="#D9D9D9"
+                                BorderThickness="1"
+                                CornerRadius="8"
+                                SnapsToDevicePixels="True">
+                                <ScrollViewer>
+                                    <ItemsPresenter/>
+                                </ScrollViewer>
+                            </Border>
+                        </Popup>
                     </Grid>
 
                     <ControlTemplate.Triggers>
+                        <!-- Hover -->
                         <Trigger Property="IsMouseOver" Value="True">
                             <Setter TargetName="Border" Property="BorderBrush" Value="#C0C0C0"/>
                         </Trigger>
 
+                        <!-- Відкритий список -->
                         <Trigger Property="IsDropDownOpen" Value="True">
                             <Setter TargetName="Border" Property="BorderBrush" Value="#FF9356"/>
-                            <Setter TargetName="Border" Property="Background" Value="White"/>
+                            <Setter TargetName="Arrow" Property="Stroke" Value="#FF9356"/>
                         </Trigger>
 
+                        <!-- Disabled -->
                         <Trigger Property="IsEnabled" Value="False">
                             <Setter Property="Opacity" Value="0.5"/>
                         </Trigger>
@@ -59,6 +99,12 @@
             </Setter.Value>
         </Setter>
     </Style>
+
+
+
+
+
+
 
     <!-- ==========================
          CHECKBOX

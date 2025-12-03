@@ -111,4 +111,8 @@ public partial class CreatePostView : UserControl
     {
         TryNavigateHome();
     }
+
+    private void CategoryComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+    }
 }

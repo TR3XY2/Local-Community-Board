@@ -21,11 +21,28 @@
 
             <TextBlock Text="Category"/>
             <ComboBox x:Name="CategoryComboBox"
-                      Width="180"
-                      Margin="0,4,0,8">
+                      Width="88"
+                      SelectionChanged="CategoryComboBox_SelectionChanged" RenderTransformOrigin="0.506,0.476" Height="38" HorizontalAlignment="Center">
+                <ComboBox.RenderTransform>
+                    <TransformGroup>
+                        <ScaleTransform/>
+                        <SkewTransform/>
+                        <RotateTransform Angle="0.179"/>
+                        <TranslateTransform/>
+                    </TransformGroup>
+                </ComboBox.RenderTransform>
                 <ComboBoxItem Content="News"/>
                 <ComboBoxItem Content="Events"/>
-                <ComboBoxItem Content="Posts"/>
+                <ComboBoxItem Content="Posts" OpacityMask="White" RenderTransformOrigin="0.5,0.5">
+                    <ComboBoxItem.RenderTransform>
+                        <TransformGroup>
+                            <ScaleTransform/>
+                            <SkewTransform/>
+                            <RotateTransform Angle="0"/>
+                            <TranslateTransform/>
+                        </TransformGroup>
+                    </ComboBoxItem.RenderTransform>
+                </ComboBoxItem>
             </ComboBox>
 
             <TextBlock Text="City"/>
