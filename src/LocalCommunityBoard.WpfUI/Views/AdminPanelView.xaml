@@ -4,19 +4,17 @@
              Background="#FFF8F8F8">
     <ScrollViewer VerticalScrollBarVisibility="Auto">
         <StackPanel Margin="20">
-            <!-- Header -->
             <TextBlock Text="Admin Panel"
                        FontSize="24"
                        FontWeight="Bold"
                        Margin="0,0,0,20"/>
 
-            <!-- Users -->
             <DataGrid x:Name="UsersGrid"
                       AutoGenerateColumns="False"
                       CanUserAddRows="False"
                       IsReadOnly="True"
                       HeadersVisibility="Column"
-                      Height="350" Width="946">
+                      Height="350">
                 <DataGrid.Columns>
                     <DataGridTextColumn Header="ID" Binding="{Binding Id}" Width="Auto"/>
                     <DataGridTextColumn Header="Username" Binding="{Binding Username}" Width="*"/>
@@ -30,10 +28,10 @@
                                     <Button x:Name="GiveAdminButton"
                                             Content="Give Admin"
                                             Margin="3"
-                                            Width="90"
+                                            Width="100"
                                             Click="GiveAdmin_Click">
                                         <Button.Style>
-                                            <Style TargetType="Button">
+                                            <Style TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
                                                 <Setter Property="Visibility" Value="Collapsed"/>
                                                 <Style.Triggers>
                                                     <DataTrigger Binding="{Binding RoleId}" Value="2">
@@ -49,17 +47,15 @@
                                     <Button x:Name="DemoteAdminButton"
                                             Content="Remove Admin"
                                             Margin="3"
-                                            Width="110"
+                                            Width="120"
                                             Click="DemoteAdmin_Click">
                                         <Button.Style>
-                                            <Style TargetType="Button">
+                                            <Style TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
                                                 <Setter Property="Visibility" Value="Collapsed"/>
                                                 <Style.Triggers>
-                                                    <!-- приховати для User -->
                                                     <DataTrigger Binding="{Binding RoleId}" Value="1">
                                                         <Setter Property="Visibility" Value="Collapsed"/>
                                                     </DataTrigger>
-                                                    <!-- приховати для SuperAdmin -->
                                                     <DataTrigger Binding="{Binding RoleId}" Value="3">
                                                         <Setter Property="Visibility" Value="Collapsed"/>
                                                     </DataTrigger>
@@ -69,7 +65,7 @@
                                     </Button>
                                     <Button Content="Block" Margin="3" Width="60" Click="BlockUser_Click">
                                         <Button.Style>
-                                            <Style TargetType="Button">
+                                            <Style TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
                                                 <Setter Property="IsEnabled" Value="False"/>
                                                 <Style.Triggers>
                                                     <DataTrigger Binding="{Binding Role.Name}" Value="Admin">
@@ -84,10 +80,10 @@
                                     </Button>
                                     <Button Content="Unblock"
                                             Margin="3"
-                                            Width="70"
+                                            Width="80"
                                             Click="UnblockUser_Click">
                                         <Button.Style>
-                                            <Style TargetType="Button">
+                                            <Style TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
                                                 <Setter Property="IsEnabled" Value="False"/>
                                                 <Style.Triggers>
                                                     <DataTrigger Binding="{Binding Status}" Value="Blocked">
@@ -99,17 +95,15 @@
                                     </Button>
 
                                     <Button Content="Edit" Margin="3" Width="50" IsEnabled="True" Click="EditUser_Click"/>
-                                    <Button Content="Delete" Margin="3" Width="60" Click="DeleteUser_Click">
+                                    <Button Content="Delete" Margin="3" Width="70" Click="DeleteUser_Click">
                                     <Button.Style>
-                                        <Style TargetType="Button">
+                                            <Style TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
                                             <Style.Triggers>
-                                                <!-- Заборонити видалення Admin -->
                                                 <DataTrigger Binding="{Binding RoleId}" Value="2">
                                                     <Setter Property="IsEnabled" Value="False"/>
                                                     <Setter Property="Opacity" Value="0.5"/>
                                                 </DataTrigger>
 
-                                                <!-- Заборонити видалення SuperAdmin -->
                                                 <DataTrigger Binding="{Binding RoleId}" Value="3">
                                                     <Setter Property="IsEnabled" Value="False"/>
                                                     <Setter Property="Opacity" Value="0.5"/>

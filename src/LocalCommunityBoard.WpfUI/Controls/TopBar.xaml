@@ -33,7 +33,7 @@
             
             <Button x:Name="CreatePostButton"
                     Content="Create Announcement"
-                    Width="130"
+                    Width="165"
                     Margin="5,0"
                     Click="CreatePost_Click"
                     Visibility="Collapsed"/>

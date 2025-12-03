@@ -17,7 +17,6 @@
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
 
-        <!-- Filters -->
         <Border Background="White" CornerRadius="10" Padding="15" BorderBrush="#DDD" BorderThickness="1" Margin="0,0,20,0">
             <StackPanel>
                 <TextBlock Text="Filters" FontWeight="Bold" FontSize="18" Margin="0,0,0,10" />
@@ -54,7 +53,6 @@
             </StackPanel>
         </Border>
 
-        <!-- Announcements -->
         <ScrollViewer Grid.Column="1" VerticalScrollBarVisibility="Auto">
             <StackPanel>
                 <ItemsControl x:Name="AnnouncementsList" ItemsSource="{Binding Announcements}">

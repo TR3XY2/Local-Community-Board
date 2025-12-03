@@ -97,6 +97,7 @@
                                             Tag="{Binding Id}"/>
                                     <Button Content="Delete"
                                             Width="70"
+                                            Margin="0,0,0,0"
                                             Click="DeleteMyAnnouncement_Click"
                                             Tag="{Binding Id}"/>
                                 </StackPanel>
