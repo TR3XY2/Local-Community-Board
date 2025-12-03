@@ -22,7 +22,7 @@
             <TextBlock Text="Category"/>
             <ComboBox x:Name="CategoryComboBox"
                       Width="88"
-                      SelectionChanged="CategoryComboBox_SelectionChanged" RenderTransformOrigin="0.506,0.476" Height="38" HorizontalAlignment="Center">
+                      SelectionChanged="CategoryComboBox_SelectionChanged" RenderTransformOrigin="0.506,0.476" Height="38" HorizontalAlignment="Left">
                 <ComboBox.RenderTransform>
                     <TransformGroup>
                         <ScaleTransform/>
