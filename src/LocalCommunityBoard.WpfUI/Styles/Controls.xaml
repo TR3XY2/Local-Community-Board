@@ -1,0 +1,198 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <!-- ==========================
+         COMBOBOX (як у мокапі)
+         ========================== -->
+    <Style TargetType="ComboBox">
+        <Setter Property="Foreground" Value="#555"/>
+        <Setter Property="Background" Value="White"/>
+        <Setter Property="BorderBrush" Value="#D9D9D9"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="Padding" Value="12,8"/>
+        <Setter Property="FontSize" Value="16"/>
+        <Setter Property="Height" Value="48"/>
+        <Setter Property="HorizontalContentAlignment" Value="Left"/>
+        <Setter Property="VerticalContentAlignment" Value="Center"/>
+
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="ComboBox">
+                    <Grid>
+                        <Border x:Name="Border"
+                                CornerRadius="8"
+                                Background="{TemplateBinding Background}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                BorderBrush="{TemplateBinding BorderBrush}"/>
+
+                        <DockPanel Margin="10,0">
+                            <!-- Текст / вибране значення -->
+                            <ContentPresenter VerticalAlignment="Center"
+                                              Margin="4,0,0,0"
+                                              RecognizesAccessKey="True"/>
+
+                            <!-- Стрілочка -->
+                            <Path DockPanel.Dock="Right"
+                                  VerticalAlignment="Center"
+                                  Data="M 0 0 L 8 8 L 16 0"
+                                  Stroke="#888"
+                                  StrokeThickness="2"
+                                  Margin="6"/>
+                        </DockPanel>
+                    </Grid>
+
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="Border" Property="BorderBrush" Value="#C0C0C0"/>
+                        </Trigger>
+
+                        <Trigger Property="IsDropDownOpen" Value="True">
+                            <Setter TargetName="Border" Property="BorderBrush" Value="#FF9356"/>
+                            <Setter TargetName="Border" Property="Background" Value="White"/>
+                        </Trigger>
+
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter Property="Opacity" Value="0.5"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- ==========================
+         CHECKBOX
+         ========================== -->
+    <Style TargetType="CheckBox">
+        <Setter Property="FontSize" Value="16"/>
+        <Setter Property="Foreground" Value="#444"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="CheckBox">
+                    <StackPanel Orientation="Horizontal">
+                        <Border x:Name="Box"
+                                Width="20"
+                                Height="20"
+                                CornerRadius="3"
+                                BorderBrush="#C8C8C8"
+                                BorderThickness="1"
+                                Background="White"/>
+
+                        <TextBlock Text="{TemplateBinding Content}"
+                                   Margin="8,0"
+                                   VerticalAlignment="Center"
+                                   Foreground="#333"/>
+                    </StackPanel>
+
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsChecked" Value="True">
+                            <Setter TargetName="Box" Property="Background" Value="#FF9551"/>
+                            <Setter TargetName="Box" Property="BorderBrush" Value="#FF9551"/>
+                        </Trigger>
+
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="Box" Property="BorderBrush" Value="#A0A0A0"/>
+                        </Trigger>
+
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter TargetName="Box" Property="Opacity" Value="0.5"/>
+                            <Setter Property="Foreground" Value="#999"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- ==========================
+         RADIOBUTTON
+         ========================== -->
+    <Style TargetType="RadioButton">
+        <Setter Property="FontSize" Value="16"/>
+        <Setter Property="Foreground" Value="#444"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="RadioButton">
+                    <StackPanel Orientation="Horizontal">
+                        <Grid Width="20" Height="20">
+                            <Ellipse x:Name="Outer"
+                                     Stroke="#C8C8C8"
+                                     StrokeThickness="2"
+                                     Fill="White"/>
+                            <Ellipse x:Name="Inner"
+                                     Width="10"
+                                     Height="10"
+                                     Fill="#FF9551"
+                                     Visibility="Collapsed"/>
+                        </Grid>
+
+                        <TextBlock Text="{TemplateBinding Content}"
+                                   Margin="8,0"
+                                   VerticalAlignment="Center"/>
+                    </StackPanel>
+
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsChecked" Value="True">
+                            <Setter TargetName="Inner" Property="Visibility" Value="Visible"/>
+                            <Setter TargetName="Outer" Property="Stroke" Value="#FF9551"/>
+                        </Trigger>
+
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter TargetName="Outer" Property="Opacity" Value="0.5"/>
+                            <Setter Property="Foreground" Value="#999"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- ==========================
+         LISTBOX + LISTBOXITEM
+         ========================== -->
+
+    <Style TargetType="ListBox">
+        <Setter Property="Background" Value="White"/>
+        <Setter Property="BorderBrush" Value="#E0E0E0"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="Padding" Value="8"/>
+        <Setter Property="ScrollViewer.HorizontalScrollBarVisibility" Value="Disabled"/>
+    </Style>
+
+    <Style TargetType="ListBoxItem">
+        <Setter Property="Padding" Value="10"/>
+        <Setter Property="Margin" Value="4"/>
+        <Setter Property="HorizontalContentAlignment" Value="Left"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="ListBoxItem">
+                    <Border x:Name="ItemBorder"
+                            Background="White"
+                            BorderBrush="#DDD"
+                            BorderThickness="1"
+                            CornerRadius="6">
+                        <ContentPresenter Margin="2"
+                                          VerticalAlignment="Center"
+                                          HorizontalAlignment="Left"/>
+                    </Border>
+
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsSelected" Value="True">
+                            <Setter TargetName="ItemBorder" Property="Background" Value="#FFE7DB"/>
+                            <Setter TargetName="ItemBorder" Property="BorderBrush" Value="#FF9551"/>
+                        </Trigger>
+
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="ItemBorder" Property="BorderBrush" Value="#FF9551"/>
+                        </Trigger>
+
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter TargetName="ItemBorder" Property="Opacity" Value="0.5"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+</ResourceDictionary>
