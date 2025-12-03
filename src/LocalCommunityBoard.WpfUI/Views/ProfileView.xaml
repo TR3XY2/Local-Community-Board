@@ -17,18 +17,12 @@
                        Margin="0,0,0,25"/>
 
             <!-- Username -->
-            <TextBlock Text="Username:"
-                       FontWeight="SemiBold"/>
             <TextBox x:Name="UsernameBox"
-                     Margin="0,5,0,15"
-                     Padding="6"/>
+                    Margin="0,5,0,15"/>
 
             <!-- Email -->
-            <TextBlock Text="Email:"
-                       FontWeight="SemiBold"/>
             <TextBox x:Name="EmailBox"
-                     Margin="0,5,0,25"
-                     Padding="6"/>
+                    Margin="0,5,0,25"/>
 
             <!-- Optional Password Section -->
             <Expander Header="Change Password"

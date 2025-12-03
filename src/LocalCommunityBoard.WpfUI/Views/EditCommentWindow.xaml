@@ -24,27 +24,25 @@
                    FontWeight="Bold"
                    Foreground="#333"/>
 
-        <!-- Comment Body Label -->
+        <!-- Label -->
         <TextBlock Text="Comment Text:"
                    Grid.Row="2"
                    FontWeight="SemiBold"
                    Foreground="#555"/>
 
-        <!-- Comment Body TextBox -->
+        <!-- Multiline TextBox using your style -->
         <TextBox x:Name="CommentBodyBox"
                  Grid.Row="3"
-                 TextWrapping="Wrap"
+                 Style="{StaticResource MultiLineTextBoxStyle}"
                  AcceptsReturn="True"
-                 VerticalScrollBarVisibility="Auto"
-                 Padding="8"
-                 FontSize="14"
-                 BorderBrush="#CCC"
-                 BorderThickness="1"/>
+                 TextWrapping="Wrap"/>
 
         <!-- Buttons -->
         <StackPanel Grid.Row="5"
                     Orientation="Horizontal"
                     HorizontalAlignment="Right">
+
+            <!-- Save -->
             <Button Content="Save"
                     Width="100"
                     Height="35"
@@ -61,11 +59,9 @@
                             <Setter.Value>
                                 <ControlTemplate TargetType="Button">
                                     <Border Background="{TemplateBinding Background}"
-                                            BorderBrush="{TemplateBinding BorderBrush}"
-                                            BorderThickness="{TemplateBinding BorderThickness}"
                                             CornerRadius="4">
                                         <ContentPresenter HorizontalAlignment="Center"
-                                                        VerticalAlignment="Center"/>
+                                                          VerticalAlignment="Center"/>
                                     </Border>
                                 </ControlTemplate>
                             </Setter.Value>
@@ -79,6 +75,7 @@
                 </Button.Style>
             </Button>
 
+            <!-- Cancel -->
             <Button Content="Cancel"
                     Width="100"
                     Height="35"
@@ -94,11 +91,9 @@
                             <Setter.Value>
                                 <ControlTemplate TargetType="Button">
                                     <Border Background="{TemplateBinding Background}"
-                                            BorderBrush="{TemplateBinding BorderBrush}"
-                                            BorderThickness="{TemplateBinding BorderThickness}"
                                             CornerRadius="4">
                                         <ContentPresenter HorizontalAlignment="Center"
-                                                        VerticalAlignment="Center"/>
+                                                          VerticalAlignment="Center"/>
                                     </Border>
                                 </ControlTemplate>
                             </Setter.Value>

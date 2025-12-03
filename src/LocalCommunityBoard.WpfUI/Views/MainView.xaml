@@ -3,7 +3,8 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-             xmlns:domain="clr-namespace:LocalCommunityBoard.Domain.Entities;assembly=LocalCommunityBoard.Domain" xmlns:viewModels="clr-namespace:LocalCommunityBoard.WpfUI.ViewModels"
+             xmlns:domain="clr-namespace:LocalCommunityBoard.Domain.Entities;assembly=LocalCommunityBoard.Domain"
+             xmlns:viewModels="clr-namespace:LocalCommunityBoard.WpfUI.ViewModels"
              mc:Ignorable="d"
              Background="#FFF8F8F8">
 
@@ -17,28 +18,52 @@
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
 
-        <Border Background="White" CornerRadius="10" Padding="15" BorderBrush="#DDD" BorderThickness="1" Margin="0,0,20,0">
+        <Border Background="White"
+                CornerRadius="10"
+                Padding="15"
+                BorderBrush="#DDD"
+                BorderThickness="1"
+                Margin="0,0,20,0">
+
             <StackPanel>
                 <TextBlock Text="Filters" FontWeight="Bold" FontSize="18" Margin="0,0,0,10" />
                 <TextBlock Text="Location" FontWeight="Bold" FontSize="14" Margin="0,0,0,10" />
 
                 <Grid Margin="0,0,0,8">
-                    <TextBox x:Name="CityInput" Height="28" />
-                    <TextBlock Text="City" Foreground="Gray" Margin="5,4,0,0" FontStyle="Italic" 
+                    <TextBox x:Name="CityInput"
+                             Height="28"
+                             Style="{StaticResource SearchTextBoxStyle}" />
+                    <TextBlock Text="City"
+                               Foreground="Gray"
+                               VerticalAlignment="Center"
+                               Margin="10,0,0,0"
+                               FontStyle="Italic" 
                                IsHitTestVisible="False"
                                Visibility="{Binding Text.IsEmpty, ElementName=CityInput, Converter={StaticResource BoolToVis}}"/>
                 </Grid>
 
                 <Grid Margin="0,0,0,8">
-                    <TextBox x:Name="DistrictInput" Height="28" />
-                    <TextBlock Text="District" Foreground="Gray" Margin="5,4,0,0" FontStyle="Italic"
+                    <TextBox x:Name="DistrictInput"
+                             Height="28"
+                             Style="{StaticResource SearchTextBoxStyle}" />
+                    <TextBlock Text="District"
+                               Foreground="Gray"
+                               VerticalAlignment="Center"
+                               Margin="10,0,0,0"
+                               FontStyle="Italic"
                                IsHitTestVisible="False"
                                Visibility="{Binding Text.IsEmpty, ElementName=DistrictInput, Converter={StaticResource BoolToVis}}"/>
                 </Grid>
 
                 <Grid Margin="0,0,0,20">
-                    <TextBox x:Name="StreetInput" Height="28" />
-                    <TextBlock Text="Street" Foreground="Gray" Margin="5,4,0,0" FontStyle="Italic"
+                    <TextBox x:Name="StreetInput"
+                             Height="28"
+                             Style="{StaticResource SearchTextBoxStyle}" />
+                    <TextBlock Text="Street"
+                               Foreground="Gray"
+                               VerticalAlignment="Center"
+                               Margin="10,0,0,0"
+                               FontStyle="Italic"
                                IsHitTestVisible="False"
                                Visibility="{Binding Text.IsEmpty, ElementName=StreetInput, Converter={StaticResource BoolToVis}}"/>
                 </Grid>
@@ -48,8 +73,16 @@
                 <CheckBox x:Name="EventsCheck" Content="Events" Margin="0,0,0,5"/>
                 <CheckBox x:Name="PostsCheck" Content="Posts" Margin="0,0,0,20"/>
 
-                <Button Content="Clear Filters" Width="120" HorizontalAlignment="Left" Margin="0,10,0,0" Click="CleaFilters_Click" />
-                <Button Content="Apply Filters" Width="120" HorizontalAlignment="Left" Margin="0,10,0,0" Click="ApplyFilters_Click" />
+                <Button Content="Clear Filters"
+                        Width="120"
+                        HorizontalAlignment="Left"
+                        Margin="0,10,0,0"
+                        Click="CleaFilters_Click" />
+                <Button Content="Apply Filters"
+                        Width="120"
+                        HorizontalAlignment="Left"
+                        Margin="0,10,0,0"
+                        Click="ApplyFilters_Click" />
             </StackPanel>
         </Border>
 
@@ -76,13 +109,13 @@
                                     Cursor="Hand">
                                 <StackPanel>
                                     <Image Source="{Binding Image}"
-                                       Height="120"
-                                       Stretch="UniformToFill"
-                                       Margin="0,0,0,5"/>
+                                           Height="120"
+                                           Stretch="UniformToFill"
+                                           Margin="0,0,0,5"/>
                                     <TextBlock Text="{Binding Title}"
-                                       FontWeight="Bold"
-                                       FontSize="14"
-                                       TextAlignment="Center"/>
+                                               FontWeight="Bold"
+                                               FontSize="14"
+                                               TextAlignment="Center"/>
                                 </StackPanel>
                             </Border>
                         </DataTemplate>

@@ -1,88 +1,145 @@
 ﻿<UserControl x:Class="LocalCommunityBoard.WpfUI.Views.AnnouncementDetailsView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:local="clr-namespace:LocalCommunityBoard.WpfUI.Helpers"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:local="clr-namespace:LocalCommunityBoard.WpfUI.Helpers"
              Background="#FFF8F8F8">
+
     <UserControl.Resources>
         <local:OwnCommentVisibilityConverter x:Key="OwnCommentVisibilityConverter"/>
     </UserControl.Resources>
 
     <ScrollViewer>
         <StackPanel Margin="20" Width="600" HorizontalAlignment="Center">
+
             <!-- Announcement Details -->
-            <Image Height="300" Stretch="UniformToFill" Source="{Binding Image}" Margin="0,0,0,10"/>
-            <TextBlock Text="{Binding Title}" FontSize="24" FontWeight="Bold" Margin="0,0,0,10" TextAlignment="Center"/>
-            <TextBlock Text="{Binding Body}" FontSize="16" TextWrapping="Wrap" TextAlignment="Left"/>
+            <Image Height="300"
+                   Stretch="UniformToFill"
+                   Source="{Binding Image}"
+                   Margin="0,0,0,10"/>
+
+            <TextBlock Text="{Binding Title}"
+                       FontSize="24"
+                       FontWeight="Bold"
+                       Margin="0,0,0,10"
+                       TextAlignment="Center"/>
+
+            <TextBlock Text="{Binding Body}"
+                       FontSize="16"
+                       TextWrapping="Wrap"/>
 
             <Separator Margin="0,20,0,20"/>
 
             <!-- Likes -->
-            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,10,0,0">
-                <!-- LIKE -->
-                <ToggleButton x:Name="LikeBtn" Width="120" Margin="0,0,10,0" Click="LikeBtn_Click">
+            <StackPanel Orientation="Horizontal"
+                        HorizontalAlignment="Center"
+                        Margin="0,10,0,0">
+
+                <ToggleButton x:Name="LikeBtn"
+                              Width="120"
+                              Margin="0,0,10,0"
+                              Click="LikeBtn_Click">
+
                     <StackPanel Orientation="Horizontal">
-                        <TextBlock Text="👍" FontSize="16" Margin="0,0,6,0"/>
+                        <TextBlock Text="👍"
+                                   FontSize="16"
+                                   Margin="0,0,6,0"/>
                         <TextBlock x:Name="LikeCountText" Text="0"/>
                     </StackPanel>
+
                 </ToggleButton>
 
-                <!-- DISLIKE -->
-                <ToggleButton x:Name="DislikeBtn" Width="120" Click="DislikeBtn_Click">
+                <ToggleButton x:Name="DislikeBtn"
+                              Width="120"
+                              Click="DislikeBtn_Click">
+
                     <StackPanel Orientation="Horizontal">
-                        <TextBlock Text="👎" FontSize="16" Margin="0,0,6,0"/>
+                        <TextBlock Text="👎"
+                                   FontSize="16"
+                                   Margin="0,0,6,0"/>
                         <TextBlock x:Name="DislikeCountText" Text="0"/>
                     </StackPanel>
-                </ToggleButton>
-            </StackPanel>
 
+                </ToggleButton>
+
+            </StackPanel>
 
             <Button Content="Report this Announcement"
                     Width="200"
                     HorizontalAlignment="Center"
                     Margin="0,15,0,20"
-                    Click="ReportAnnouncement_Click"
-                    />
+                    Click="ReportAnnouncement_Click"/>
 
             <Separator Margin="0,20,0,20"/>
 
             <!-- Comments Section -->
-            <TextBlock Text="Comments" FontSize="20" FontWeight="Bold" Margin="0,0,0,10"/>
+            <TextBlock Text="Comments"
+                       FontSize="20"
+                       FontWeight="Bold"
+                       Margin="0,0,0,10"/>
+
             <ItemsControl x:Name="CommentsList">
+
                 <ItemsControl.ItemTemplate>
                     <DataTemplate>
-                        <Border BorderBrush="#CCC" BorderThickness="1" CornerRadius="8" Margin="0,5,0,5" Padding="10">
-                            <StackPanel>
-                                <TextBlock Text="{Binding User.Username}" FontWeight="Bold"/>
-                                <TextBlock Text="{Binding Body}" TextWrapping="Wrap" Margin="0,3,0,0"/>
-                                <TextBlock Text="{Binding CreatedAt}" FontStyle="Italic" FontSize="11" Foreground="Gray"/>
 
-                                <!-- Action Buttons Row -->
-                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,8,0,0">
+                        <Border BorderBrush="#CCC"
+                                BorderThickness="1"
+                                CornerRadius="8"
+                                Margin="0,5,0,5"
+                                Padding="10">
+
+                            <StackPanel>
+
+                                <TextBlock Text="{Binding User.Username}"
+                                           FontWeight="Bold"/>
+
+                                <TextBlock Text="{Binding Body}"
+                                           TextWrapping="Wrap"
+                                           Margin="0,3,0,0"/>
+
+                                <TextBlock Text="{Binding CreatedAt}"
+                                           FontStyle="Italic"
+                                           FontSize="11"
+                                           Foreground="Gray"/>
+
+                                <StackPanel Orientation="Horizontal"
+                                            HorizontalAlignment="Right"
+                                            Margin="0,8,0,0">
+
                                     <Button Content="Report"
-                                Tag="{Binding Id}"
-                                Width="100"
-                                Margin="0,0,10,0"
-                                Click="ReportButton_Click"/>
+                                            Tag="{Binding Id}"
+                                            Width="100"
+                                            Margin="0,0,10,0"
+                                            Click="ReportButton_Click"/>
 
                                     <Button Content="Delete"
-                                Tag="{Binding Id}"
-                                Width="100"
-                                Click="DeleteButton_Click"
-                                Visibility="{Binding User.Id, Converter={StaticResource OwnCommentVisibilityConverter}}"/>
+                                            Tag="{Binding Id}"
+                                            Width="100"
+                                            Click="DeleteButton_Click"
+                                            Visibility="{Binding User.Id,
+                                                Converter={StaticResource OwnCommentVisibilityConverter}}"/>
+
                                 </StackPanel>
+
                             </StackPanel>
+
                         </Border>
+
                     </DataTemplate>
                 </ItemsControl.ItemTemplate>
+
             </ItemsControl>
 
-
-
             <!-- Add Comment -->
-            <TextBox x:Name="CommentBox" Height="60" TextWrapping="Wrap" Margin="0,15,0,5" />
+            <TextBox x:Name="CommentBox"
+                     Style="{StaticResource MultiLineTextBoxStyle}"
+                     Margin="0,15,0,5"/>
+
             <Button Content="Post Comment"
                     Width="150"
                     HorizontalAlignment="Right"
                     Click="PostComment_Click"/>
+
         </StackPanel>
     </ScrollViewer>
 </UserControl>

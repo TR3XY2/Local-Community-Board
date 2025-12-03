@@ -36,10 +36,6 @@
                    FontWeight="SemiBold"
                    Foreground="#555"/>
         <TextBox Grid.Row="3"
-                 Padding="8"
-                 FontSize="14"
-                 BorderBrush="#CCC"
-                 BorderThickness="1"
                  Text="{Binding Username, UpdateSourceTrigger=PropertyChanged}"/>
 
         <!-- Email -->
@@ -48,10 +44,6 @@
                    FontWeight="SemiBold"
                    Foreground="#555"/>
         <TextBox Grid.Row="6"
-                 Padding="8"
-                 FontSize="14"
-                 BorderBrush="#CCC"
-                 BorderThickness="1"
                  Text="{Binding Email, UpdateSourceTrigger=PropertyChanged}"/>
 
         <!-- New Password -->
@@ -59,13 +51,8 @@
                    Grid.Row="8"
                    FontWeight="SemiBold"
                    Foreground="#555"/>
-        <!-- PasswordBox cannot be bound directly, value is forwarded in code-behind -->
         <PasswordBox x:Name="NewPasswordBox"
                      Grid.Row="9"
-                     Padding="8"
-                     FontSize="14"
-                     BorderBrush="#CCC"
-                     BorderThickness="1"
                      PasswordChanged="NewPasswordBox_PasswordChanged"/>
 
         <!-- Buttons -->
@@ -73,13 +60,14 @@
                     Orientation="Horizontal"
                     HorizontalAlignment="Right"
                     Margin="0,20,0,0">
+
+            <!-- Save -->
             <Button Content="Save Changes"
                     Width="120"
-                    Height="35"
+                    Height="38"
                     Margin="0,0,10,0"
                     Foreground="White"
                     FontWeight="SemiBold"
-                    BorderThickness="0"
                     Cursor="Hand"
                     Command="{Binding SaveCommand}">
                 <Button.Style>
@@ -89,8 +77,6 @@
                             <Setter.Value>
                                 <ControlTemplate TargetType="Button">
                                     <Border Background="{TemplateBinding Background}"
-                                            BorderBrush="{TemplateBinding BorderBrush}"
-                                            BorderThickness="{TemplateBinding BorderThickness}"
                                             CornerRadius="4">
                                         <ContentPresenter HorizontalAlignment="Center"
                                                           VerticalAlignment="Center"/>
@@ -107,12 +93,12 @@
                 </Button.Style>
             </Button>
 
+            <!-- Cancel -->
             <Button Content="Cancel"
                     Width="100"
-                    Height="35"
+                    Height="38"
                     Foreground="White"
                     FontWeight="SemiBold"
-                    BorderThickness="0"
                     Cursor="Hand"
                     Command="{Binding CancelCommand}">
                 <Button.Style>
@@ -122,8 +108,6 @@
                             <Setter.Value>
                                 <ControlTemplate TargetType="Button">
                                     <Border Background="{TemplateBinding Background}"
-                                            BorderBrush="{TemplateBinding BorderBrush}"
-                                            BorderThickness="{TemplateBinding BorderThickness}"
                                             CornerRadius="4">
                                         <ContentPresenter HorizontalAlignment="Center"
                                                           VerticalAlignment="Center"/>
