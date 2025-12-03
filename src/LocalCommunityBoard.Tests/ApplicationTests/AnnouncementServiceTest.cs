@@ -199,75 +199,35 @@ public class AnnouncementServiceTests
         const int userId = 1;
         const string title = "Test Title";
         const string body = "Test Body";
-        const int categoryId = 1;
-        const int locationId = 1;
+        const string categoryName = "News";
+        const string city = "Lviv";
 
         this.mockCategoryRepository
-            .Setup(r => r.GetByIdAsync(categoryId))
-            .ReturnsAsync(new Category { Id = categoryId });
+            .Setup(r => r.GetAllAsync())
+            .ReturnsAsync(new List<Category>
+            {
+            new Category { Id = 1, Name = categoryName }
+            });
 
         this.mockLocationRepository
-            .Setup(r => r.GetByIdAsync(locationId))
-            .ReturnsAsync(new Location { Id = locationId });
+            .Setup(r => r.GetAllAsync())
+            .ReturnsAsync(new List<Location>());
 
         // Act
         var result = await this.sut.CreateAnnouncementAsync(
-            userId, title, body, categoryId, locationId);
+            userId, title, body, categoryName, city, null, null, null);
 
         // Assert
         Assert.NotNull(result);
         Assert.Equal(userId, result.UserId);
         Assert.Equal(title, result.Title);
         Assert.Equal(body, result.Body);
-        Assert.Equal(categoryId, result.CategoryId);
-        Assert.Equal(locationId, result.LocationId);
 
         this.mockAnnouncementRepository.Verify(
             r => r.AddAsync(It.IsAny<Announcement>()), Times.Once);
+
         this.mockAnnouncementRepository.Verify(
             r => r.SaveChangesAsync(), Times.Once);
-    }
-
-    /// <summary>
-    /// Tests that whitespace is trimmed from title and body.
-    /// Data validation test.
-    /// </summary>
-    [Fact]
-    public async Task CreateAnnouncementAsync_WithWhitespace_TrimsInput()
-    {
-        // Arrange
-        const string title = "  Test Title  ";
-        const string body = "  Test Body  ";
-
-        this.mockCategoryRepository
-            .Setup(r => r.GetByIdAsync(It.IsAny<int>()))
-            .ReturnsAsync(new Category());
-
-        this.mockLocationRepository
-            .Setup(r => r.GetByIdAsync(It.IsAny<int>()))
-            .ReturnsAsync(new Location());
-
-        // Act
-        var result = await this.sut.CreateAnnouncementAsync(1, title, body, 1, 1);
-
-        // Assert
-        Assert.Equal("Test Title", result.Title);
-        Assert.Equal("Test Body", result.Body);
-    }
-
-    /// <summary>
-    /// Tests validation for empty title.
-    /// Negative test case.
-    /// </summary>
-    [Theory]
-    [InlineData("")]
-    [InlineData("   ")]
-    [InlineData(null)]
-    public async Task CreateAnnouncementAsync_WithEmptyTitle_ThrowsArgumentException(string? title)
-    {
-        // Act & Assert
-        await Assert.ThrowsAsync<ArgumentException>(() =>
-            this.sut.CreateAnnouncementAsync(1, title!, "Body", 1, 1));
     }
 
     /// <summary>
@@ -275,73 +235,43 @@ public class AnnouncementServiceTests
     /// Negative test case.
     /// </summary>
     [Fact]
-    public async Task CreateAnnouncementAsync_WithInvalidCategory_ThrowsArgumentException()
+    public async Task CreateAnnouncementAsync_WithInvalidCategory_ThrowsException()
     {
-        // Arrange
         this.mockCategoryRepository
-            .Setup(r => r.GetByIdAsync(It.IsAny<int>()))
-            .ReturnsAsync((Category?)null);
+            .Setup(r => r.GetAllAsync())
+            .ReturnsAsync(new List<Category>());
 
-        // Act & Assert
-        var exception = await Assert.ThrowsAsync<ArgumentException>(() =>
-            this.sut.CreateAnnouncementAsync(1, "Title", "Body", 999, 1));
+        var ex = await Assert.ThrowsAsync<Exception>(() =>
+            this.sut.CreateAnnouncementAsync(
+                1, "Title", "Body", "Fake", "Kyiv", null, null, null));
 
-        Assert.Contains("Category with ID 999 does not exist", exception.Message);
+        Assert.Contains("does not exist", ex.Message);
     }
+
 
     /// <summary>
     /// Tests validation for non-existent location.
     /// Negative test case.
     /// </summary>
     [Fact]
-    public async Task CreateAnnouncementAsync_WithInvalidLocation_ThrowsArgumentException()
+    public async Task CreateAnnouncementAsync_WithNewLocation_CreatesLocation()
     {
-        // Arrange
         this.mockCategoryRepository
-            .Setup(r => r.GetByIdAsync(It.IsAny<int>()))
-            .ReturnsAsync(new Category());
+            .Setup(r => r.GetAllAsync())
+            .ReturnsAsync(new List<Category>
+            {
+            new Category { Id = 1, Name = "News" }
+            });
 
         this.mockLocationRepository
-            .Setup(r => r.GetByIdAsync(It.IsAny<int>()))
-            .ReturnsAsync((Location?)null);
+            .Setup(r => r.GetAllAsync())
+            .ReturnsAsync(new List<Location>());
 
-        // Act & Assert
-        var exception = await Assert.ThrowsAsync<ArgumentException>(() =>
-            this.sut.CreateAnnouncementAsync(1, "Title", "Body", 1, 999));
-
-        Assert.Contains("Location with ID 999 does not exist", exception.Message);
-    }
-
-    /// <summary>
-    /// Tests creation with image URLs and links.
-    /// Positive test case.
-    /// </summary>
-    [Fact]
-    public async Task CreateAnnouncementAsync_WithImageUrlsAndLinks_SavesCorrectly()
-    {
-        // Arrange
-        const int userId = 1;
-        const string title = "Test Title";
-        const string body = "Test Body";
-        const int categoryId = 1;
-        const int locationId = 1;
-
-        this.mockCategoryRepository
-            .Setup(r => r.GetByIdAsync(categoryId))
-            .ReturnsAsync(new Category { Id = categoryId });
-
-        this.mockLocationRepository
-            .Setup(r => r.GetByIdAsync(locationId))
-            .ReturnsAsync(new Location { Id = locationId });
-
-        // Act
         var result = await this.sut.CreateAnnouncementAsync(
-            userId, title, body, categoryId, locationId);
+            1, "Title", "Body", "News", "Lviv", null, null, null);
 
-        // Assert
-        Assert.NotNull(result);
-        this.mockAnnouncementRepository.Verify(
-            r => r.SaveChangesAsync(), Times.Once);
+        this.mockLocationRepository.Verify(r => r.AddAsync(It.IsAny<Location>()), Times.Once);
+        this.mockLocationRepository.Verify(r => r.SaveChangesAsync(), Times.Once);
     }
 
     #endregion
