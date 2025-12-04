@@ -14,72 +14,28 @@
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="TextBox">
-                    <Grid>
-                        <!-- Main Border -->
-                        <Border x:Name="MainBorder"
-                                Background="{TemplateBinding Background}"
-                                BorderBrush="{TemplateBinding BorderBrush}"
-                                BorderThickness="{TemplateBinding BorderThickness}"
-                                CornerRadius="6"
-                                SnapsToDevicePixels="True">
-                            
-                            <ScrollViewer x:Name="PART_ContentHost"
-                                        Margin="{TemplateBinding Padding}"
-                                        VerticalAlignment="{TemplateBinding VerticalContentAlignment}"/>
-                        </Border>
-
-                        <!-- Focus Border (animated) -->
-                        <Border x:Name="FocusBorder"
-                                BorderBrush="#2196F3"
-                                BorderThickness="2"
-                                CornerRadius="6"
-                                Opacity="0"
-                                IsHitTestVisible="False"/>
-
-                        <!-- Error Border -->
-                        <Border x:Name="ErrorBorder"
-                                BorderBrush="#F44336"
-                                BorderThickness="2"
-                                CornerRadius="6"
-                                Opacity="0"
-                                IsHitTestVisible="False"/>
-                    </Grid>
+                    <Border x:Name="MainBorder"
+                            Background="{TemplateBinding Background}"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="{TemplateBinding BorderThickness}"
+                            CornerRadius="6"
+                            SnapsToDevicePixels="True">
+                        
+                        <ScrollViewer x:Name="PART_ContentHost"
+                                    Margin="{TemplateBinding Padding}"
+                                    VerticalAlignment="{TemplateBinding VerticalContentAlignment}"/>
+                    </Border>
 
                     <ControlTemplate.Triggers>
                         <!-- Focus Trigger -->
                         <Trigger Property="IsFocused" Value="True">
-                            <Trigger.EnterActions>
-                                <BeginStoryboard>
-                                    <Storyboard>
-                                        <DoubleAnimation Storyboard.TargetName="FocusBorder"
-                                                       Storyboard.TargetProperty="Opacity"
-                                                       To="1"
-                                                       Duration="0:0:0.2"/>
-                                    </Storyboard>
-                                </BeginStoryboard>
-                            </Trigger.EnterActions>
-                            <Trigger.ExitActions>
-                                <BeginStoryboard>
-                                    <Storyboard>
-                                        <DoubleAnimation Storyboard.TargetName="FocusBorder"
-                                                       Storyboard.TargetProperty="Opacity"
-                                                       To="0"
-                                                       Duration="0:0:0.2"/>
-                                    </Storyboard>
-                                </BeginStoryboard>
-                            </Trigger.ExitActions>
                             <Setter TargetName="MainBorder" Property="Background" Value="#FAFAFA"/>
+                            <Setter TargetName="MainBorder" Property="BorderBrush" Value="#999999"/>
                         </Trigger>
 
                         <!-- MouseOver Trigger -->
                         <Trigger Property="IsMouseOver" Value="True">
                             <Setter TargetName="MainBorder" Property="BorderBrush" Value="#999999"/>
-                        </Trigger>
-
-                        <!-- Validation Error Trigger -->
-                        <Trigger Property="Validation.HasError" Value="True">
-                            <Setter TargetName="ErrorBorder" Property="Opacity" Value="1"/>
-                            <Setter TargetName="MainBorder" Property="Background" Value="#FFF5F5"/>
                         </Trigger>
 
                         <!-- Disabled Trigger -->
@@ -108,39 +64,30 @@
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="TextBox">
-                    <Grid>
-                        <Border x:Name="MainBorder"
-                                Background="{TemplateBinding Background}"
-                                BorderBrush="{TemplateBinding BorderBrush}"
-                                BorderThickness="{TemplateBinding BorderThickness}"
-                                CornerRadius="18"
-                                SnapsToDevicePixels="True">
-                            
-                            <Grid Margin="12,0">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="Auto"/>
-                                    <ColumnDefinition Width="*"/>
-                                </Grid.ColumnDefinitions>
+                    <Border x:Name="MainBorder"
+                            Background="{TemplateBinding Background}"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="{TemplateBinding BorderThickness}"
+                            CornerRadius="18"
+                            SnapsToDevicePixels="True">
+                        
+                        <Grid Margin="12,0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
 
-                                <!-- Content -->
-                                <ScrollViewer x:Name="PART_ContentHost"
-                                            Grid.Column="1"
-                                            VerticalAlignment="Center"/>
-                            </Grid>
-                        </Border>
-
-                        <Border x:Name="FocusBorder"
-                                BorderBrush="#2196F3"
-                                BorderThickness="2"
-                                CornerRadius="18"
-                                Opacity="0"
-                                IsHitTestVisible="False"/>
-                    </Grid>
+                            <!-- Content -->
+                            <ScrollViewer x:Name="PART_ContentHost"
+                                        Grid.Column="1"
+                                        VerticalAlignment="Center"/>
+                        </Grid>
+                    </Border>
 
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsFocused" Value="True">
-                            <Setter TargetName="FocusBorder" Property="Opacity" Value="1"/>
                             <Setter TargetName="MainBorder" Property="Background" Value="#FAFAFA"/>
+                            <Setter TargetName="MainBorder" Property="BorderBrush" Value="#999999"/>
                         </Trigger>
                         <Trigger Property="IsMouseOver" Value="True">
                             <Setter TargetName="MainBorder" Property="BorderBrush" Value="#999999"/>
@@ -166,31 +113,22 @@
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="PasswordBox">
-                    <Grid>
-                        <Border x:Name="MainBorder"
-                                Background="{TemplateBinding Background}"
-                                BorderBrush="{TemplateBinding BorderBrush}"
-                                BorderThickness="{TemplateBinding BorderThickness}"
-                                CornerRadius="6"
-                                SnapsToDevicePixels="True">
-                            
-                            <ScrollViewer x:Name="PART_ContentHost"
-                                        Margin="{TemplateBinding Padding}"
-                                        VerticalAlignment="{TemplateBinding VerticalContentAlignment}"/>
-                        </Border>
-
-                        <Border x:Name="FocusBorder"
-                                BorderBrush="#2196F3"
-                                BorderThickness="2"
-                                CornerRadius="6"
-                                Opacity="0"
-                                IsHitTestVisible="False"/>
-                    </Grid>
+                    <Border x:Name="MainBorder"
+                            Background="{TemplateBinding Background}"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="{TemplateBinding BorderThickness}"
+                            CornerRadius="6"
+                            SnapsToDevicePixels="True">
+                        
+                        <ScrollViewer x:Name="PART_ContentHost"
+                                    Margin="{TemplateBinding Padding}"
+                                    VerticalAlignment="{TemplateBinding VerticalContentAlignment}"/>
+                    </Border>
 
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsFocused" Value="True">
-                            <Setter TargetName="FocusBorder" Property="Opacity" Value="1"/>
                             <Setter TargetName="MainBorder" Property="Background" Value="#FAFAFA"/>
+                            <Setter TargetName="MainBorder" Property="BorderBrush" Value="#999999"/>
                         </Trigger>
                         <Trigger Property="IsMouseOver" Value="True">
                             <Setter TargetName="MainBorder" Property="BorderBrush" Value="#999999"/>
